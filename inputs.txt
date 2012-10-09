@@ -1,0 +1,4 @@
+cat ajpk\"
+cmd param1 param2 param3"part2"    >   out.t"x"t < "input" 2>> "error.log"
+cmd &
+cmd param1 param2 param3"pa rt2" param\ 4    >   out.t"x"t ahoj < "inp><<>%^&ut" 2>> "error.log"
