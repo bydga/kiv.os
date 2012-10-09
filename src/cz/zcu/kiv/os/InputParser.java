@@ -1,11 +1,6 @@
 package cz.zcu.kiv.os;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -13,12 +8,13 @@ import java.util.Set;
  */
 public class InputParser {
 
-	private Set<Character> escapeCharacters = new HashSet<Character>(Arrays.asList(new Character[]{'\\', '"', '\'', '|', '&', '>', '<'}));
 	private char escapeSymbol = '\\';
+	private Set<Character> quotationMarks = new HashSet<Character>(Arrays.asList(new Character[]{'"', '\''}));
 
 	public String[] parse(String input) {
 
-		char quotType;
+		input = input.trim();
+		char quotType = ' ';
 		boolean inQuotation = false;
 
 		List<String> output = new ArrayList<String>();
@@ -29,35 +25,66 @@ public class InputParser {
 
 			char currentChar = input.charAt(i);
 
-			//whitespaces at the beginning
-			while (currentChar == ' ' && output.isEmpty()) {
-				currentChar = input.charAt(++i);
-			}
-
+			//escape symbol
 			if (currentChar == this.escapeSymbol) {
+				//advance to next char
+				i++;
+				if (i >= inputSize) {
+					throw new RuntimeException("No symbol after escape sequence");
+				}
 
-				
-				buffer.append(input.charAt(++i));
-				break;
+				buffer.append(input.charAt(i));
+				continue;
 			}
 
-			if (currentChar == ' ') {
+			if (currentChar == ' ' && !inQuotation) {
 				output.add(buffer.toString());
 				buffer.delete(0, buffer.length());
 				//skip additional spaces if present
-				while (currentChar == ' ')
-				{
-					currentChar = input.charAt(++i);
+				while (i + 1 < inputSize) {
+					if (input.charAt(i + 1) == ' ') {
+						i++;
+					} else {
+						break;
+					}
 				}
+
+				continue;
+			}
+
+			// " and ' symbols
+			if (this.quotationMarks.contains(currentChar)) {
+
+				//already inside 
+				if (inQuotation) {
+					//same one - end of quotation block
+					if (currentChar == quotType) {
+						inQuotation = false;
+
+					} else {
+						// "'" or '"' case
+						buffer.append(currentChar);
+
+					}
+				} else {
+					//quotation beginning
+					inQuotation = true;
+					quotType = currentChar;
+				}
+				continue;
 			}
 
 			buffer.append(currentChar);
 
 		}
 
-
-
-
-		return output.toArray(new String[]{});
+		if (buffer.length() > 0) {
+			output.add(buffer.toString());
+		}
+		if (inQuotation) {
+			throw new RuntimeException("Missing corresponding quotation mark");
+		}
+		return output.toArray(
+				new String[]{});
 	}
 }
