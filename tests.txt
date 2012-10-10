@@ -1,0 +1,18 @@
+cat ajpk\" ">ahoj"
+Args: [cat, ajpk", >ahoj]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: no
+cmd param1 param2 param3"part2"    >   out.t"x"t < "input" 2>> "error.log"
+Args: [cmd, param1, param2, param3part2]stdIn: inputstdOut: out.txt Append: nostdErr: error.log Append: yes
+cmd &
+Args: [cmd]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: yes
+cmd param1 param2 param3"pa rt2" param\ 4    >   out.t"x"t ahoj < "inp><<>%^&ut" 2>> "error.log"
+Args: [cmd, param1, param2, param3pa rt2, param 4, ahoj]stdIn: inp><<>%^&utstdOut: out.txt Append: nostdErr: error.log Append: yes
+cat a | sort | wc -l
+Args: [cat, a]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: noPIPE: Args: [sort]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: noPIPE: Args: [wc, -l]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: no
+  wget "http://seznam.cz" > out1.txt > out2.txt 
+Args: [wget, http://seznam.cz]stdIn: nullstdOut: out2.txt Append: nostdErr: null Append: noBg: no
+sjdhfiusjdhfjfj
+Args: [sjdhfiusjdhfjfj]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: no
+
+Args: []stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: no
+"cmd x" | cat "aaaaaaa'''" popo \& &
+Args: [cmd x]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: noPIPE: Args: [cat, aaaaaaa''', popo, &]stdIn: nullstdOut: null Append: nostdErr: null Append: noBg: yes

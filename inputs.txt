@@ -1,4 +1,10 @@
-cat ajpk\"
+cat ajpk\" ">ahoj"
 cmd param1 param2 param3"part2"    >   out.t"x"t < "input" 2>> "error.log"
 cmd &
 cmd param1 param2 param3"pa rt2" param\ 4    >   out.t"x"t ahoj < "inp><<>%^&ut" 2>> "error.log"
+cat a | sort | wc -l
+  wget "http://seznam.cz" > out1.txt > out2.txt 
+sjdhfiusjdhfjfj
+
+"cmd x" | cat "aaaaaaa'''" popo \& &
+ahhfhf"jsdf

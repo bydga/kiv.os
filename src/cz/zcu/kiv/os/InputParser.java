@@ -11,7 +11,7 @@ public class InputParser {
 	private char escapeSymbol = '\\';
 	private Set<Character> quotationMarks = new HashSet<Character>(Arrays.asList(new Character[]{'"', '\''}));
 
-	public ParseResult parse(String input) {
+	public ParseResult parse(String input) throws ParseException {
 		input = input.trim();
 		int inputSize = input.length();
 		char quotType = ' ';
@@ -35,6 +35,13 @@ public class InputParser {
 			if (currentChar == '&' && !inQuotation) {
 				result.isBackgroundTask = true;
 				break; //breaking out of the main for-loop: & is the last character
+			}
+
+			if (currentChar == '|' && !inQuotation) {
+				result.pipeline = this.parse(input.substring(i + 1));
+				input = input.substring(0, i);
+				inputSize = input.length();
+				continue;
 			}
 
 			buffer.append(currentChar);
@@ -90,10 +97,10 @@ public class InputParser {
 				stdErrAppend = false;
 				buffer.delete(0, buffer.length());
 				continue;
-			} //check if it is fwd parameter - need to do this before escaping as the information would be lost
+			}
 
-			if (buffer.length() == 1 && (currentChar == '>' || currentChar == '<' || currentChar == '2')) {
-
+			if (buffer.length() == 1 && !inQuotation && (currentChar == '>' || currentChar == '<' || currentChar == '2')) {
+				//check if it is fwd parameter - need to do this before escaping as the information would be lost
 				buffer.deleteCharAt(buffer.length() - 1);
 				if (currentChar == '>') {
 					inStdOut = true;
@@ -123,13 +130,14 @@ public class InputParser {
 					}
 				}
 				continue;
-			} //escape symbol
+			}
+
 			if (currentChar == this.escapeSymbol) {
 				buffer.deleteCharAt(buffer.length() - 1);
 				//advance to the escaped character
 				i++;
 				if (i >= inputSize) {
-					throw new RuntimeException("No symbol after escape sequence");
+					throw new ParseException("No symbol after escape sequence");
 				}
 
 				buffer.append(input.charAt(i));
@@ -151,7 +159,7 @@ public class InputParser {
 		}
 
 		if (inQuotation) {
-			throw new RuntimeException("Missing corresponding quotation mark");
+			throw new ParseException("Missing corresponding quotation mark");
 		}
 		result.args = parameters.toArray(new String[]{});
 		return result;

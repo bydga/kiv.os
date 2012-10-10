@@ -1,6 +1,7 @@
 *.class
 nbproject
 build
+dist
 
 # Package Files #
 *.jar
