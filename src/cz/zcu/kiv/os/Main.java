@@ -4,6 +4,8 @@
  */
 package cz.zcu.kiv.os;
 
+import cz.zcu.kiv.os.terminal.SwingTerminal;
+
 
 /**
  *
@@ -15,6 +17,8 @@ public class Main {
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) {
+
+            SwingTerminal t = new SwingTerminal();
 		
 //		InputParser parser = new InputParser();
 //		

@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class InputParser {
 
-	private Set<Character> escapeCharacters = new HashSet<>(Arrays.asList(new Character[]{'\\', '"', '\'', '|', '&', '>', '<'}));
+	private Set<Character> escapeCharacters = new HashSet<Character>(Arrays.asList(new Character[]{'\\', '"', '\'', '|', '&', '>', '<'}));
 	private char escapeSymbol = '\\';
 
 	public String[] parse(String input) {
@@ -21,7 +21,7 @@ public class InputParser {
 		char quotType;
 		boolean inQuotation = false;
 
-		List<String> output = new ArrayList<>();
+		List<String> output = new ArrayList<String>();
 		StringBuilder buffer = new StringBuilder();
 
 		int inputSize = input.length();
