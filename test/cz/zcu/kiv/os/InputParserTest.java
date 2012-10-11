@@ -5,12 +5,12 @@
 package cz.zcu.kiv.os;
 
 import cz.zcu.kiv.os.terminal.InputParser;
+import cz.zcu.kiv.os.terminal.ParseResult;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.*;
-import static org.junit.Assert.*;
 
 /**
  *
