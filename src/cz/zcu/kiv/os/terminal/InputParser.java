@@ -1,4 +1,4 @@
-package cz.zcu.kiv.os;
+package cz.zcu.kiv.os.terminal;
 
 import java.util.*;
 

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.zcu.kiv.os;
+package cz.zcu.kiv.os.terminal;
 
 import java.util.Arrays;
 

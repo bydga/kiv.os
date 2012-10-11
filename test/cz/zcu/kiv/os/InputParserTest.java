@@ -4,6 +4,7 @@
  */
 package cz.zcu.kiv.os;
 
+import cz.zcu.kiv.os.terminal.InputParser;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -118,8 +119,4 @@ public class InputParserTest {
 		this.testCase(16);
 	}
 	
-	@Test
-	public void testParse18() throws Exception {
-		this.testCase(18);
-	}
 }
