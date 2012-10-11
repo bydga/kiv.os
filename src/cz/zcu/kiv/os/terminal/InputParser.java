@@ -8,8 +8,11 @@ import java.util.*;
  */
 public class InputParser {
 
-	private char escapeSymbol = '\\';
-	private Set<Character> quotationMarks = new HashSet<Character>(Arrays.asList(new Character[]{'"', '\''}));
+	public static final char ESCAPE_SYMBOL = '\\';
+	public static final Set<Character> QUOTATION_MARKS = new HashSet<Character>(Arrays.asList(new Character[]{'"', '\''}));
+	public static final char BACKGROUND_OPERATOR = '&';
+	public static final char PIPELINE_OPERATOR = '|';
+	public static final char PARAMETER_DELIMITER = ' ';
 
 	public ParseResult parse(String input) throws ParseException {
 		input = input.trim();
@@ -32,22 +35,20 @@ public class InputParser {
 			char currentChar = input.charAt(i);
 
 			//bg operator is the last one, dont care whats after it
-			if (currentChar == '&' && !inQuotation) {
+			if (currentChar == InputParser.BACKGROUND_OPERATOR && !inQuotation) {
 				result.isBackgroundTask = true;
 				break; //breaking out of the main for-loop: & is the last character
 			}
 
-			if (currentChar == '|' && !inQuotation) {
+			if (currentChar == InputParser.PIPELINE_OPERATOR && !inQuotation) {
 				result.pipeline = this.parse(input.substring(i + 1));
-				input = input.substring(0, i);
-				inputSize = input.length();
-				continue;
+				break;
 			}
 
 			buffer.append(currentChar);
 
 			// " and ' symbols
-			if (this.quotationMarks.contains(currentChar)) {
+			if (InputParser.QUOTATION_MARKS.contains(currentChar)) {
 
 				//already inside 
 				if (inQuotation) {
@@ -66,9 +67,9 @@ public class InputParser {
 			}
 
 			//end of parameter/input
-			if ((currentChar == ' ' && !inQuotation) || (i == inputSize - 1)) {
+			if ((currentChar == InputParser.PARAMETER_DELIMITER && !inQuotation) || (i == inputSize - 1)) {
 
-				if (currentChar == ' ') {
+				if (currentChar == InputParser.PARAMETER_DELIMITER) {
 					buffer.deleteCharAt(buffer.length() - 1);
 				}
 				if (inStdIn) {
@@ -83,7 +84,7 @@ public class InputParser {
 					parameters.add(buffer.toString());
 					//skip additional spaces if present
 					while (i + 1 < inputSize) {
-						if (input.charAt(i + 1) == ' ') {
+						if (input.charAt(i + 1) == InputParser.PARAMETER_DELIMITER) {
 							i++;
 						} else {
 							break;
@@ -123,7 +124,7 @@ public class InputParser {
 
 				//skip additional spaces if present
 				while (i + 1 < inputSize) {
-					if (input.charAt(i + 1) == ' ') {
+					if (input.charAt(i + 1) == InputParser.PARAMETER_DELIMITER) {
 						i++;
 					} else {
 						break;
@@ -132,7 +133,7 @@ public class InputParser {
 				continue;
 			}
 
-			if (currentChar == this.escapeSymbol) {
+			if (currentChar == InputParser.ESCAPE_SYMBOL) {
 				buffer.deleteCharAt(buffer.length() - 1);
 				//advance to the escaped character
 				i++;
