@@ -6,50 +6,65 @@ package cz.zcu.kiv.os.core;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  *
- * @author bydga
+ * @author bydga, george
  */
-public abstract class Process {
+public abstract class Process extends Observable implements Runnable {
+	
+	protected static final int STATE_STOPPED = 0;
+	protected static final int STATE_FINISHED = 0;
 	
 	protected Thread workingThread;
+	
+	protected int pid;
+	protected int ppid;
+	protected int[] children;
+	protected InputStream stdIn;
+	protected OutputStream stdOut;
+	protected OutputStream stdErr;
 
-	public Process parent;
-	public int pid;
-	public List<Process> children;
-	protected abstract void run() throws Exception;
+	@Override
+	public abstract void run();
 	
-	
-	public int getPid()
-	{
-		return this.pid;
-	}
-	//TODO: supply all params, save them as instant variables
-	public Process(int pid, Process parent, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
+	public Process(int pid, int ppid, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer processManager) {
 		this.pid = pid;
-		this.parent = parent;
-		this.children = new ArrayList<Process>();
-	}
-	
-	public List<Process> getChildren()
-	{
-		return this.children;
+		this.ppid = ppid;
+		this.stdIn = stdIn;
+		this.stdOut = stdOut;
+		this.stdErr = stdErr;
+		this.workingThread = new Thread(this);
+		this.addObserver(processManager);
 	}
 	
 	public final void stop()
 	{
-		//sth like thread stop..
+		this.workingThread.interrupt();
+		this.setChanged();
+		this.notifyObservers(this.STATE_STOPPED);
 	}
 	
-	public final void start() {
-		//wrapper above working thread execution
-		try {
-			this.run();
-		} catch (Exception e)  {
-			
-		}
+	public final void start()
+	{	
+		this.workingThread.start();	
+	}
+	
+	/**
+     * Add children process id
+     */
+	public final void addChildren()
+	{
+		
+	}
+	
+	/**
+     * Remove children process id
+     */
+	public final void removeChildren()
+	{
+		
 	}
 }

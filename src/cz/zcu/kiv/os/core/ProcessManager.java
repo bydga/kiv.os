@@ -10,12 +10,14 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  *
  * @author bydga
  */
-public class ProcessManager {
+public class ProcessManager implements Observer{
 
 	protected static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
 	protected Map<Integer, ProcessTableRecord> processTable;
@@ -36,9 +38,9 @@ public class ProcessManager {
 		String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
 		String fullClassName = ProcessManager.PROCESS_PACKAGE + "." + className;
 		Class procClass = Class.forName(fullClassName);
-		Constructor constructor = procClass.getConstructor(int.class, Process.class, String[].class, InputStream.class, OutputStream.class, OutputStream.class);
-
-		Process p = (Process) constructor.newInstance(this.counter, parent, args, System.in, System.out, System.out);
+		Constructor constructor = procClass.getConstructor(int.class, int.class, InputStream.class, OutputStream.class, OutputStream.class, ProcessManager.class);
+		
+		Process p = (Process) constructor.newInstance(this.counter, parent.pid, stdIn, stdOut, stdErr, this);
 		ProcessTableRecord record = new ProcessTableRecord(p);
 		record.setIsRunning(true);
 		this.processTable.put(this.counter, record);
@@ -61,5 +63,10 @@ public class ProcessManager {
 
 	public synchronized void removeStreamFromProcess(int pid, Closeable stream) {
 		this.processTable.get(pid).getOpenedStreams().remove(stream);
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO: handle change of Observable object (stopped process etc)
 	}
 }
