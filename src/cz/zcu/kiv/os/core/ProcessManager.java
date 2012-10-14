@@ -26,19 +26,19 @@ public class ProcessManager {
 		this.counter = -1;
 	}
 
-	public synchronized Process createProcess(Process parent, String processName, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) throws Exception {
+	public synchronized Process createProcess(Process parent, String processName, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) throws Exception {
 
 		do {
 			this.counter = (counter + 1 <= 0) ? 0 : counter + 1;
 		} while (this.processTable.containsKey(this.counter));
 
-		//policy: class name begins with Capital letter
+		//class name begins with Capital letter
 		String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
 		String fullClassName = ProcessManager.PROCESS_PACKAGE + "." + className;
 		Class procClass = Class.forName(fullClassName);
-		Constructor constructor = procClass.getConstructor(int.class, InputStream.class, OutputStream.class, OutputStream.class);
-		
-		Process p = (Process) constructor.newInstance(this.counter, System.in, System.out, System.out);
+		Constructor constructor = procClass.getConstructor(int.class, Process.class, String[].class, InputStream.class, OutputStream.class, OutputStream.class);
+
+		Process p = (Process) constructor.newInstance(this.counter, parent, args, System.in, System.out, System.out);
 		ProcessTableRecord record = new ProcessTableRecord(p);
 		record.setIsRunning(true);
 		this.processTable.put(this.counter, record);
@@ -50,19 +50,16 @@ public class ProcessManager {
 	public synchronized void killProcess(int pid) throws Exception {
 		ProcessTableRecord p = this.processTable.remove(pid);
 		p.getProcess().stop();
-		for( Closeable stream : p.openedStreams)
-		{
+		for (Closeable stream : p.openedStreams) {
 			stream.close();
 		}
 	}
-	
-	public synchronized void addStreamToProcess(int pid, Closeable stream)
-	{
+
+	public synchronized void addStreamToProcess(int pid, Closeable stream) {
 		this.processTable.get(pid).getOpenedStreams().add(stream);
 	}
-	
-	public synchronized void removeStreamFromProcess(int pid, Closeable stream)
-	{
+
+	public synchronized void removeStreamFromProcess(int pid, Closeable stream) {
 		this.processTable.get(pid).getOpenedStreams().remove(stream);
 	}
 }

@@ -12,18 +12,20 @@ import java.io.OutputStream;
  *
  * @author bydga
  */
-public class Sort extends Process {
+public class Init extends cz.zcu.kiv.os.core.Process{
 
-	public Sort(int pid, Process parent, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
+	@Override
+	protected void run() throws Exception {
+	}
+
+	public Init(int pid, Process parent, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
 		super(pid, parent, args, stdIn, stdOut, stdErr);
 	}
 
 
 
 	
-
-	@Override
-	protected void run() throws Exception {
-
-	}
+	
+	
+	
 }

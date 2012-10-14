@@ -4,6 +4,8 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.Core.CoreServices;
+import cz.zcu.kiv.os.terminal.ParseResult;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
@@ -16,6 +18,6 @@ public interface ICoreServices {
 
 	public PipedInputStream openFile(Process caller, String fileName, String rights);
 	public void closeFile(Process caller, PipedInputStream stream);
-	public Process createProcess(Process parent, String processName, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) throws Exception;
-	public Process createProcess(Process parent, String processName, String[] args) throws Exception;
+	public Process createProcess(Process parent, String processName, String[] args, String stdIn, String stdOut, String stdErr) throws Exception;
+	public Process createProcess(Process parent, ParseResult result) throws Exception;
 }

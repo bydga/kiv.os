@@ -6,6 +6,8 @@ package cz.zcu.kiv.os.core;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -15,17 +17,27 @@ public abstract class Process {
 	
 	protected Thread workingThread;
 
+	public Process parent;
+	public int pid;
+	public List<Process> children;
 	protected abstract void run() throws Exception;
 	
 	
 	public int getPid()
 	{
-		return 1;
+		return this.pid;
 	}
 	//TODO: supply all params, save them as instant variables
-	public Process(int pid, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
+	public Process(int pid, Process parent, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
+		this.pid = pid;
+		this.parent = parent;
+		this.children = new ArrayList<Process>();
 	}
 	
+	public List<Process> getChildren()
+	{
+		return this.children;
+	}
 	
 	public final void stop()
 	{

@@ -4,9 +4,9 @@
  */
 package cz.zcu.kiv.os.core;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
+import cz.zcu.kiv.os.terminal.InputParser;
+import cz.zcu.kiv.os.terminal.ParseResult;
+import java.io.*;
 
 /**
  *
@@ -17,6 +17,7 @@ public class Core {
 	protected static Core instance;
 	protected ICoreServices services;
 	protected ProcessManager processManager;
+	protected InputParser inputParser;
 
 	public static synchronized Core getInstance() {
 		if (Core.instance == null) {
@@ -29,9 +30,10 @@ public class Core {
 	protected Core() {
 		this.services = new Core.CoreServices();
 		this.processManager = new ProcessManager();
+		this.inputParser = new InputParser();
 	}
 
-	public ICoreServices getServices() {
+	public synchronized ICoreServices getServices() {
 		return this.services;
 	}
 
@@ -47,20 +49,46 @@ public class Core {
 		}
 
 		@Override
-		public Process createProcess(Process parent, String processName, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) throws Exception {
-			Process p = Core.this.processManager.createProcess(parent, processName, stdIn, stdOut, stdErr);
-			
-			return p;
-		}
+		public Process createProcess(Process parent, String processName, String[] args, String stdIn, String stdOut, String stdErr) throws Exception {
+			InputStream in;
+			OutputStream out, err;
+			if (stdIn == null) {
+				in = new PipedInputStream();
+			} else {
+				in = new FileInputStream(stdIn);
+			}
 
-		@Override
-		public Process createProcess(Process parent, String processName, String[] args) throws Exception {
-			return this.createProcess(parent, processName, args, null, null, null);
+			if (stdOut == null) {
+				out = new PipedOutputStream();
+			} else {
+				out = new FileOutputStream(stdOut);
+			}
+
+			if (stdErr == null) {
+				err = new PipedOutputStream();
+			} else {
+				err = new FileOutputStream(stdErr);
+			}
+
+			Process p = Core.this.processManager.createProcess(parent, processName, null, in, out, err);
+
+			return p;
 		}
 
 		@Override
 		public void closeFile(Process caller, PipedInputStream stream) {
 			Core.this.processManager.removeStreamFromProcess(caller.getPid(), stream);
+		}
+
+		@Override
+		public Process createProcess(Process caller, ParseResult parseResult) throws Exception {
+
+			Process parent = parseResult.pipeline == null ? caller : this.createProcess(caller, parseResult.pipeline);
+			Process result = this.createProcess(parent, parseResult.args[0], parseResult.args, parseResult.stdIn, parseResult.stdOut, parseResult.stdErr);
+			parent.children.add(result);
+			//TODO: connect streams, init in/out/err...
+
+			return result;
 		}
 	}
 }
