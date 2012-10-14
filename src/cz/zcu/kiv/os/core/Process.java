@@ -17,9 +17,13 @@ public abstract class Process {
 
 	protected abstract void run() throws Exception;
 	
+	
+	public int getPid()
+	{
+		return 1;
+	}
 	//TODO: supply all params, save them as instant variables
 	public Process(int pid, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
-		
 	}
 	
 	

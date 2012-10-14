@@ -4,13 +4,11 @@
  */
 package cz.zcu.kiv.os.core;
 
-import cz.zcu.kiv.os.processes.Sort;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,16 +22,17 @@ public class ProcessManager {
 	int counter;
 
 	public ProcessManager() {
-		this.processTable = new Hashtable<Integer, ProcessTableRecord>();
+		this.processTable = new HashMap<Integer, ProcessTableRecord>();
 		this.counter = -1;
 	}
 
-	public synchronized Process createProcess(String processName, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Process parent) throws Exception {
+	public synchronized Process createProcess(Process parent, String processName, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) throws Exception {
 
 		do {
 			this.counter = (counter + 1 <= 0) ? 0 : counter + 1;
 		} while (this.processTable.containsKey(this.counter));
 
+		//policy: class name begins with Capital letter
 		String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
 		String fullClassName = ProcessManager.PROCESS_PACKAGE + "." + className;
 		Class procClass = Class.forName(fullClassName);
@@ -49,13 +48,21 @@ public class ProcessManager {
 	}
 
 	public synchronized void killProcess(int pid) throws Exception {
-		ProcessTableRecord p = this.processTable.get(pid);
+		ProcessTableRecord p = this.processTable.remove(pid);
 		p.getProcess().stop();
-		
-		
-
+		for( Closeable stream : p.openedStreams)
+		{
+			stream.close();
+		}
 	}
-
-	public synchronized void killProcess(Process p) {
+	
+	public synchronized void addStreamToProcess(int pid, Closeable stream)
+	{
+		this.processTable.get(pid).getOpenedStreams().add(stream);
+	}
+	
+	public synchronized void removeStreamFromProcess(int pid, Closeable stream)
+	{
+		this.processTable.get(pid).getOpenedStreams().remove(stream);
 	}
 }

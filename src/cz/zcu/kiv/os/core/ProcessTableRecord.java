@@ -4,17 +4,26 @@
  */
 package cz.zcu.kiv.os.core;
 
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author bydga
  */
 public class ProcessTableRecord {
-	
+
 	protected Process process;
 	protected boolean isRunning;
+	protected List<Closeable> openedStreams;
+
+	public List<Closeable> getOpenedStreams() {
+		return this.openedStreams;
+	}
 
 	public boolean isRunning() {
-		return isRunning;
+		return this.isRunning;
 	}
 
 	public void setIsRunning(boolean isRunning) {
@@ -22,13 +31,11 @@ public class ProcessTableRecord {
 	}
 
 	public Process getProcess() {
-		return process;
+		return this.process;
 	}
-	
-	public ProcessTableRecord(Process p)
-	{
+
+	public ProcessTableRecord(Process p) {
 		this.process = p;
+		this.openedStreams = new ArrayList<Closeable>();
 	}
-	
-	
 }
