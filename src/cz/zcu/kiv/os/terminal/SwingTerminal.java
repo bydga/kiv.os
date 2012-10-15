@@ -1,8 +1,10 @@
 package cz.zcu.kiv.os.terminal;
 
+import cz.zcu.kiv.os.core.device.IInputDevice;
+import cz.zcu.kiv.os.core.device.InOutDevice;
+import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.HeadlessException;
 import javax.swing.*;
 
 /**
@@ -10,28 +12,46 @@ import javax.swing.*;
  *
  * @author Jakub Danek
  */
-public class SwingTerminal extends JFrame {
+public class SwingTerminal extends InOutDevice {
 
+    private JFrame frame;
     private JTextArea historyArea;
+    private Thread messageListener;
     private JLabel promptLabel;
+
+    private IInputDevice stdout;
+    private IOutputDevice stdin;
     
 
     /**
      * Default constructor.
-     * @throws HeadlessException
      */
-    public SwingTerminal() throws HeadlessException {
-        initComponents();
-        initFrame();
+    public SwingTerminal(IInputDevice stdout, IOutputDevice stdin) {
+        super(stdout, stdin);
+        this.stdin = stdin;
+        this.stdout = stdout;
+        runGui();
+    }
+
+    private void runGui() {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                initFrame();
+            }
+        });
     }
 
     /**
      * Initialize frame parameters.
      */
     private void initFrame() {
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setVisible(true);
-        this.pack();
+        frame = new JFrame("OS simulation");
+        initComponents();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        frame.pack();
     }
 
     /**
@@ -44,7 +64,21 @@ public class SwingTerminal extends JFrame {
         outer.add(createTopPanel(), BorderLayout.NORTH);
         outer.add(createBottomPanel(), BorderLayout.SOUTH);
 
-        this.getContentPane().add(outer);
+        frame.getContentPane().add(outer);
+        startListening();
+    }
+
+    private void startListening() {
+        messageListener = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while(stdout.isOpen()) {
+                    historyArea.append(stdout.readLine());
+                }
+            }
+        });
+        messageListener.start();
     }
 
     /**

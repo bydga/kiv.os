@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os;
 
 import cz.zcu.kiv.os.core.Core;
@@ -9,6 +5,12 @@ import cz.zcu.kiv.os.processes.Init;
 import cz.zcu.kiv.os.terminal.InputParser;
 import cz.zcu.kiv.os.terminal.ParseResult;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 /**
  *
