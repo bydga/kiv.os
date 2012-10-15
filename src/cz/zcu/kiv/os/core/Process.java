@@ -29,6 +29,11 @@ public abstract class Process extends Observable {
 	protected OutputStream stdOut;
 	protected OutputStream stdErr;
 	
+	public int getPid()
+	{
+		return this.pid;
+	}
+	
 	public abstract void run() throws Exception;
 	
 	public Process(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer processManager)

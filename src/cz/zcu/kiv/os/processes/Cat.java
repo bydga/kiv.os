@@ -7,6 +7,7 @@ package cz.zcu.kiv.os.processes;
 import cz.zcu.kiv.os.core.Process;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Observer;
 
 /**
  *
@@ -15,12 +16,16 @@ import java.io.OutputStream;
 public class Cat extends cz.zcu.kiv.os.core.Process{
 
 	@Override
-	protected void run() throws Exception {
+	public void run() throws Exception {
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public Cat(int pid, Process parent, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
-		super(pid, parent, args, stdIn, stdOut, stdErr);
+	public Cat(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer processManager) {
+		super(pid, ppid, args, stdIn, stdOut, stdErr, processManager);
 	}
+	
+	
+
 
 	
 

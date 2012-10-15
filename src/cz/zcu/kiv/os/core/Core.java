@@ -85,7 +85,6 @@ public class Core {
 
 			Process parent = parseResult.pipeline == null ? caller : this.createProcess(caller, parseResult.pipeline);
 			Process result = this.createProcess(parent, parseResult.args[0], parseResult.args, parseResult.stdIn, parseResult.stdOut, parseResult.stdErr);
-			parent.children.add(result);
 			//TODO: connect streams, init in/out/err...
 
 			return result;

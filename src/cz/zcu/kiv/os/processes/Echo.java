@@ -11,11 +11,6 @@ import java.util.Observer;
  * @author Jiri Zikmund
  */
 public class Echo extends Process {
-
-	public static void main(String[] args) {
-		Vytvor v = new Vytvor();
-		v.vytvor();
-	}
 	
 	public Echo(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer observer){
 		super(pid, ppid, args, stdIn, stdOut, stdErr, observer);
@@ -34,21 +29,4 @@ public class Echo extends Process {
 		}
 	}
 
-}
-
-class Vytvor implements Observer {
-
-	public  void vytvor() {
-		Echo echo = new Echo(1, 1000, System.in, System.out, System.out, this);
-		Echo echo2 = new Echo(2, 500, System.in, System.out, System.out, this);
-		echo.start();
-		echo2.start();
-		echo.stop();
-	}
-	
-	@Override
-	public void update(Observable o, Object arg) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-	
 }

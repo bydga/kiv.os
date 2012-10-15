@@ -22,7 +22,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 
 
-		cz.zcu.kiv.os.core.Process p = new Init(0, null, null, null, null, null);
+		cz.zcu.kiv.os.core.Process p = new Init(0, 0, null, null, null, null, null);
 
 
 		InputParser parser = new InputParser();
