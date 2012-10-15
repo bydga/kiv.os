@@ -38,9 +38,10 @@ public class ProcessManager implements Observer{
 		String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
 		String fullClassName = ProcessManager.PROCESS_PACKAGE + "." + className;
 		Class procClass = Class.forName(fullClassName);
-		Constructor constructor = procClass.getConstructor(int.class, int.class, InputStream.class, OutputStream.class, OutputStream.class, ProcessManager.class);
+		Constructor constructor = procClass.getConstructor();
 		
-		Process p = (Process) constructor.newInstance(this.counter, parent.pid, stdIn, stdOut, stdErr, this);
+		Process p = (Process) constructor.newInstance();
+		p.init(counter, parent, args, stdIn, stdOut, stdErr);
 		ProcessTableRecord record = new ProcessTableRecord(p);
 		record.setIsRunning(true);
 		this.processTable.put(this.counter, record);

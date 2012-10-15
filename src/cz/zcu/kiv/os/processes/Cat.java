@@ -20,10 +20,11 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public Cat(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer processManager) {
-		super(pid, ppid, args, stdIn, stdOut, stdErr, processManager);
+	@Override
+	public void initProcess(String[] args) {
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
-	
+
 	
 
 

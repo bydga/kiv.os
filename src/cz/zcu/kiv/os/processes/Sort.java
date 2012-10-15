@@ -15,12 +15,15 @@ import java.util.Observer;
  */
 public class Sort extends Process {
 
-	public Sort(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer processManager) {
-		super(pid, ppid, args, stdIn, stdOut, stdErr, processManager);
-	}
+
 
 	@Override
 	public void run() throws Exception {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public void initProcess(String[] args) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 

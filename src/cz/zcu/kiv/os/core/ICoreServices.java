@@ -4,10 +4,7 @@
  */
 package cz.zcu.kiv.os.core;
 
-import cz.zcu.kiv.os.core.Core.CoreServices;
 import cz.zcu.kiv.os.terminal.ParseResult;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PipedInputStream;
 
 /**

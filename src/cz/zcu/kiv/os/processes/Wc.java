@@ -15,12 +15,14 @@ import java.util.Observer;
  */
 public class Wc extends cz.zcu.kiv.os.core.Process{
 
-	public Wc(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer processManager) {
-		super(pid, ppid, args, stdIn, stdOut, stdErr, processManager);
-	}
 
 	@Override
 	public void run() throws Exception {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public void initProcess(String[] args) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 

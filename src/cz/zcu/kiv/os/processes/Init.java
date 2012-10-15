@@ -20,11 +20,11 @@ public class Init extends cz.zcu.kiv.os.core.Process{
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public Init(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer processManager) {
-		super(pid, ppid, args, stdIn, stdOut, stdErr, processManager);
+	@Override
+	public void initProcess(String[] args) {
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
-	
-	
+
 
 
 

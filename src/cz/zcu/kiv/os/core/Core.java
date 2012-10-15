@@ -70,7 +70,7 @@ public class Core {
 				err = new FileOutputStream(stdErr);
 			}
 
-			Process p = Core.this.processManager.createProcess(parent, processName, null, in, out, err);
+			Process p = Core.this.processManager.createProcess(parent, processName, args, in, out, err);
 
 			return p;
 		}

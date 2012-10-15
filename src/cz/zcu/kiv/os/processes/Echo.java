@@ -12,21 +12,22 @@ import java.util.Observer;
  */
 public class Echo extends Process {
 	
-	public Echo(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer observer){
-		super(pid, ppid, args, stdIn, stdOut, stdErr, observer);
-	}
 	
 	@Override
 	public void run() {
 		try {
 			for (int i = 0; i < 100; i++) {
 				this.stdOut.write(("PID "+(this.pid)+"\n").getBytes());
-				this.workingThread.sleep(this.ppid);
 			}
 		}
 		catch(Exception e) {
 			
 		}
+	}
+
+	@Override
+	public void initProcess(String[] args) {
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 }
