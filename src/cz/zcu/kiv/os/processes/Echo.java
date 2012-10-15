@@ -17,8 +17,8 @@ public class Echo extends Process {
 		v.vytvor();
 	}
 	
-	public Echo(int pid, int ppid, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer observer){
-		super(pid, ppid, stdIn, stdOut, stdErr, observer);
+	public Echo(int pid, int ppid, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr, Observer observer){
+		super(pid, ppid, args, stdIn, stdOut, stdErr, observer);
 	}
 	
 	@Override
