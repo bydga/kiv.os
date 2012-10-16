@@ -18,15 +18,8 @@ public class Sort extends Process {
 
 
 	@Override
-	public void run() throws Exception {
+	public void run(String[] args) throws Exception {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	@Override
-	public void initProcess(String[] args) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-
-	
 }

@@ -16,14 +16,10 @@ import java.util.Observer;
 public class Cat extends cz.zcu.kiv.os.core.Process{
 
 	@Override
-	public void run() throws Exception {
+	public void run(String[] args) throws Exception {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
-
-	@Override
-	public void initProcess(String[] args) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
+	
 
 	
 

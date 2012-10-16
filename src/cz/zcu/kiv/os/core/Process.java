@@ -24,7 +24,6 @@ public abstract class Process extends Observable {
 	protected int pid;
 	protected Process parent;
 	protected List<Process> children;
-	protected String[] args;
 	protected InputStream stdIn;
 	protected OutputStream stdOut;
 	protected OutputStream stdErr;
@@ -32,25 +31,23 @@ public abstract class Process extends Observable {
 	public int getPid() {
 		return this.pid;
 	}
+	
+	public abstract void run(String[] args) throws Exception;
 
-	public abstract void run() throws Exception;
 
-	public abstract void initProcess(String[] args);
-
-	public final void init(int pid, Process parent, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
+	public final void init(int pid, Process parent, final String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
 		this.children = new ArrayList<Process>();
 		this.pid = pid;
 		this.parent = parent;
 		this.stdIn = stdIn;
 		this.stdOut = stdOut;
 		this.stdErr = stdErr;
-		this.initProcess(args);
 		this.workingThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					Process.this.run();
+					Process.this.run(args);
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_FINISH);
 				} catch (Exception ex) {

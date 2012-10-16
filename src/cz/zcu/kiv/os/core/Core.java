@@ -42,14 +42,14 @@ public class Core {
 		@Override
 		public PipedInputStream openFile(Process caller, String fileName, String rights) {
 
-			int pid = 0;
+			int pid = caller.getPid();
 			PipedInputStream is = null;
 			Core.this.processManager.addStreamToProcess(pid, is);
 			return is;
 		}
 
 		@Override
-		public Process createProcess(Process parent, String processName, String[] args, String stdIn, String stdOut, String stdErr) throws Exception {
+		public Process createProcess(Process parent, String processName, String[] args, String stdIn, String stdOut, boolean appendStdOut, String stdErr, boolean appendStdErr, boolean isBackgroundProcess) throws Exception {
 			InputStream in;
 			OutputStream out, err;
 			if (stdIn == null) {
@@ -76,15 +76,20 @@ public class Core {
 		}
 
 		@Override
+		public Process createProcess(Process parent, String processName, String[] args) throws Exception {
+			return this.createProcess(parent, processName, args, null, null, false, null, false, false);
+		}
+
+		@Override
 		public void closeFile(Process caller, PipedInputStream stream) {
 			Core.this.processManager.removeStreamFromProcess(caller.getPid(), stream);
 		}
 
-		@Override
 		public Process createProcess(Process caller, ParseResult parseResult) throws Exception {
 
 			Process parent = parseResult.pipeline == null ? caller : this.createProcess(caller, parseResult.pipeline);
-			Process result = this.createProcess(parent, parseResult.args[0], parseResult.args, parseResult.stdIn, parseResult.stdOut, parseResult.stdErr);
+			Process result = this.createProcess(parent, parseResult.args[0], parseResult.args, parseResult.stdIn, parseResult.stdOut, false,
+					parseResult.stdErr, false, false);
 			//TODO: connect streams, init in/out/err...
 
 			return result;

@@ -14,7 +14,7 @@ public class Echo extends Process {
 	
 	
 	@Override
-	public void run() {
+	public void run(String[] args) {
 		try {
 			for (int i = 0; i < 100; i++) {
 				this.stdOut.write(("PID "+(this.pid)+"\n").getBytes());
@@ -23,11 +23,6 @@ public class Echo extends Process {
 		catch(Exception e) {
 			
 		}
-	}
-
-	@Override
-	public void initProcess(String[] args) {
-		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 }

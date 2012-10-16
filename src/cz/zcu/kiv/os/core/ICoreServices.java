@@ -15,6 +15,6 @@ public interface ICoreServices {
 
 	public PipedInputStream openFile(Process caller, String fileName, String rights);
 	public void closeFile(Process caller, PipedInputStream stream);
-	public Process createProcess(Process parent, String processName, String[] args, String stdIn, String stdOut, String stdErr) throws Exception;
-	public Process createProcess(Process parent, ParseResult result) throws Exception;
+	public Process createProcess(Process parent, String processName, String[] args, String stdIn, String stdOut, boolean appendStdOut, String stdErr, boolean appendStdErr, boolean isBackgroundProcess ) throws Exception;
+	public Process createProcess(Process parent, String processName, String[] args ) throws Exception;
 }

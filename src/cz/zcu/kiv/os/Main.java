@@ -30,9 +30,9 @@ public class Main {
 
 		InputParser parser = new InputParser();
 		ParseResult pr = parser.parse("cat ahoj | sort | wc -l");
-		cz.zcu.kiv.os.core.Process result = Core.getInstance().getServices().createProcess(p, pr);
+//		cz.zcu.kiv.os.core.Process result = Core.getInstance().getServices().createProcess(p, pr);
 
-		SwingTerminal t = new SwingTerminal();
+//		SwingTerminal t = new SwingTerminal();
 
 
 	}
