@@ -1,15 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.core.device;
 
 /**
+ * Output device abstraction - e.g. stdout or file opened for writing.
  *
- * @author veveri
+ * @author Jakub Danek
  */
 public interface IOutputDevice extends IDevice {
 
+    /**
+     * Writes one line to the output stream.
+     * @param input
+     */
     public void writeLine(String input);
 
 }

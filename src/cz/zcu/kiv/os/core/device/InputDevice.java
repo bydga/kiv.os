@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Input device implementation. Can read from any InputStream provided to it.
  *
  * @author Jakub Danek
  */
@@ -15,6 +16,10 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
     
     private BufferedReader reader;
 
+    /**
+     * Basic constructor
+     * @param inputStream open input stream that can be read from
+     */
     public InputDevice(InputStream inputStream) {
         InputStreamReader isr = new InputStreamReader(inputStream);
         reader = new BufferedReader(isr);
