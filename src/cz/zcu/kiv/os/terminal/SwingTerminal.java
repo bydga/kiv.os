@@ -59,7 +59,7 @@ public class SwingTerminal extends InOutDevice {
      */
     private void initComponents() {
         JPanel outer = new JPanel(new BorderLayout());
-        outer.setPreferredSize(new Dimension(1024, 800));
+        outer.setPreferredSize(new Dimension(640, 480));
 
         outer.add(createTopPanel(), BorderLayout.NORTH);
         outer.add(createBottomPanel(), BorderLayout.SOUTH);
@@ -87,11 +87,11 @@ public class SwingTerminal extends InOutDevice {
      */
     private JPanel createTopPanel() {
         JPanel topPanel = new JPanel();
-        topPanel.setPreferredSize(new Dimension(1024, 768));
+        topPanel.setPreferredSize(new Dimension(640, 450));
 
         historyArea = new JTextArea();
         historyArea.setEditable(false);
-        historyArea.setPreferredSize(new Dimension(1024, 768));
+        historyArea.setPreferredSize(new Dimension(640, 450));
 
         JScrollPane scroll = new JScrollPane(historyArea);
 
@@ -105,7 +105,7 @@ public class SwingTerminal extends InOutDevice {
      */
     private JPanel createBottomPanel() {
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setPreferredSize(new Dimension(1024, 33));
+        bottomPanel.setPreferredSize(new Dimension(640, 30));
 
         //TODO dummy data
         promptLabel = new JLabel("uzivatel  /path/to/dest/ $");

@@ -4,6 +4,8 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.device.IInputDevice;
+import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,7 +30,7 @@ public class ProcessManager implements Observer{
 		this.counter = -1;
 	}
 
-	public synchronized Process createProcess(Process parent, String processName, String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) throws Exception {
+	public synchronized Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws Exception {
 
 		do {
 			this.counter = (counter + 1 <= 0) ? 0 : counter + 1;
@@ -41,7 +43,7 @@ public class ProcessManager implements Observer{
 		Constructor constructor = procClass.getConstructor();
 		
 		Process p = (Process) constructor.newInstance();
-		p.init(counter, parent, args, stdIn, stdOut, stdErr);
+		p.init(this.counter, parent, args, stdIn, stdOut, stdErr);
 		ProcessTableRecord record = new ProcessTableRecord(p);
 		record.setIsRunning(true);
 		this.processTable.put(this.counter, record);

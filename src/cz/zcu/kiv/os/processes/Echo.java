@@ -17,7 +17,7 @@ public class Echo extends Process {
 	public void run(String[] args) {
 		try {
 			for (int i = 0; i < 100; i++) {
-				this.stdOut.write(("PID "+(this.pid)+"\n").getBytes());
+				this.stdOut.writeLine(("PID "+(this.pid)+"\n"));
 			}
 		}
 		catch(Exception e) {

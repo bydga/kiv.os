@@ -4,6 +4,8 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.device.IInputDevice;
+import cz.zcu.kiv.os.core.device.IOutputDevice;
 import cz.zcu.kiv.os.terminal.InputParser;
 import cz.zcu.kiv.os.terminal.ParseResult;
 import java.io.*;
@@ -49,50 +51,13 @@ public class Core {
 		}
 
 		@Override
-		public Process createProcess(Process parent, String processName, String[] args, String stdIn, String stdOut, boolean appendStdOut, String stdErr, boolean appendStdErr, boolean isBackgroundProcess) throws Exception {
-			InputStream in;
-			OutputStream out, err;
-			if (stdIn == null) {
-				in = new PipedInputStream();
-			} else {
-				in = new FileInputStream(stdIn);
-			}
-
-			if (stdOut == null) {
-				out = new PipedOutputStream();
-			} else {
-				out = new FileOutputStream(stdOut);
-			}
-
-			if (stdErr == null) {
-				err = new PipedOutputStream();
-			} else {
-				err = new FileOutputStream(stdErr);
-			}
-
-			Process p = Core.this.processManager.createProcess(parent, processName, args, in, out, err);
-
-			return p;
-		}
-
-		@Override
-		public Process createProcess(Process parent, String processName, String[] args) throws Exception {
-			return this.createProcess(parent, processName, args, null, null, false, null, false, false);
+		public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws Exception {
+			return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut);
 		}
 
 		@Override
 		public void closeFile(Process caller, PipedInputStream stream) {
 			Core.this.processManager.removeStreamFromProcess(caller.getPid(), stream);
-		}
-
-		public Process createProcess(Process caller, ParseResult parseResult) throws Exception {
-
-			Process parent = parseResult.pipeline == null ? caller : this.createProcess(caller, parseResult.pipeline);
-			Process result = this.createProcess(parent, parseResult.args[0], parseResult.args, parseResult.stdIn, parseResult.stdOut, false,
-					parseResult.stdErr, false, false);
-			//TODO: connect streams, init in/out/err...
-
-			return result;
 		}
 	}
 }

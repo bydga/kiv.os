@@ -4,6 +4,8 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.device.IInputDevice;
+import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -24,18 +26,18 @@ public abstract class Process extends Observable {
 	protected int pid;
 	protected Process parent;
 	protected List<Process> children;
-	protected InputStream stdIn;
-	protected OutputStream stdOut;
-	protected OutputStream stdErr;
+	protected IInputDevice stdIn;
+	protected IOutputDevice stdOut;
+	protected IOutputDevice stdErr;
 
 	public int getPid() {
 		return this.pid;
 	}
 	
-	public abstract void run(String[] args) throws Exception;
+	protected abstract void run(String[] args) throws Exception;
 
 
-	public final void init(int pid, Process parent, final String[] args, InputStream stdIn, OutputStream stdOut, OutputStream stdErr) {
+	protected final void init(int pid, Process parent, final String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) {
 		this.children = new ArrayList<Process>();
 		this.pid = pid;
 		this.parent = parent;
@@ -58,27 +60,27 @@ public abstract class Process extends Observable {
 		});
 	}
 
-	public final void stop() {
+	protected final void stop() {
 		this.workingThread.interrupt();
 		this.setChanged();
 		this.notifyObservers(Process.STATE_STOP);
 	}
 
-	public final void start() {
+	protected final void start() {
 		this.workingThread.start();
 	}
 
 	/**
 	 * Add children process id
 	 */
-	public final void addChildren(Process p) {
+	protected final void addChildren(Process p) {
 		this.children.add(p);
 	}
 
 	/**
 	 * Remove children process id
 	 */
-	public final void removeChildren(Process p) {
+	protected final void removeChildren(Process p) {
 		this.children.remove(p);
 		
 	}
