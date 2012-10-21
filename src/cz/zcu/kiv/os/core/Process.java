@@ -4,6 +4,7 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.io.InputStream;
@@ -49,15 +50,18 @@ public abstract class Process extends Observable {
 			@Override
 			public void run() {
 				try {
+					Utilities.log("Process " + Process.this.getClass().getName() + " starting");
 					Process.this.run(args);
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_FINISH);
+					Utilities.log("Process " + Process.this.getClass().getName() + " finished");
 				} catch (Exception ex) {
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_EXCEPTION);
+					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception");
 				}
 			}
-		});
+		}, "process-" + this.getClass().getName());
 	}
 
 	protected final void stop() {

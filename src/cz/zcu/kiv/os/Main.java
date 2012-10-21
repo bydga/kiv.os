@@ -21,8 +21,5 @@ public class Main {
 		Utilities.log("starting OS");
 		Process p = Core.getInstance().getServices().createProcess(null, "Init", null, new InputDevice(System.in), new OutputDevice(System.out), new OutputDevice(System.err));
 
-		Utilities.log("Init running");
-
-
 	}
 }

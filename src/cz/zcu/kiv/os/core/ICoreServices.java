@@ -17,5 +17,5 @@ public interface ICoreServices {
 
 	public PipedInputStream openFile(Process caller, String fileName, String rights);
 	public void closeFile(Process caller, PipedInputStream stream);
-	public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws Exception;
+	public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws NoSuchProcessException;
 }

@@ -30,6 +30,7 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
     public void writeLine(String input) {
         try {
             writer.write(input);
+			writer.newLine();
             writer.flush();
         } catch (IOException ex) {
             Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);

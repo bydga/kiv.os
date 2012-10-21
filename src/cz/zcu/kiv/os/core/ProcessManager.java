@@ -19,7 +19,7 @@ import java.util.Observer;
  *
  * @author bydga
  */
-public class ProcessManager implements Observer{
+public class ProcessManager implements Observer {
 
 	protected static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
 	protected Map<Integer, ProcessTableRecord> processTable;
@@ -30,26 +30,31 @@ public class ProcessManager implements Observer{
 		this.counter = -1;
 	}
 
-	public synchronized Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws Exception {
+	public synchronized Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws NoSuchProcessException {
 
 		do {
 			this.counter = (counter + 1 <= 0) ? 0 : counter + 1;
 		} while (this.processTable.containsKey(this.counter));
 
-		//class name begins with Capital letter
-		String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
-		String fullClassName = ProcessManager.PROCESS_PACKAGE + "." + className;
-		Class procClass = Class.forName(fullClassName);
-		Constructor constructor = procClass.getConstructor();
-		
-		Process p = (Process) constructor.newInstance();
-		p.init(this.counter, parent, args, stdIn, stdOut, stdErr);
-		ProcessTableRecord record = new ProcessTableRecord(p);
-		record.setIsRunning(true);
-		this.processTable.put(this.counter, record);
-		p.start();
+		try {
+			//class name begins with Capital letter
+			String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
+			String fullClassName = ProcessManager.PROCESS_PACKAGE + "." + className;
+			Class procClass = Class.forName(fullClassName);
+			Constructor constructor = procClass.getConstructor();
 
-		return p;
+			Process p = (Process) constructor.newInstance();
+			p.init(this.counter, parent, args, stdIn, stdOut, stdErr);
+			ProcessTableRecord record = new ProcessTableRecord(p);
+			record.setIsRunning(true);
+			this.processTable.put(this.counter, record);
+			p.start();
+
+			return p;
+		} catch (Exception ex) {
+			throw new NoSuchProcessException("Process " + processName + " doesn't exist or is malformed.");
+
+		}
 	}
 
 	public synchronized void killProcess(int pid) throws Exception {

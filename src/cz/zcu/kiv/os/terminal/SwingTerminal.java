@@ -5,6 +5,8 @@ import cz.zcu.kiv.os.core.device.InOutDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 
 /**
@@ -74,7 +76,8 @@ public class SwingTerminal extends InOutDevice {
             @Override
             public void run() {
                 while(stdout.isOpen()) {
-                    historyArea.append(stdout.readLine());
+					String s = stdout.readLine();
+                    historyArea.append(s +"\n");
                 }
             }
         });
@@ -111,7 +114,15 @@ public class SwingTerminal extends InOutDevice {
         promptLabel = new JLabel("uzivatel  /path/to/dest/ $");
         bottomPanel.add(promptLabel, BorderLayout.WEST);
 
-        JTextField inputField = new JTextField();
+        final JTextField inputField = new JTextField();
+		inputField.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SwingTerminal.this.stdin.writeLine(inputField.getText());
+				inputField.setText("");
+			}
+		});
         bottomPanel.add(inputField);
         
 
