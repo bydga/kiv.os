@@ -38,12 +38,14 @@ public class InOutDevice extends AbstractDevice implements IInputDevice, IOutput
     }
 
     @Override
-    public String readLine() {
+    //TODO better exception
+    public String readLine() throws Exception {
         return reader.readLine();
     }
 
     @Override
-    public void writeLine(String input) {
+    //TODO better exception
+    public void writeLine(String input) throws Exception {
         writer.writeLine(input);
     }
 

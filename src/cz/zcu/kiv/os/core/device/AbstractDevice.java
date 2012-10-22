@@ -8,7 +8,7 @@ package cz.zcu.kiv.os.core.device;
  */
 public abstract class AbstractDevice implements IDevice {
 
-    private volatile boolean open;
+    private boolean open;
 
     protected AbstractDevice() {
         open = true;
@@ -18,13 +18,15 @@ public abstract class AbstractDevice implements IDevice {
      *
      * @return true if the device is open
      */
-    public boolean isOpen() {
+    @Override
+    public synchronized boolean isOpen() {
         return open;
     }
 
     /**
      * Closes the device.
      */
+    @Override
     public synchronized void close() {
         if(open) {
             open = false;
@@ -35,6 +37,9 @@ public abstract class AbstractDevice implements IDevice {
     /**
      * Override this action to provide any actions that need to be done upon
      * device close.
+     *
+     * If explicitly called by child class or another package class, must be synchronized
+     * via the owning instance monitor!!!
      */
     protected abstract void closeAction();
 

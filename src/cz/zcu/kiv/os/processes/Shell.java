@@ -41,15 +41,18 @@ public class Shell extends Process {
 		while (true) {
 			String command = this.stdIn.readLine();
 			if (command != null) {
-				try {
-					ParseResult pr = parser.parse(command);
-					this.createProcess(this, pr);
-					Utilities.log("finished command " + command);
-				} catch (ParseException e) {
-					this.stdOut.writeLine("Invalid input: " + e.getMessage());
-				}
-
-			}
+                            this.stdOut.writeLine(command);
+                            try {
+                                    ParseResult pr = parser.parse(command);
+                                    this.createProcess(this, pr);
+                                    Utilities.log("finished command " + command);
+                            } catch (ParseException e) {
+                                    this.stdOut.writeLine("Invalid input: " + e.getMessage());
+                            }
+			} else {
+                            //write empty line
+                            this.stdOut.writeLine("");
+                        }
 		}
 	}
 }

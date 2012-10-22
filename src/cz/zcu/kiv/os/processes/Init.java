@@ -7,13 +7,9 @@ package cz.zcu.kiv.os.processes;
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.Process;
-import cz.zcu.kiv.os.core.device.IInputDevice;
-import cz.zcu.kiv.os.core.device.IOutputDevice;
-import cz.zcu.kiv.os.core.device.InOutDevice;
+import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 
 /**
  *
@@ -21,10 +17,8 @@ import java.io.PipedOutputStream;
  */
 public class Init extends cz.zcu.kiv.os.core.Process {
 
-	private InOutDevice createStdDevice() throws IOException {
-		PipedInputStream pis = new PipedInputStream();
-		PipedOutputStream pos = new PipedOutputStream(pis);
-		return new InOutDevice(pis, pos);
+	private AbstractIODevice createStdDevice() throws IOException {
+		return new IOQueueDevice();
 	}
 
 	@Override

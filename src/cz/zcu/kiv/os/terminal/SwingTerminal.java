@@ -7,6 +7,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 
 /**
@@ -76,8 +78,13 @@ public class SwingTerminal extends InOutDevice {
             @Override
             public void run() {
                 while(stdout.isOpen()) {
-					String s = stdout.readLine();
-                    historyArea.append(s +"\n");
+                    try {
+                        String s = stdout.readLine();
+                        historyArea.append(s +"\n");
+                    } catch (Exception ex) {
+                        //TODO handle exception
+                        Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         });
@@ -117,11 +124,16 @@ public class SwingTerminal extends InOutDevice {
         final JTextField inputField = new JTextField();
 		inputField.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				SwingTerminal.this.stdin.writeLine(inputField.getText());
-				inputField.setText("");
-			}
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            SwingTerminal.this.stdin.writeLine(inputField.getText());
+                            inputField.setText("");
+                        } catch (Exception ex) {
+                            //TODO handle exception
+                            Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
 		});
         bottomPanel.add(inputField);
         

@@ -11,6 +11,7 @@ public interface IOutputDevice extends IDevice {
      * Writes one line to the output stream.
      * @param input
      */
-    public void writeLine(String input);
+    //TODO better exception
+    public void writeLine(String input) throws Exception;
 
 }
