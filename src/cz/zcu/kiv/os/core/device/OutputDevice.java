@@ -1,9 +1,6 @@
 package cz.zcu.kiv.os.core.device;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

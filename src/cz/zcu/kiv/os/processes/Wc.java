@@ -13,12 +13,18 @@ import java.util.Observer;
  *
  * @author bydga
  */
-public class Wc extends cz.zcu.kiv.os.core.Process{
-
+public class Wc extends cz.zcu.kiv.os.core.Process {
 
 	@Override
 	public void run(String[] args) throws Exception {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
 
+		int i = 0;
+		String line = null;
+		while ((line = this.stdIn.readLine()) != null) {
+			i++;
+		}
+		
+		this.stdOut.writeLine("Total of " + i + " lines.");
+
+	}
 }

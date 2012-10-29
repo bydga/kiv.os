@@ -52,7 +52,7 @@ public class ProcessManager implements Observer {
 
 			return p;
 		} catch (Exception ex) {
-			throw new NoSuchProcessException("Process " + processName + " doesn't exist or is malformed.");
+			throw new NoSuchProcessException("Process " + processName + " doesn't exist or it's implementation malformed.");
 
 		}
 	}

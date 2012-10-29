@@ -30,6 +30,21 @@ public abstract class Process extends Observable {
 	protected IInputDevice stdIn;
 	protected IOutputDevice stdOut;
 	protected IOutputDevice stdErr;
+	
+	public IInputDevice getInputStream()
+	{
+		return this.stdIn;
+	}
+	
+	public IOutputDevice getOutputStream()
+	{
+		return this.stdOut;
+	}
+	
+	public IOutputDevice getErrorStream()
+	{
+		return this.stdErr;
+	}
 
 	public int getPid() {
 		return this.pid;
@@ -52,13 +67,17 @@ public abstract class Process extends Observable {
 				try {
 					Utilities.log("Process " + Process.this.getClass().getName() + " starting");
 					Process.this.run(args);
+					
+					//TODO: some condition - close streams fwded into files or pipes, DO NOT CLOSE STDIN/OUT
+//					Process.this.stdOut.close();
+//					Process.this.stdIn.close();
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_FINISH);
 					Utilities.log("Process " + Process.this.getClass().getName() + " finished");
 				} catch (Exception ex) {
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_EXCEPTION);
-					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception");
+					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception" + ex.getMessage());
 				}
 			}
 		}, "process-" + this.getClass().getName());
