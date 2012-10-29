@@ -4,11 +4,6 @@
  */
 package cz.zcu.kiv.os.processes;
 
-import cz.zcu.kiv.os.core.Process;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Observer;
-
 /**
  *
  * @author bydga

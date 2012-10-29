@@ -6,7 +6,6 @@ package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
-import cz.zcu.kiv.os.terminal.ParseResult;
 import java.io.PipedInputStream;
 
 /**

@@ -29,15 +29,6 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
 	public String readLine() {
 		
 		try {
-			do {
-				Thread.sleep(100);
-				System.out.println("waiting for connection");
-			} while (is instanceof PipedInputStream && ((PipedInputStream) is).available() == 0);
-		} catch (Exception ex) {
-			Logger.getLogger(InputDevice.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		
-		try {
 			return reader.readLine();
 		} catch (IOException ex) {
 			Logger.getLogger(InputDevice.class.getName()).log(Level.SEVERE, null, ex);
