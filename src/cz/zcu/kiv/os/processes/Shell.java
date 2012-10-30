@@ -130,6 +130,9 @@ public class Shell extends Process {
 				} else if (command.equals(Shell.CWD_COMMAND)) {
 					Utilities.log("changing directory");
 				}
+				if (command.equals("")) {
+					continue;
+				}
 
 				try {
 					//process command

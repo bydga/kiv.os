@@ -7,6 +7,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -18,128 +20,134 @@ import javax.swing.*;
  */
 public class SwingTerminal extends InOutDevice {
 
-    private JFrame frame;
-    private JTextArea historyArea;
-    private Thread messageListener;
-    private JLabel promptLabel;
+	private JFrame frame;
+	private JTextArea historyArea;
+	private Thread messageListener;
+	private JLabel promptLabel;
+	private IInputDevice stdout;
+	private IOutputDevice stdin;
 
-    private IInputDevice stdout;
-    private IOutputDevice stdin;
-    
+	/**
+	 * Default constructor.
+	 */
+	public SwingTerminal(IInputDevice stdout, IOutputDevice stdin) {
+		super(stdout, stdin);
+		this.stdin = stdin;
+		this.stdout = stdout;
+		runGui();
+	}
 
-    /**
-     * Default constructor.
-     */
-    public SwingTerminal(IInputDevice stdout, IOutputDevice stdin) {
-        super(stdout, stdin);
-        this.stdin = stdin;
-        this.stdout = stdout;
-        runGui();
-    }
+	private void runGui() {
+		SwingUtilities.invokeLater(new Runnable() {
 
-    private void runGui() {
-        SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				initFrame();
+			}
+		});
+	}
 
-            @Override
-            public void run() {
-                initFrame();
-            }
-        });
-    }
+	/**
+	 * Initialize frame parameters.
+	 */
+	private void initFrame() {
+		frame = new JFrame("OS simulation");
+		initComponents();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		frame.pack();
+	}
 
-    /**
-     * Initialize frame parameters.
-     */
-    private void initFrame() {
-        frame = new JFrame("OS simulation");
-        initComponents();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-        frame.pack();
-    }
+	/**
+	 * Create form components.
+	 */
+	private void initComponents() {
+		JPanel outer = new JPanel(new BorderLayout());
+		outer.setPreferredSize(new Dimension(640, 480));
 
-    /**
-     * Create form components.
-     */
-    private void initComponents() {
-        JPanel outer = new JPanel(new BorderLayout());
-        outer.setPreferredSize(new Dimension(640, 480));
+		outer.add(createTopPanel(), BorderLayout.NORTH);
+		outer.add(createBottomPanel(), BorderLayout.SOUTH);
 
-        outer.add(createTopPanel(), BorderLayout.NORTH);
-        outer.add(createBottomPanel(), BorderLayout.SOUTH);
+		frame.getContentPane().add(outer);
+		startListening();
+	}
 
-        frame.getContentPane().add(outer);
-        startListening();
-    }
+	private void startListening() {
+		messageListener = new Thread(new Runnable() {
 
-    private void startListening() {
-        messageListener = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (stdout.isOpen()) {
+					try {
+						String s = stdout.readLine();
+						historyArea.append(s + "\n");
+					} catch (Exception ex) {
+						//TODO handle exception
+						Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+			}
+		});
+		messageListener.start();
+	}
 
-            @Override
-            public void run() {
-                while(stdout.isOpen()) {
-                    try {
-                        String s = stdout.readLine();
-                        historyArea.append(s +"\n");
-                    } catch (Exception ex) {
-                        //TODO handle exception
-                        Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        });
-        messageListener.start();
-    }
+	/**
+	 * Create msg output panel.
+	 *
+	 * @return
+	 */
+	private JPanel createTopPanel() {
+		JPanel topPanel = new JPanel();
+		topPanel.setPreferredSize(new Dimension(640, 450));
 
-    /**
-     * Create msg output panel.
-     * @return
-     */
-    private JPanel createTopPanel() {
-        JPanel topPanel = new JPanel();
-        topPanel.setPreferredSize(new Dimension(640, 450));
+		historyArea = new JTextArea();
+		historyArea.setEditable(false);
 
-        historyArea = new JTextArea();
-        historyArea.setEditable(false);
-        historyArea.setPreferredSize(new Dimension(640, 450));
+		JScrollPane scroll = new JScrollPane(historyArea);
+		scroll.setPreferredSize(new Dimension(640, 450));
 
-        JScrollPane scroll = new JScrollPane(historyArea);
+		scroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 
-        topPanel.add(scroll);
-        return topPanel;
-    }
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				e.getAdjustable().setValue(e.getAdjustable().getMaximum());
+			}
+		});
 
-    /**
-     * Create prompt line.
-     * @return
-     */
-    private JPanel createBottomPanel() {
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setPreferredSize(new Dimension(640, 30));
+		topPanel.add(scroll);
+		return topPanel;
+	}
 
-        //TODO dummy data
-        promptLabel = new JLabel("uzivatel  /path/to/dest/ $");
-        bottomPanel.add(promptLabel, BorderLayout.WEST);
+	/**
+	 * Create prompt line.
+	 *
+	 * @return
+	 */
+	private JPanel createBottomPanel() {
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel.setPreferredSize(new Dimension(640, 30));
 
-        final JTextField inputField = new JTextField();
+		//TODO dummy data
+		promptLabel = new JLabel("uzivatel  /path/to/dest/ $");
+		bottomPanel.add(promptLabel, BorderLayout.WEST);
+
+		final JTextField inputField = new JTextField();
 		inputField.addActionListener(new ActionListener() {
 
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        try {
-                            SwingTerminal.this.stdin.writeLine(inputField.getText());
-                            inputField.setText("");
-                        } catch (Exception ex) {
-                            //TODO handle exception
-                            Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					SwingTerminal.this.stdin.writeLine(inputField.getText());
+					inputField.setText("");
+				} catch (Exception ex) {
+					//TODO handle exception
+					Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
 		});
-        bottomPanel.add(inputField);
-        
+		bottomPanel.add(inputField);
 
 
-        return bottomPanel;
-    }
 
+		return bottomPanel;
+	}
 }

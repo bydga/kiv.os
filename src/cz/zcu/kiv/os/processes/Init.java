@@ -29,11 +29,10 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 		this.stdErr = this.createStdDevice();
 		SwingTerminal terminal = new SwingTerminal((IInputDevice) stdOut, (IOutputDevice) stdIn);
 		
-		String login = "bydga";
-		Process shell = Core.getInstance().getServices().createProcess(this, "shell", null, this.stdIn, this.stdOut, this.stdErr,"/home/"+login);
-		Utilities.log("Terminal and shell started");
-		while (true) {
-			
+		while (true)
+		{
+			Process login = Core.getInstance().getServices().createProcess(this, "Login", null, stdIn, stdOut, stdErr, this.getWorkingDir());
+			login.join();
 		}
 	}
 }
