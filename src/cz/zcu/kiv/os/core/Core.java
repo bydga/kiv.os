@@ -4,6 +4,8 @@ import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.filesystem.FileMode;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  *
@@ -38,21 +40,21 @@ public class Core {
 	private class CoreServices implements ICoreServices {
 
             @Override
-            public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws NoSuchProcessException {
-                    return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut);
+            public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr, String workingDir) throws NoSuchProcessException {
+                    return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut, workingDir);
             }
 
             @Override
-            public IInputDevice openFileForRead(Process caller, String path) {
-                IInputDevice file = fileManager.openFile(path, caller.getWorkingDir(), FileMode.READ);
+            public IInputDevice openFileForRead(Process caller, String path) throws IOException {
+                IInputDevice file = (IInputDevice) fileManager.openFile(path, caller.getWorkingDir(), FileMode.READ);
                 processManager.addStreamToProcess(caller.getPid(), file);
                 return file;
             }
 
             @Override
-            public IOutputDevice openFileForWrite(Process caller, String path, boolean append) {
+            public IOutputDevice openFileForWrite(Process caller, String path, boolean append) throws IOException {
                 FileMode mode = append ? FileMode.APPEND : FileMode.WRITE;
-                IOutputDevice file = fileManager.openFile(path, caller.getWorkingDir(), mode);
+                IOutputDevice file = (IOutputDevice) fileManager.openFile(path, caller.getWorkingDir(), mode);
                 processManager.addStreamToProcess(caller.getPid(), file);
                 return file;
             }
