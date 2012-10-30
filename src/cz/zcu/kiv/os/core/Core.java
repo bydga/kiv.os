@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
-import cz.zcu.kiv.os.terminal.InputParser;
-import cz.zcu.kiv.os.terminal.ParseResult;
-import java.io.*;
+import cz.zcu.kiv.os.core.filesystem.FileManager;
+import cz.zcu.kiv.os.core.filesystem.FileMode;
 
 /**
  *
@@ -16,10 +11,10 @@ import java.io.*;
  */
 public class Core {
 
-	protected static Core instance;
-	protected ICoreServices services;
-	protected ProcessManager processManager;
-	protected InputParser inputParser;
+	private static Core instance;
+	private ICoreServices services;
+	private ProcessManager processManager;
+        private FileManager fileManager;
 
 	public static synchronized Core getInstance() {
 		if (Core.instance == null) {
@@ -29,35 +24,38 @@ public class Core {
 		return Core.instance;
 	}
 
-	protected Core() {
+	private Core() {
 		this.services = new Core.CoreServices();
 		this.processManager = new ProcessManager();
-		this.inputParser = new InputParser();
+                //TODO path separator
+                this.fileManager = new FileManager(System.getProperty("user.home") + "os");
 	}
 
 	public synchronized ICoreServices getServices() {
 		return this.services;
 	}
 
-	protected class CoreServices implements ICoreServices {
+	private class CoreServices implements ICoreServices {
 
-		@Override
-		public PipedInputStream openFile(Process caller, String fileName, String rights) {
+            @Override
+            public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws NoSuchProcessException {
+                    return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut);
+            }
 
-			int pid = caller.getPid();
-			PipedInputStream is = null;
-			Core.this.processManager.addStreamToProcess(pid, is);
-			return is;
-		}
+            @Override
+            public IInputDevice openFileForRead(Process caller, String path) {
+                IInputDevice file = fileManager.openFile(path, caller.getWorkingDir(), FileMode.READ);
+                processManager.addStreamToProcess(caller.getPid(), file);
+                return file;
+            }
 
-		@Override
-		public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr, String workingDir) throws NoSuchProcessException {
-			return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut, workingDir);
-		}
+            @Override
+            public IOutputDevice openFileForWrite(Process caller, String path, boolean append) {
+                FileMode mode = append ? FileMode.APPEND : FileMode.WRITE;
+                IOutputDevice file = fileManager.openFile(path, caller.getWorkingDir(), mode);
+                processManager.addStreamToProcess(caller.getPid(), file);
+                return file;
+            }
 
-		@Override
-		public void closeFile(Process caller, PipedInputStream stream) {
-			Core.this.processManager.removeStreamFromProcess(caller.getPid(), stream);
-		}
 	}
 }

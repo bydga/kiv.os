@@ -1,5 +1,7 @@
 package cz.zcu.kiv.os.core.device;
 
+import java.io.IOException;
+
 /**
  * Basic implementation of IDevice interface. Provides basic means for determining
  * whether the device is open or not.
@@ -27,7 +29,7 @@ public abstract class AbstractDevice implements IDevice {
      * Closes the device.
      */
     @Override
-    public synchronized void close() {
+    public synchronized void close() throws IOException {
         if(open) {
             open = false;
             this.closeAction();
@@ -41,6 +43,6 @@ public abstract class AbstractDevice implements IDevice {
      * If explicitly called by child class or another package class, must be synchronized
      * via the owning instance monitor!!!
      */
-    protected abstract void closeAction();
+    protected abstract void closeAction() throws IOException;
 
 }

@@ -50,7 +50,7 @@ public class InOutDevice extends AbstractDevice implements IInputDevice, IOutput
     }
 
     @Override
-    protected void closeAction() {
+    protected void closeAction() throws IOException {
         writer.close();
         reader.close();
     }
