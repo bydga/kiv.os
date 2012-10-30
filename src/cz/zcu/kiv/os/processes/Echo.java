@@ -13,12 +13,15 @@ public class Echo extends Process {
 
 	@Override
 	public void run(String[] args) {
-		for (int i = 0; i < 10; i++) {
-			try {
+		try {
+			Thread.sleep(1000);
+			this.stdOut.writeLine("start");
+			for (int i = 0; i < 10; i++) {
 				this.stdOut.writeLine(("PID " + (this.pid)));
-			} catch (Exception ex) {
-				Logger.getLogger(Echo.class.getName()).log(Level.SEVERE, null, ex);
+				Thread.sleep(400);
 			}
+		} catch (Exception ex) {
+			Logger.getLogger(Echo.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 }

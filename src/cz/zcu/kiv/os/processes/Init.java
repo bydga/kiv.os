@@ -28,7 +28,9 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 		this.stdOut = this.createStdDevice();
 		this.stdErr = this.createStdDevice();
 		SwingTerminal terminal = new SwingTerminal((IInputDevice) stdOut, (IOutputDevice) stdIn);
-		Process shell = Core.getInstance().getServices().createProcess(this, "shell", null, this.stdIn, this.stdOut, this.stdErr);
+		
+		String login = "bydga";
+		Process shell = Core.getInstance().getServices().createProcess(this, "shell", null, this.stdIn, this.stdOut, this.stdErr,"/home/"+login);
 		Utilities.log("Terminal and shell started");
 		while (true) {
 			

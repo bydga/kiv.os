@@ -51,8 +51,8 @@ public class Core {
 		}
 
 		@Override
-		public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws NoSuchProcessException {
-			return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut);
+		public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr, String workingDir) throws NoSuchProcessException {
+			return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut, workingDir);
 		}
 
 		@Override

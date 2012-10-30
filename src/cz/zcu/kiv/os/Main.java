@@ -19,7 +19,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 
 		Utilities.log("starting OS");
-		Process p = Core.getInstance().getServices().createProcess(null, "Init", null, new InputDevice(System.in), new OutputDevice(System.out), new OutputDevice(System.err));
+		Process p = Core.getInstance().getServices().createProcess(null, "Init", null, new InputDevice(System.in), new OutputDevice(System.out), new OutputDevice(System.err), "/");
 
 	}
 }

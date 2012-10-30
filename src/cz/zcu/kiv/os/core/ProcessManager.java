@@ -30,7 +30,7 @@ public class ProcessManager implements Observer {
 		this.counter = -1;
 	}
 
-	public synchronized Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr) throws NoSuchProcessException {
+	public synchronized Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr, String workingDir) throws NoSuchProcessException {
 
 		do {
 			this.counter = (counter + 1 <= 0) ? 0 : counter + 1;
@@ -44,15 +44,18 @@ public class ProcessManager implements Observer {
 			Constructor constructor = procClass.getConstructor();
 
 			Process p = (Process) constructor.newInstance();
-			p.init(this.counter, parent, args, stdIn, stdOut, stdErr);
+			p.init(this.counter, parent, args, stdIn, stdOut, stdErr, workingDir);
 			ProcessTableRecord record = new ProcessTableRecord(p);
 			record.setIsRunning(true);
 			this.processTable.put(this.counter, record);
 			p.start();
 
+			if (parent != null) { //because of init
+				parent.addChildren(p);
+			}
 			return p;
 		} catch (Exception ex) {
-			throw new NoSuchProcessException("Process " + processName + " doesn't exist or it's implementation malformed.");
+			throw new NoSuchProcessException("Process " + processName + " failed to create: " + ex.getClass().getName() + ": " + ex.getMessage());
 
 		}
 	}
