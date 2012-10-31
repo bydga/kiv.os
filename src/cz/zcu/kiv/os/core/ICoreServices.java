@@ -36,6 +36,8 @@ public interface ICoreServices {
 	
 	public boolean directoryExists(String filename);
 	
+	public void setTerminalCommand(String command);
+	
 	
 	
 	

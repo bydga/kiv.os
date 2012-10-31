@@ -28,6 +28,7 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 		this.stdOut = this.createStdDevice();
 		this.stdErr = this.createStdDevice();
 		SwingTerminal terminal = new SwingTerminal((IInputDevice) stdOut, (IOutputDevice) stdIn);
+		Core.getInstance().setTerminal(terminal);
 		
 		while (true)
 		{

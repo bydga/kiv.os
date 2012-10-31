@@ -1,14 +1,12 @@
 package cz.zcu.kiv.os.terminal;
 
+import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.InOutDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
+import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -22,6 +20,7 @@ public class SwingTerminal extends InOutDevice {
 
 	private JFrame frame;
 	private JTextArea historyArea;
+	private JTextField inputField;
 	private Thread messageListener;
 	private JLabel promptLabel;
 	private IInputDevice stdout;
@@ -35,6 +34,10 @@ public class SwingTerminal extends InOutDevice {
 		this.stdin = stdin;
 		this.stdout = stdout;
 		runGui();
+	}
+
+	public void setText(String text) {
+		this.inputField.setText(text);
 	}
 
 	private void runGui() {
@@ -108,6 +111,7 @@ public class SwingTerminal extends InOutDevice {
 
 		scroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 
+			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				e.getAdjustable().setValue(e.getAdjustable().getMaximum());
 			}
@@ -129,8 +133,7 @@ public class SwingTerminal extends InOutDevice {
 		//TODO dummy data
 		promptLabel = new JLabel("uzivatel  /path/to/dest/ $");
 		bottomPanel.add(promptLabel, BorderLayout.WEST);
-
-		final JTextField inputField = new JTextField();
+		inputField = new JTextField();
 		inputField.addActionListener(new ActionListener() {
 
 			@Override
@@ -144,10 +147,60 @@ public class SwingTerminal extends InOutDevice {
 				}
 			}
 		});
+
+		inputField.addKeyListener(new KeyAdapter() {
+
+			private boolean ctrlDown = false;
+			private boolean cDown = false;
+			private boolean dDown = false;
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				Utilities.log(e.paramString());
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_C:
+						this.cDown = true;
+						break;
+					case KeyEvent.VK_D:
+						this.dDown = true;
+						break;
+					case KeyEvent.VK_CONTROL:
+						this.ctrlDown = true;
+						break;
+				}
+
+				if (this.ctrlDown && this.cDown) {
+					Utilities.log("ctrl c pressed");
+					e.consume();
+				} else if (this.ctrlDown && this.dDown) {
+					Utilities.log("ctrl d pressed");
+					e.consume();
+				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
+					Utilities.log("up pressed");
+					e.consume();
+				} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+					Utilities.log("down pressed");
+					e.consume();
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_C:
+						this.cDown = false;
+						break;
+					case KeyEvent.VK_D:
+						this.dDown = false;
+						break;
+					case KeyEvent.VK_CONTROL:
+						this.ctrlDown = false;
+						break;
+				}
+			}
+		});
+
 		bottomPanel.add(inputField);
-
-
-
 		return bottomPanel;
 	}
 }

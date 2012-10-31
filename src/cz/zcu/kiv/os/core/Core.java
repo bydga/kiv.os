@@ -4,6 +4,7 @@ import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.filesystem.FileMode;
+import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -17,6 +18,11 @@ public class Core {
 	private ICoreServices services;
 	private ProcessManager processManager;
 	private FileManager fileManager;
+	private SwingTerminal terminal;
+
+	public void setTerminal(SwingTerminal t) {
+		this.terminal = t;
+	}
 
 	public static synchronized Core getInstance() {
 		if (Core.instance == null) {
@@ -67,6 +73,11 @@ public class Core {
 		@Override
 		public boolean directoryExists(String filename) {
 			return false;
+		}
+
+		@Override
+		public void setTerminalCommand(String command) {
+			Core.this.terminal.setText(command);
 		}
 	}
 }

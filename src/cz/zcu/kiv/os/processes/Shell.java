@@ -26,6 +26,8 @@ public class Shell extends Process {
 
 	private static final String EXIT_COMMAND = "exit";
 	private static final String CWD_COMMAND = "cd";
+	
+	private List<String> history;
 
 	/**
 	 * Initializes new instance of output device - suitable for forwarding process's output/error streams. If given path
@@ -116,6 +118,7 @@ public class Shell extends Process {
 	@Override
 	protected void run(String[] args) throws Exception {
 		InputParser parser = new InputParser();
+		this.history = new ArrayList<String>();
 
 		//this loop reads input from terminal
 		while (true) {
@@ -124,6 +127,8 @@ public class Shell extends Process {
 			if (command != null) {
 				this.stdOut.writeLine(command);
 
+				this.history.add(command);
+				
 				//special cases of input command
 				if (command.equals(Shell.EXIT_COMMAND)) {
 					return;
