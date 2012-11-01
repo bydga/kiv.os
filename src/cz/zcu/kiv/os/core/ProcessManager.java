@@ -4,6 +4,7 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.io.Closeable;
@@ -21,14 +22,19 @@ import java.util.Observer;
  */
 public class ProcessManager implements Observer {
 
-	protected static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
-	protected Map<Integer, ProcessTableRecord> processTable;
-	int counter;
-	protected Process foregroundProcess = null;
+	private static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
+	private Map<Integer, ProcessTableRecord> processTable;
+	private int counter;
+	private  Process foregroundProcess = null;
 
 	public ProcessManager() {
 		this.processTable = new HashMap<Integer, ProcessTableRecord>();
 		this.counter = -1;
+	}
+	
+	public Process getForegroundProcess()
+	{
+		return this.foregroundProcess;
 	}
 
 	public synchronized Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
@@ -56,6 +62,7 @@ public class ProcessManager implements Observer {
 			if (!properties.isBackgroundProcess) {
 				this.foregroundProcess = p;
 			}
+			Utilities.log("FG: " + p.getClass().getName());
 			return p;
 		} catch (Exception ex) {
 			throw new NoSuchProcessException("Process " + processName + " failed to create: " + ex.getClass().getName() + ": " + ex.getMessage());

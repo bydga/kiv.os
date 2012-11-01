@@ -1,13 +1,13 @@
 package cz.zcu.kiv.os.core;
 
-import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
-import cz.zcu.kiv.os.core.interrupts.Signals;
+import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.filesystem.FileMode;
+import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
+import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -88,12 +88,14 @@ public class Core {
 
 		@Override
 		public void dispatchSystemSignal(Signals sig) {
-			Core.this.dispatcher.dispatchSystemSignal(sig);
+			Process p = Core.this.processManager.getForegroundProcess();
+			Core.this.dispatcher.dispatchSystemSignal(p, sig);
 		}
 
 		@Override
 		public void dispatchKeyboardEvent(KeyboardEvent evt) {
-			Core.this.dispatcher.dispatchKeyboardEvent(evt);
+			Process p = Core.this.processManager.getForegroundProcess();
+			Core.this.dispatcher.dispatchKeyboardEvent(p, evt);
 		}
 	}
 }

@@ -10,6 +10,7 @@ import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
+import cz.zcu.kiv.os.core.interrupts.Interrupt;
 import cz.zcu.kiv.os.processes.Echo;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,15 +128,14 @@ public abstract class Process extends Observable implements Observer {
 			this.notifyObservers(Process.STATE_STOP);
 			Utilities.log("Process " + Process.this.getClass().getName() + " terminated manually ");
 
+			String message = "Process " + Process.this.getClass().getName() + " was stopped";
+			if (reason != null) {
+				message += ", because " + reason;
+			}
+			Utilities.log(message);
 		}
-		
-		String message = "Process " + Process.this.getClass().getName() + " was stopped";
-		if( reason != null ) {
-			message += ", because " + reason;
-		}
-		Utilities.log(message);
 	}
-	
+
 	protected final void stop() {
 		this.stop(null);
 	}
@@ -177,10 +177,7 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected void handleSignalSIGTERM() {
-		if (this instanceof Echo) {
-
-			this.stop();
-		}
+		this.stop();
 	}
 
 	protected void handleSignalSIGQUIT() {
@@ -189,12 +186,20 @@ public abstract class Process extends Observable implements Observer {
 	protected void handleKeyboardEvent(KeyboardEvent e) {
 	}
 
+	/**
+	 * Implementation of observer pattern. Awaits special events from dispatcher and processes them.
+	 */
 	@Override
 	public final void update(Observable o, Object arg) {
-		if (arg instanceof Signals) {
-			this.handleSignal((Signals) arg);
-		} else if (arg instanceof KeyboardEvent) {
-			this.handleKeyboardEvent((KeyboardEvent) arg);
+		Interrupt interrupt = (Interrupt) arg;
+		if (this == interrupt.getReceiver()) {
+			Utilities.log(this.getClass().getSimpleName() + "got " + interrupt.getInterrupt().toString());
+			if (arg instanceof Signals) {
+				this.handleSignal((Signals) arg);
+			} else if (arg instanceof KeyboardEvent) {
+				this.handleKeyboardEvent((KeyboardEvent) arg);
+			}
 		}
+
 	}
 }
