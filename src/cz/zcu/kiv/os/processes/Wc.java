@@ -15,11 +15,11 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 
 		int i = 0;
 		String line = null;
-		while ((line = this.stdIn.readLine()) != null) {
+		while ((line = this.getInputStream().readLine()) != null) {
 			i++;
 		}
 		
-		this.stdOut.writeLine("Total of " + i + " lines.");
+		this.getOutputStream().writeLine("Total of " + i + " lines.");
 
 	}
 }

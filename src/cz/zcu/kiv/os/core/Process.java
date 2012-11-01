@@ -5,15 +5,12 @@
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
-import cz.zcu.kiv.os.core.device.OutputDevice;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,20 +25,30 @@ public abstract class Process extends Observable {
 	public static final int STATE_EXCEPTION = 2;
 	protected Thread workingThread;
 	protected int pid;
-	protected Process parent;
 	protected List<Process> children;
-	protected IInputDevice stdIn;
-	protected IOutputDevice stdOut;
-	protected IOutputDevice stdErr;
-	
-	protected String workingDir;
+	private ProcessProperties properties;
 
 	public String getWorkingDir() {
-		return workingDir;
+		return this.properties.workingDir;
 	}
 
 	public void setWorkingDir(String workingDir) {
-		this.workingDir = workingDir;
+		this.properties.workingDir = workingDir;
+	}
+	
+	public void setInputStream(IInputDevice stream)
+	{
+		this.properties.inputStream = stream;
+	}
+	
+	public void setOutputStream(IOutputDevice stream)
+	{
+		this.properties.outputStream = stream;
+	}
+	
+	public void setErrorStream(IOutputDevice stream)
+	{
+		this.properties.errorStream = stream;
 	}
 
 	public boolean isRunning() {
@@ -57,15 +64,23 @@ public abstract class Process extends Observable {
 	}
 
 	public IInputDevice getInputStream() {
-		return this.stdIn;
+		return this.properties.inputStream;
 	}
 
 	public IOutputDevice getOutputStream() {
-		return this.stdOut;
+		return this.properties.outputStream;
 	}
 
 	public IOutputDevice getErrorStream() {
-		return this.stdErr;
+		return this.properties.errorStream;
+	}
+
+	public String[] getArgs() {
+		return this.properties.args;
+	}
+
+	public ThreadGroup getProcessGroup() {
+		return this.properties.processGroup;
 	}
 
 	public int getPid() {
@@ -74,21 +89,16 @@ public abstract class Process extends Observable {
 
 	protected abstract void run(String[] args) throws Exception;
 
-	protected final void init(int pid, Process parent, final String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr, String workingDir) {
+	protected final void init(int pid, ProcessProperties properties) {
 		this.children = new ArrayList<Process>();
 		this.pid = pid;
-		this.parent = parent;
-		this.stdIn = stdIn;
-		this.stdOut = stdOut;
-		this.stdErr = stdErr;
-		this.workingDir = workingDir;
-		this.workingThread = new Thread(new Runnable() {
-
+		this.properties = properties;
+		this.workingThread = new Thread(this.properties.processGroup, new Runnable() {
 			@Override
 			public void run() {
 				try {
 					Utilities.log("Process " + Process.this.getClass().getName() + " starting");
-					Process.this.run(args);
+					Process.this.run(Process.this.properties.args);
 
 					//TODO: some condition - close streams fwded into files or pipes, DO NOT CLOSE STDIN/OUT
 //					Process.this.stdOut.close();

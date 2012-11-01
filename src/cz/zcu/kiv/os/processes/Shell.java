@@ -8,6 +8,7 @@ import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.NoSuchProcessException;
 import cz.zcu.kiv.os.core.Process;
+import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.terminal.InputParser;
 import cz.zcu.kiv.os.terminal.ParseException;
@@ -26,7 +27,6 @@ public class Shell extends Process {
 
 	private static final String EXIT_COMMAND = "exit";
 	private static final String CWD_COMMAND = "cd";
-	
 	private List<String> history;
 
 	/**
@@ -82,6 +82,7 @@ public class Shell extends Process {
 	 */
 	private Process createProcess(ParseResult parseResult) throws NoSuchProcessException {
 
+		ThreadGroup group = new ThreadGroup("group_" + parseResult.args[0]);
 		//only for debugging reasons
 		List<Process> list = new ArrayList<Process>();
 		IInputDevice in = this.createInput(parseResult.stdIn, this.getInputStream());
@@ -97,7 +98,8 @@ public class Shell extends Process {
 			err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 			in = this.createInput(parseResult.stdIn, in);
 
-			Process p = Core.getInstance().getServices().createProcess(this, parseResult.args[0], parseResult.args, in, out, err, this.getWorkingDir());
+			ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+			Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
 			list.add(p);
 			//pipe was used as an output device here, remember it for next iteration, where it will stand as an input
 			in = pipe;
@@ -110,7 +112,9 @@ public class Shell extends Process {
 		out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, this.getOutputStream());
 		err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 
-		Process p = Core.getInstance().getServices().createProcess(this, parseResult.args[0], parseResult.args, in, out, err, this.getWorkingDir());
+		ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+		Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
+
 		list.add(p);
 		return p;
 	}
@@ -123,12 +127,12 @@ public class Shell extends Process {
 		//this loop reads input from terminal
 		while (true) {
 			Utilities.log("reading");
-			String command = this.stdIn.readLine();
+			String command = this.getInputStream().readLine();
 			if (command != null) {
-				this.stdOut.writeLine(command);
+				this.getOutputStream().writeLine(command);
 
 				this.history.add(command);
-				
+
 				//special cases of input command
 				if (command.equals(Shell.EXIT_COMMAND)) {
 					return;
@@ -147,15 +151,15 @@ public class Shell extends Process {
 						Utilities.log("going to sleep");
 						p.join();
 					} else {
-						this.stdOut.writeLine("[1] " + p.getPid());
+						this.getOutputStream().writeLine("[1] " + p.getPid());
 					}
 				} catch (ParseException e) {
-					this.stdOut.writeLine("Invalid input: " + e.getMessage());
+					this.getOutputStream().writeLine("Invalid input: " + e.getMessage());
 				} catch (NoSuchProcessException ex) {
-					this.stdOut.writeLine("Invalid process name");
+					this.getOutputStream().writeLine("Invalid process name");
 				}
 			} else {
-				this.stdOut.writeLine("");
+				this.getOutputStream().writeLine("");
 			}
 		}
 	}

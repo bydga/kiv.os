@@ -7,6 +7,7 @@ package cz.zcu.kiv.os.processes;
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.Process;
+import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.IOException;
@@ -24,15 +25,16 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 	@Override
 	public void run(String[] args) throws Exception {
 		Utilities.log("INIT running...");
-		this.stdIn = this.createStdDevice();
-		this.stdOut = this.createStdDevice();
-		this.stdErr = this.createStdDevice();
-		SwingTerminal terminal = new SwingTerminal((IInputDevice) stdOut, (IOutputDevice) stdIn);
+		this.setInputStream(this.createStdDevice());
+		this.setOutputStream(this.createStdDevice());
+		this.setErrorStream(this.createStdDevice());
+		SwingTerminal terminal = new SwingTerminal((IInputDevice) this.getOutputStream(), (IOutputDevice) this.getInputStream());
 		Core.getInstance().setTerminal(terminal);
-		
-		while (true)
-		{
-			Process login = Core.getInstance().getServices().createProcess(this, "Login", null, stdIn, stdOut, stdErr, this.getWorkingDir());
+
+		while (true) {
+			
+			ProcessProperties props = new ProcessProperties(this, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ThreadGroup("initgroup"));
+			Process login = Core.getInstance().getServices().createProcess("Login", props);
 			login.join();
 		}
 	}

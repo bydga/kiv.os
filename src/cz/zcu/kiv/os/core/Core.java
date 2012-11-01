@@ -46,8 +46,8 @@ public class Core {
 	private class CoreServices implements ICoreServices {
 
 		@Override
-		public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr, String workingDir) throws NoSuchProcessException {
-			return Core.this.processManager.createProcess(parent, processName, args, stdIn, stdOut, stdOut, workingDir);
+		public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
+			return Core.this.processManager.createProcess(processName, properties);
 		}
 
 		@Override

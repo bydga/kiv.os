@@ -30,15 +30,11 @@ public interface ICoreServices {
 	 */
 	public IOutputDevice openFileForWrite(Process caller, String path, boolean append) throws IOException;
 
-	public Process createProcess(Process parent, String processName, String[] args, IInputDevice stdIn, IOutputDevice stdOut, IOutputDevice stdErr, String workingDir) throws NoSuchProcessException;
-	
+	public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException;
+
 	public void createDirectory(String dirName);
-	
+
 	public boolean directoryExists(String filename);
-	
+
 	public void setTerminalCommand(String command);
-	
-	
-	
-	
 }

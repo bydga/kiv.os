@@ -15,9 +15,9 @@ public class Echo extends Process {
 	public void run(String[] args) {
 		try {
 			Thread.sleep(1000);
-			this.stdOut.writeLine("start");
+			this.getOutputStream().writeLine("start");
 			for (int i = 0; i < 10; i++) {
-				this.stdOut.writeLine(("PID " + (this.pid)));
+				this.getOutputStream().writeLine(("PID " + (this.pid)));
 				Thread.sleep(400);
 			}
 		} catch (Exception ex) {

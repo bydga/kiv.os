@@ -15,7 +15,11 @@ import java.util.List;
 public class ProcessTableRecord {
 
 	protected Process process;
-	protected boolean isRunning;
+	private boolean backgroundProcess;
+
+	public boolean isForegroundProcess() {
+		return this.backgroundProcess;
+	}
 	protected List<Closeable> openedStreams;
 
 	public List<Closeable> getOpenedStreams() {
@@ -23,19 +27,16 @@ public class ProcessTableRecord {
 	}
 
 	public boolean isRunning() {
-		return this.isRunning;
-	}
-
-	public void setIsRunning(boolean isRunning) {
-		this.isRunning = isRunning;
+		return this.process.isRunning();
 	}
 
 	public Process getProcess() {
 		return this.process;
 	}
 
-	public ProcessTableRecord(Process p) {
+	public ProcessTableRecord(Process p, boolean isBackgroundProcess) {
 		this.process = p;
+		this.backgroundProcess = isBackgroundProcess;
 		this.openedStreams = new ArrayList<Closeable>();
 	}
 }

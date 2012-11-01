@@ -42,6 +42,7 @@ public class InputParser {
 
 			if (currentChar == InputParser.PIPELINE_OPERATOR && !inQuotation) {
 				result.pipeline = this.parse(input.substring(i + 1));
+				result.isBackgroundTask = result.pipeline.isBackgroundTask;
 				break;
 			}
 
