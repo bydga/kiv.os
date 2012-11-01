@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author bydga, george
+ * @author bydga, Jiri Zikmund
  */
 public abstract class Process extends Observable {
 
@@ -102,16 +102,26 @@ public abstract class Process extends Observable {
 				} catch (Exception ex) {
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_EXCEPTION);
-					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception" + ex.getMessage());
+					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception " + ex.getMessage());
 				}
 			}
 		}, "process-" + this.getClass().getName());
 	}
 
-	protected final void stop() {
+	protected final void stop(String reason) {
 		this.workingThread.interrupt();
 		this.setChanged();
 		this.notifyObservers(Process.STATE_STOP);
+		
+		String message = "Process " + Process.this.getClass().getName() + " was stopped";
+		if( reason != null ) {
+			message += ", because " + reason;
+		}
+		Utilities.log(message);
+	}
+	
+	protected final void stop() {
+		this.stop(null);
 	}
 
 	protected final void start() {
