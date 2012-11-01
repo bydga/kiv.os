@@ -54,6 +54,7 @@ public class ProcessManager implements Observer {
 			p.init(this.counter, properties);
 			ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess);
 			this.processTable.put(this.counter, record);
+			p.addObserver(this);
 			p.start();
 
 			if (properties.parent != null) { //because of init
@@ -88,6 +89,9 @@ public class ProcessManager implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
+		Utilities.log("process manager got from " + o + ": " + arg);
+		Process finished = (Process) o;
 		// TODO: handle change of Observable object (stopped process etc)
+		this.foregroundProcess = finished.getParent();
 	}
 }

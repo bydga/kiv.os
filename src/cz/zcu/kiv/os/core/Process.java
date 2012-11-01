@@ -38,6 +38,10 @@ public abstract class Process extends Observable implements Observer {
 		return this.properties.workingDir;
 	}
 
+	public Process getParent() {
+		return this.properties.parent;
+	}
+
 	public void setWorkingDir(String workingDir) {
 		this.properties.workingDir = workingDir;
 	}
@@ -58,12 +62,8 @@ public abstract class Process extends Observable implements Observer {
 		return this.workingThread == null ? false : this.workingThread.isAlive();
 	}
 
-	public void join() {
-		try {
-			this.workingThread.join();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(Process.class.getName()).log(Level.SEVERE, null, ex);
-		}
+	public void join() throws InterruptedException {
+		this.workingThread.join();
 	}
 
 	public IInputDevice getInputStream() {
@@ -126,8 +126,13 @@ public abstract class Process extends Observable implements Observer {
 			this.workingThread.stop();
 			this.setChanged();
 			this.notifyObservers(Process.STATE_STOP);
-			Utilities.log("Process " + Process.this.getClass().getName() + " terminated manually ");
-
+			String message = "Process " + Process.this.getClass().getName() + " was manually stopped";
+			if (reason != null) {
+				message += ", because " + reason;
+			}
+			Utilities.log(message);
+		} else {
+			Utilities.log("Killing dead process" + Process.this.getClass().getSimpleName());
 			String message = "Process " + Process.this.getClass().getName() + " was stopped";
 			if (reason != null) {
 				message += ", because " + reason;
@@ -194,10 +199,10 @@ public abstract class Process extends Observable implements Observer {
 		Interrupt interrupt = (Interrupt) arg;
 		if (this == interrupt.getReceiver()) {
 			Utilities.log(this.getClass().getSimpleName() + "got " + interrupt.getInterrupt().toString());
-			if (arg instanceof Signals) {
-				this.handleSignal((Signals) arg);
-			} else if (arg instanceof KeyboardEvent) {
-				this.handleKeyboardEvent((KeyboardEvent) arg);
+			if (interrupt.getInterrupt() instanceof Signals) {
+				this.handleSignal((Signals) interrupt.getInterrupt());
+			} else if (interrupt.getInterrupt() instanceof KeyboardEvent) {
+				this.handleKeyboardEvent((KeyboardEvent) interrupt.getInterrupt());
 			}
 		}
 
