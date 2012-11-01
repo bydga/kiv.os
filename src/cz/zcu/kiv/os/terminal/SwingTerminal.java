@@ -2,8 +2,8 @@ package cz.zcu.kiv.os.terminal;
 
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
-import cz.zcu.kiv.os.core.KeyboardEvent;
-import cz.zcu.kiv.os.core.Signals;
+import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
+import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.InOutDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;

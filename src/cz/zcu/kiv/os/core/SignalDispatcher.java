@@ -4,6 +4,8 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
+import cz.zcu.kiv.os.core.interrupts.Signals;
 import java.util.Observable;
 import java.util.Observer;
 

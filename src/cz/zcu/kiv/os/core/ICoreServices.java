@@ -1,5 +1,7 @@
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
+import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.io.FileNotFoundException;

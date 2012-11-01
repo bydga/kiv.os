@@ -4,6 +4,8 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
+import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IInputDevice;
@@ -175,20 +177,16 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected void handleSignalSIGTERM() {
-		Utilities.log("got sigterm");
 		if (this instanceof Echo) {
 
-			Utilities.log("stopping exho");
 			this.stop();
 		}
 	}
 
 	protected void handleSignalSIGQUIT() {
-		Utilities.log("got sigquit");
 	}
 
 	protected void handleKeyboardEvent(KeyboardEvent e) {
-		Utilities.log("got keyb evt " + e.name());
 	}
 
 	@Override

@@ -130,7 +130,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 	
 	private void writeln(String line) {
 		try {
-			this.stdOut.writeLine(line);
+			this.getOutputStream().writeLine(line);
 		} catch (Exception ex) {
 			this.stop("stdOut writeLine exception " + ex.getMessage());
 		}
@@ -138,7 +138,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 	
 	private String readln() {
 		try {
-			return this.stdIn.readLine();
+			return this.getInputStream().readLine();
 		} catch (Exception ex) {
 			this.stop("stdIn readLine exception " + ex.getMessage());
 			return null;
