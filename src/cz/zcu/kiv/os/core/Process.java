@@ -8,17 +8,20 @@ import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
+import cz.zcu.kiv.os.processes.Echo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * observable - because of process cleanup during process termination observer because of system/keyboard events
  *
  * @author bydga, Jiri Zikmund
  */
-public abstract class Process extends Observable {
+public abstract class Process extends Observable implements Observer {
 
 	public static final int STATE_STOP = 0;
 	public static final int STATE_FINISH = 1;
@@ -35,19 +38,16 @@ public abstract class Process extends Observable {
 	public void setWorkingDir(String workingDir) {
 		this.properties.workingDir = workingDir;
 	}
-	
-	public void setInputStream(IInputDevice stream)
-	{
+
+	public void setInputStream(IInputDevice stream) {
 		this.properties.inputStream = stream;
 	}
-	
-	public void setOutputStream(IOutputDevice stream)
-	{
+
+	public void setOutputStream(IOutputDevice stream) {
 		this.properties.outputStream = stream;
 	}
-	
-	public void setErrorStream(IOutputDevice stream)
-	{
+
+	public void setErrorStream(IOutputDevice stream) {
 		this.properties.errorStream = stream;
 	}
 
@@ -119,9 +119,13 @@ public abstract class Process extends Observable {
 	}
 
 	protected final void stop(String reason) {
-		this.workingThread.interrupt();
-		this.setChanged();
-		this.notifyObservers(Process.STATE_STOP);
+		if (this.workingThread.isAlive()) {
+			this.workingThread.stop();
+			this.setChanged();
+			this.notifyObservers(Process.STATE_STOP);
+			Utilities.log("Process " + Process.this.getClass().getName() + " terminated manually ");
+
+		}
 		
 		String message = "Process " + Process.this.getClass().getName() + " was stopped";
 		if( reason != null ) {
@@ -136,6 +140,7 @@ public abstract class Process extends Observable {
 
 	protected final void start() {
 		this.workingThread.start();
+
 	}
 
 	/**
@@ -150,6 +155,48 @@ public abstract class Process extends Observable {
 	 */
 	protected final void removeChildren(Process p) {
 		this.children.remove(p);
+	}
 
+	private void handleSignal(Signals sig) {
+		switch (sig) {
+
+			case SIGQUIT:
+				this.handleSignalSIGQUIT();
+				break;
+
+			case SIGTERM:
+				this.handleSignalSIGTERM();
+				break;
+
+			default:
+
+				break;
+		}
+	}
+
+	protected void handleSignalSIGTERM() {
+		Utilities.log("got sigterm");
+		if (this instanceof Echo) {
+
+			Utilities.log("stopping exho");
+			this.stop();
+		}
+	}
+
+	protected void handleSignalSIGQUIT() {
+		Utilities.log("got sigquit");
+	}
+
+	protected void handleKeyboardEvent(KeyboardEvent e) {
+		Utilities.log("got keyb evt " + e.name());
+	}
+
+	@Override
+	public final void update(Observable o, Object arg) {
+		if (arg instanceof Signals) {
+			this.handleSignal((Signals) arg);
+		} else if (arg instanceof KeyboardEvent) {
+			this.handleKeyboardEvent((KeyboardEvent) arg);
+		}
 	}
 }

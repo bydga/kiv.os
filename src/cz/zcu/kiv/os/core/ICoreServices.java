@@ -37,4 +37,8 @@ public interface ICoreServices {
 	public boolean directoryExists(String filename);
 
 	public void setTerminalCommand(String command);
+	
+	public void dispatchSystemSignal(Signals sig);
+	
+	public void dispatchKeyboardEvent(KeyboardEvent evt);
 }

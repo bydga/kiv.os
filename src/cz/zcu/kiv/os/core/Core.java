@@ -19,6 +19,7 @@ public class Core {
 	private ProcessManager processManager;
 	private FileManager fileManager;
 	private SwingTerminal terminal;
+	private SignalDispatcher dispatcher;
 
 	public void setTerminal(SwingTerminal t) {
 		this.terminal = t;
@@ -37,6 +38,7 @@ public class Core {
 		this.processManager = new ProcessManager();
 		//TODO path separator
 		this.fileManager = new FileManager(System.getProperty("user.home") + "os");
+		this.dispatcher = new SignalDispatcher();
 	}
 
 	public synchronized ICoreServices getServices() {
@@ -47,7 +49,9 @@ public class Core {
 
 		@Override
 		public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
-			return Core.this.processManager.createProcess(processName, properties);
+			Process p = Core.this.processManager.createProcess(processName, properties);
+			Core.this.dispatcher.addObserver(p);
+			return p;
 		}
 
 		@Override
@@ -78,6 +82,16 @@ public class Core {
 		@Override
 		public void setTerminalCommand(String command) {
 			Core.this.terminal.setText(command);
+		}
+
+		@Override
+		public void dispatchSystemSignal(Signals sig) {
+			Core.this.dispatcher.dispatchSystemSignal(sig);
+		}
+
+		@Override
+		public void dispatchKeyboardEvent(KeyboardEvent evt) {
+			Core.this.dispatcher.dispatchKeyboardEvent(evt);
 		}
 	}
 }

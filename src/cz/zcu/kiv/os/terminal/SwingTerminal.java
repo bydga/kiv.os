@@ -1,11 +1,15 @@
 package cz.zcu.kiv.os.terminal;
 
 import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.Core;
+import cz.zcu.kiv.os.core.KeyboardEvent;
+import cz.zcu.kiv.os.core.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.InOutDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +22,7 @@ import javax.swing.*;
  */
 public class SwingTerminal extends InOutDevice {
 
+	public static final char KEY_UP = 0x16;
 	private JFrame frame;
 	private JTextArea historyArea;
 	private JTextField inputField;
@@ -42,7 +47,6 @@ public class SwingTerminal extends InOutDevice {
 
 	private void runGui() {
 		SwingUtilities.invokeLater(new Runnable() {
-
 			@Override
 			public void run() {
 				initFrame();
@@ -77,7 +81,6 @@ public class SwingTerminal extends InOutDevice {
 
 	private void startListening() {
 		messageListener = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				while (stdout.isOpen()) {
@@ -110,7 +113,6 @@ public class SwingTerminal extends InOutDevice {
 		scroll.setPreferredSize(new Dimension(640, 450));
 
 		scroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				e.getAdjustable().setValue(e.getAdjustable().getMaximum());
@@ -135,7 +137,6 @@ public class SwingTerminal extends InOutDevice {
 		bottomPanel.add(promptLabel, BorderLayout.WEST);
 		inputField = new JTextField();
 		inputField.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -149,14 +150,12 @@ public class SwingTerminal extends InOutDevice {
 		});
 
 		inputField.addKeyListener(new KeyAdapter() {
-
 			private boolean ctrlDown = false;
 			private boolean cDown = false;
 			private boolean dDown = false;
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				Utilities.log(e.paramString());
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_C:
 						this.cDown = true;
@@ -167,19 +166,25 @@ public class SwingTerminal extends InOutDevice {
 					case KeyEvent.VK_CONTROL:
 						this.ctrlDown = true;
 						break;
+
 				}
 
 				if (this.ctrlDown && this.cDown) {
-					Utilities.log("ctrl c pressed");
+//					Utilities.log("ctrl c pressed");
+					Core.getInstance().getServices().dispatchSystemSignal(Signals.SIGTERM);
 					e.consume();
 				} else if (this.ctrlDown && this.dDown) {
-					Utilities.log("ctrl d pressed");
+//					Utilities.log("ctrl d pressed");
+					Core.getInstance().getServices().dispatchSystemSignal(Signals.SIGQUIT);
 					e.consume();
 				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
-					Utilities.log("up pressed");
+					Core.getInstance().getServices().dispatchKeyboardEvent(KeyboardEvent.ARROW_UP);
+//					Utilities.log("up pressed");
 					e.consume();
 				} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-					Utilities.log("down pressed");
+					Core.getInstance().getServices().dispatchKeyboardEvent(KeyboardEvent.ARROW_DOWN);
+//					Utilities.log("down pressed");
+
 					e.consume();
 				}
 			}

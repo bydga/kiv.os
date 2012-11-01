@@ -13,6 +13,7 @@ import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.terminal.InputParser;
 import cz.zcu.kiv.os.terminal.ParseException;
 import cz.zcu.kiv.os.terminal.ParseResult;
+import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

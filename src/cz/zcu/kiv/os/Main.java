@@ -5,8 +5,6 @@ import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.InputDevice;
 import cz.zcu.kiv.os.core.device.OutputDevice;
-import java.io.IOError;
-import javax.management.RuntimeErrorException;
 
 /**
  *

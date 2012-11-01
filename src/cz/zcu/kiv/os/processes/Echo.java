@@ -10,18 +10,16 @@ import java.util.logging.Logger;
  * @author Jiri Zikmund
  */
 public class Echo extends Process {
-
+	
 	@Override
-	public void run(String[] args) {
-		try {
-			Thread.sleep(1000);
-			this.getOutputStream().writeLine("start");
-			for (int i = 0; i < 10; i++) {
-				this.getOutputStream().writeLine(("PID " + (this.pid)));
-				Thread.sleep(400);
-			}
-		} catch (Exception ex) {
-			Logger.getLogger(Echo.class.getName()).log(Level.SEVERE, null, ex);
+	public void run(String[] args) throws Exception {
+		this.getOutputStream().writeLine("start");
+		for (int i = 0; i < 1000000; i++) {
+			this.getOutputStream().writeLine(("PID " + (this.pid) + " " + i));
+//			Thread.sleep(400);
+
+			
+//			Thread.sleep(200);
 		}
 	}
 }
