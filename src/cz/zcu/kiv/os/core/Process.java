@@ -99,9 +99,7 @@ public abstract class Process extends Observable implements Observer {
 					Utilities.log("Process " + Process.this.getClass().getName() + " starting");
 					Process.this.run(Process.this.properties.args);
 
-					//TODO: some condition - close streams fwded into files or pipes, DO NOT CLOSE STDIN/OUT
-//					Process.this.stdOut.close();
-//					Process.this.stdIn.close();
+                                        Process.this.getOutputStream().EOF();//im not gonna write into this anymore
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_FINISH);
 					synchronized (Process.this) {
@@ -109,6 +107,7 @@ public abstract class Process extends Observable implements Observer {
 					}
 					Utilities.log("Process " + Process.this.getClass().getName() + " finished");
 				} catch (Exception ex) {
+                                        Process.this.getOutputStream().EOF();//im not gonna write into this anymore
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_EXCEPTION);
 					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception " + ex.getMessage());

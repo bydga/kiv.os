@@ -6,11 +6,11 @@ package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.device.IDevice;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -87,7 +87,23 @@ public class ProcessManager implements Observer {
 	public void update(Observable o, Object arg) {
 		Utilities.log("process manager got from " + o + ": " + arg);
 		Process finished = (Process) o;
+                cleanUpProcess(finished);
 		// TODO: handle change of Observable object (stopped process etc)
 		this.foregroundProcess = finished.getParent();
 	}
+
+        private void cleanUpProcess(Process p) {
+            closeStreams(p.getPid());
+        }
+
+        private void closeStreams(int pid) {
+            List<IDevice> devs = processTable.get(pid).getOpenedStreams();
+            for(IDevice device : devs) {
+                try {
+                    device.detach();
+                } catch (IOException ex) {
+                    Logger.getLogger(ProcessManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
 }
