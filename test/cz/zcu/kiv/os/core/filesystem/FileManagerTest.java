@@ -107,4 +107,13 @@ public class FileManagerTest {
         assertEquals("Resolved path doesnt match the expected result!",result, resolved);
     }
 
+    @Test
+    public void testNoDirPath() throws Exception {
+        String testPath = "ahoj.txt";
+        String result = "/workingDir/workingSubdir/ahoj.txt";
+
+        String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/");
+        assertEquals("Resolved path doesnt match the expected result!", result, resolved);
+    }
+
 }

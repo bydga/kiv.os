@@ -17,6 +17,7 @@ import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,8 +44,8 @@ public class Shell extends Process {
 		if (path != null) {
 
 			try {
-				return new OutputDevice(new FileOutputStream(path, append));
-			} catch (FileNotFoundException ex) {
+				return Core.getInstance().getServices().openFileForWrite(this, path, append);
+			} catch (IOException ex) {
 				Utilities.log("Error when moving output to " + path);
 			}
 		}
@@ -64,8 +65,8 @@ public class Shell extends Process {
 		if (path != null) {
 
 			try {
-				return new InputDevice(new FileInputStream(path));
-			} catch (FileNotFoundException ex) {
+				return Core.getInstance().getServices().openFileForRead(this, path);
+			} catch (IOException ex) {
 				Utilities.log("Error when moving stdout to " + path);
 			}
 		}

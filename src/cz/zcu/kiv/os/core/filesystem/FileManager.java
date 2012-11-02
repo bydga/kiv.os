@@ -14,8 +14,10 @@ import java.io.FileOutputStream;
  * @author Jakub Danek
  */
 public class FileManager {
+
+    public static final String SEPARATOR = System.getProperty("file.separator");
     
-    private String rootPath = "/";
+    private final String rootPath;
 
     /**
      * Default constructor
@@ -33,10 +35,32 @@ public class FileManager {
      * @return created device
      * @throws FileNotFoundException if file doesnt exist and couldnt be created
      */
-    public synchronized AbstractDevice openFile(String path, String workingDir, FileMode mode) throws FileNotFoundException {
+    public AbstractDevice openFile(String path, String workingDir, FileMode mode) throws FileNotFoundException {
         String realPath = resolveRealPath(path, workingDir);
 
         return prepareDevice(realPath, mode);
+    }
+
+    public boolean createDirectory(String path, String workingDir) {
+        String realPath = resolveRealPath(path, workingDir);
+
+        return mkDir(realPath);
+    }
+
+    public boolean directoryExists(String path, String workingDir) {
+        String realPath = resolveRealPath(path, workingDir);
+
+        return isDir(realPath);
+    }
+
+    private boolean isDir(String realPath) {
+        File dir = new File(realPath);
+        return dir.isDirectory();
+    }
+
+    private boolean mkDir(String realPath) {
+        File dir = new File(realPath);
+        return dir.mkdirs();
     }
 
     /**
@@ -52,17 +76,23 @@ public class FileManager {
         String innerPath;
         switch(path.charAt(0)) {
             case '/': //absolute path
-                innerPath = resolveRelativePath("/", path.substring(1));
+                innerPath = resolveRelativePath("/", path);
                 break;
             default: //relative path
-                innerPath = resolveRelativePath(workingDir, path.substring(1));
+                innerPath = resolveRelativePath(workingDir, path);
                 break;
         }
 
-        //remove leading '/'
-        realPath.append(innerPath.substring(1));
+        innerPath = substituteFileSeparators(innerPath);
+
+        //replace root separator by root path
+        realPath.append(innerPath.substring(SEPARATOR.length()));
 
         return realPath.toString();
+    }
+
+    private String substituteFileSeparators(String path) {
+        return path.replaceAll("/", SEPARATOR);
     }
 
     /**

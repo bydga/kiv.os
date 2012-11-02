@@ -40,6 +40,7 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
 	protected void detachAction() {
 		try {
 			reader.close();
+                        reader = null;
 		} catch (IOException ex) {
 			Logger.getLogger(InputDevice.class.getName()).log(Level.SEVERE, null, ex);
 		}

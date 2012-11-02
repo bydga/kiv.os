@@ -34,9 +34,9 @@ public interface ICoreServices {
 
 	public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException;
 
-	public void createDirectory(String dirName);
+	public boolean createDirectory(Process caller, String dirName);
 
-	public boolean directoryExists(String filename);
+	public boolean directoryExists(Process caller, String filename);
 
 	public void setTerminalCommand(String command);
 	

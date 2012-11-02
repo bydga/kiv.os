@@ -39,6 +39,7 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
     protected void detachAction() {
         try {
             writer.close();
+            writer = null;
         } catch (IOException ex) {
             //TODO handle exception
             Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);

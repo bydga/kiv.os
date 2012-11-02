@@ -26,10 +26,10 @@ public class Login extends cz.zcu.kiv.os.core.Process {
 
 		this.getOutputStream().writeLine("Logging in as " + login + "...");
 
-		String path = "/home/" + login;
-		if (!Core.getInstance().getServices().directoryExists(path)) {
+		String path = "/home/" + login + "/";
+		if (!Core.getInstance().getServices().directoryExists(this, path)) {
 			this.getOutputStream().writeLine("Creating home directory " + path);
-			Core.getInstance().getServices().createDirectory(path);
+			Core.getInstance().getServices().createDirectory(this, path);
 		}
 		ProcessProperties props = new ProcessProperties(this, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), path, new ThreadGroup("shellgroup"));
 		cz.zcu.kiv.os.core.Process shell = Core.getInstance().getServices().createProcess("shell", props);

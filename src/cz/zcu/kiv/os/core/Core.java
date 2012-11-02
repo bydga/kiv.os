@@ -38,8 +38,9 @@ public class Core {
 	private Core() {
 		this.services = new Core.CoreServices();
 		this.processManager = new ProcessManager();
-		//TODO path separator
-		this.fileManager = new FileManager(System.getProperty("user.home") + "os");
+
+                String separator = System.getProperty("file.separator");
+		this.fileManager = new FileManager(System.getProperty("user.home") + separator + "os" + separator);
 		this.dispatcher = new SignalDispatcher();
 	}
 
@@ -72,13 +73,13 @@ public class Core {
 		}
 
 		@Override
-		public void createDirectory(String dirName) {
-			return;
+		public boolean createDirectory(Process caller, String dirName) {
+			return fileManager.createDirectory(dirName, caller.getWorkingDir());
 		}
 
 		@Override
-		public boolean directoryExists(String filename) {
-			return false;
+		public boolean directoryExists(Process caller, String filename) {
+			return fileManager.directoryExists(filename, caller.getWorkingDir());
 		}
 
 		@Override
