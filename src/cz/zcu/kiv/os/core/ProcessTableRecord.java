@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.core;
 
-import java.io.Closeable;
+import cz.zcu.kiv.os.core.device.IDevice;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +18,7 @@ public class ProcessTableRecord {
 	}
 	protected List<Closeable> openedStreams;
 
-	public List<Closeable> getOpenedStreams() {
+	public List<IDevice> getOpenedStreams() {
 		return this.openedStreams;
 	}
 

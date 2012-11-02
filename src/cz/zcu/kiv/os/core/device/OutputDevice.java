@@ -36,7 +36,7 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
     }
 
     @Override
-    protected void closeAction() {
+    protected void detachAction() {
         try {
             writer.close();
         } catch (IOException ex) {
@@ -45,4 +45,12 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
         }
     }
 
+    @Override
+    public void EOF() {
+        try {
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

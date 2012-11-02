@@ -94,7 +94,7 @@ public class Shell extends Process {
 		//there is another process waiting in the pipeline for ouput of this process
 		while (parseResult.pipeline != null) {
 			//create the pipe
-			IOQueueDevice pipe = new IOQueueDevice();
+			AbstractIODevice pipe = new IOQueueDevice();
 			out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, pipe);
 			err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 			in = this.createInput(parseResult.stdIn, in);

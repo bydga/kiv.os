@@ -14,4 +14,5 @@ public interface IOutputDevice extends IDevice {
     //TODO better exception
     public void writeLine(String input) throws Exception;
 
+    public void EOF();
 }

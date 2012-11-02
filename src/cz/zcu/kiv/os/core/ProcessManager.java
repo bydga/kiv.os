@@ -4,7 +4,7 @@
  */
 package cz.zcu.kiv.os.core;
 
-import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.device.IDevice;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.io.Closeable;
@@ -74,16 +74,16 @@ public class ProcessManager implements Observer {
 	public synchronized void killProcess(int pid) throws Exception {
 		ProcessTableRecord p = this.processTable.remove(pid);
 		p.getProcess().stop();
-		for (Closeable stream : p.getOpenedStreams()) {
-			stream.close();
+		for (IDevice stream : p.getOpenedStreams()) {
+                    stream.detach();
 		}
 	}
 
-	public synchronized void addStreamToProcess(int pid, Closeable stream) {
+	public synchronized void addStreamToProcess(int pid, IDevice stream) {
 		this.processTable.get(pid).getOpenedStreams().add(stream);
 	}
 
-	public synchronized void removeStreamFromProcess(int pid, Closeable stream) {
+	public synchronized void removeStreamFromProcess(int pid, IDevice stream) {
 		this.processTable.get(pid).getOpenedStreams().remove(stream);
 	}
 

@@ -21,7 +21,7 @@ public abstract class AbstractDevice implements IDevice {
      * @return true if the device is open
      */
     @Override
-    public synchronized boolean isOpen() {
+    public boolean isOpen() {
         return open;
     }
 
@@ -29,10 +29,10 @@ public abstract class AbstractDevice implements IDevice {
      * Closes the device.
      */
     @Override
-    public synchronized void close() throws IOException {
+    public synchronized void detach() throws IOException {
         if(open) {
             open = false;
-            this.closeAction();
+            this.detachAction();
         }
     }
 
@@ -43,6 +43,6 @@ public abstract class AbstractDevice implements IDevice {
      * If explicitly called by child class or another package class, must be synchronized
      * via the owning instance monitor!!!
      */
-    protected abstract void closeAction() throws IOException;
+    protected abstract void detachAction() throws IOException;
 
 }

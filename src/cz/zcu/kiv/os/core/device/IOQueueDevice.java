@@ -1,7 +1,7 @@
 package cz.zcu.kiv.os.core.device;
 
+import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,11 +18,11 @@ public class IOQueueDevice extends AbstractIODevice {
     private Queue<String> buffer;
 
     public IOQueueDevice() {
-        buffer = new ConcurrentLinkedQueue<String>();
+        buffer = new LinkedList<String>();
     }
 
     @Override
-    protected void closeAction() {
+    protected void detachAction() {
         synchronized(buffer) {
             buffer.clear();
             buffer = null;
@@ -33,7 +33,7 @@ public class IOQueueDevice extends AbstractIODevice {
     public String readLine() throws Exception {
         if(isOpen()) {
             synchronized(buffer) {
-                while(buffer.isEmpty()) {
+                while(buffer.isEmpty() && isOpen()) {
                     try { //sleep if no messages to pass on
                         buffer.wait();
                     } catch (InterruptedException ex) {
@@ -41,12 +41,13 @@ public class IOQueueDevice extends AbstractIODevice {
                         Logger.getLogger(IOQueueDevice.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-
+                if(!isOpen()) {
+                    return null;
+                }
                 return buffer.poll();
             }
         } else {
-            //TODO better exception
-            throw new Exception();
+            return null;
         }
 
     }
@@ -54,16 +55,24 @@ public class IOQueueDevice extends AbstractIODevice {
     @Override
     public void writeLine(String input) throws Exception {
         if(isOpen()) {
+
             synchronized(buffer) {
                 buffer.add(input);
                 buffer.notifyAll(); //wake-up potential readers
             }
+            
         } else {
             //TODO better exception
             throw new Exception();
         }
     }
 
-
+    @Override
+    public void EOF() {
+        synchronized(buffer) {
+            buffer.add(null);
+            buffer.notifyAll();
+        }
+    }
 
 }

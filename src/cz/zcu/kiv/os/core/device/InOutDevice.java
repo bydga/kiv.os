@@ -8,7 +8,7 @@ import java.io.*;
  * It's very unprobable that processes would use this type of reference on a device.
  * Usually they will need only IInputDevice or IOutputDevice reference.
  *
- * One exception could be e.g. a file open for both reading and writing.
+ * This object is NOT thread-safe!
  *
  * @author Jakub Danek
  */
@@ -50,9 +50,14 @@ public class InOutDevice extends AbstractDevice implements IInputDevice, IOutput
     }
 
     @Override
-    protected void closeAction() throws IOException {
-        writer.close();
-        reader.close();
+    protected void detachAction() throws IOException {
+        writer.detach();
+        reader.detach();
+    }
+
+    @Override
+    public void EOF() {
+        writer.EOF();
     }
 
 }

@@ -37,7 +37,7 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
 	}
 
 	@Override
-	protected void closeAction() {
+	protected void detachAction() {
 		try {
 			reader.close();
 		} catch (IOException ex) {

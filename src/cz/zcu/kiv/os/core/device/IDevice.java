@@ -1,16 +1,16 @@
 package cz.zcu.kiv.os.core.device;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * Device abstraction.
  *
  * @author Jakub Danek
  */
-public interface IDevice extends Closeable{
-    /**
-     * Checks whether the device is open and can read from/written to.
-     * @return
-     */
+public interface IDevice {
+
     public boolean isOpen();
+
+    public void detach() throws IOException;
 }
