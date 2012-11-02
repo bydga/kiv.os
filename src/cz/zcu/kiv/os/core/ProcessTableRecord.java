@@ -10,13 +10,19 @@ import java.util.List;
  */
 public class ProcessTableRecord {
 
-	protected Process process;
+	private Process process;
 	private boolean backgroundProcess;
+	private List<IDevice> openedStreams;
 
-	public boolean isForegroundProcess() {
+        public ProcessTableRecord(Process p, boolean isBackgroundProcess) {
+		this.process = p;
+		this.backgroundProcess = isBackgroundProcess;
+		this.openedStreams = new ArrayList<IDevice>();
+	}
+
+        public boolean isForegroundProcess() {
 		return this.backgroundProcess;
 	}
-	protected List<Closeable> openedStreams;
 
 	public List<IDevice> getOpenedStreams() {
 		return this.openedStreams;
@@ -30,9 +36,8 @@ public class ProcessTableRecord {
 		return this.process;
 	}
 
-	public ProcessTableRecord(Process p, boolean isBackgroundProcess) {
-		this.process = p;
-		this.backgroundProcess = isBackgroundProcess;
-		this.openedStreams = new ArrayList<Closeable>();
-	}
+        public void addOpenStream(IDevice stream) {
+            this.openedStreams.add(stream);
+        }
+
 }

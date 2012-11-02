@@ -4,12 +4,8 @@
  */
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.device.IDevice;
-import cz.zcu.kiv.os.core.device.IInputDevice;
-import cz.zcu.kiv.os.core.device.IOutputDevice;
-import java.io.Closeable;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;

@@ -7,16 +7,13 @@ package cz.zcu.kiv.os.core;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.Utilities;
-import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import cz.zcu.kiv.os.core.interrupts.Interrupt;
-import cz.zcu.kiv.os.processes.Echo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Observer;
 
 /**
  * observable - because of process cleanup during process termination observer because of system/keyboard events
