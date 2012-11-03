@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.regex.Matcher;
 
 /**
  * Manager class for resolving path and opening files.
@@ -92,7 +93,7 @@ public class FileManager {
     }
 
     private String substituteFileSeparators(String path) {
-        return path.replaceAll("/", SEPARATOR);
+        return path.replaceAll("/", Matcher.quoteReplacement(SEPARATOR));
     }
 
     /**
@@ -101,7 +102,7 @@ public class FileManager {
      * @param path the path
      * @return minimal path to the file
      */
-    private String resolveRelativePath(String workingDir, String path) {
+    public String resolveRelativePath(String workingDir, String path) {
         StringBuffer result = new StringBuffer(workingDir);
         StringBuffer tmp = new StringBuffer();
         char character;

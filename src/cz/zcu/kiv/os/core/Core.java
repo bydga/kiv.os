@@ -39,7 +39,7 @@ public class Core {
 		this.services = new Core.CoreServices();
 		this.processManager = new ProcessManager();
 
-                String separator = System.getProperty("file.separator");
+		String separator = System.getProperty("file.separator");
 		this.fileManager = new FileManager(System.getProperty("user.home") + separator + "os" + separator);
 		this.dispatcher = new SignalDispatcher();
 	}
@@ -97,6 +97,16 @@ public class Core {
 		public void dispatchKeyboardEvent(KeyboardEvent evt) {
 			Process p = Core.this.processManager.getForegroundProcess();
 			Core.this.dispatcher.dispatchKeyboardEvent(p, evt);
+		}
+
+		@Override
+		public String getTerminalCommand() {
+			return Core.this.terminal.getText();
+		}
+
+		@Override
+		public String resolveRelativePath(String path, String cwd) {
+			return Core.this.fileManager.resolveRelativePath(cwd, path);
 		}
 	}
 }

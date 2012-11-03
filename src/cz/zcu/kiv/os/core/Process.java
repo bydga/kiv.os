@@ -99,7 +99,8 @@ public abstract class Process extends Observable implements Observer {
 					Utilities.log("Process " + Process.this.getClass().getName() + " starting");
 					Process.this.run(Process.this.properties.args);
 
-                                        Process.this.getOutputStream().EOF();//im not gonna write into this anymore
+					Process.this.getOutputStream().EOF();//im not gonna write into this anymore
+					Process.this.getErrorStream().EOF();//im not gonna write into this anymore
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_FINISH);
 					synchronized (Process.this) {
@@ -107,7 +108,8 @@ public abstract class Process extends Observable implements Observer {
 					}
 					Utilities.log("Process " + Process.this.getClass().getName() + " finished");
 				} catch (Exception ex) {
-                                        Process.this.getOutputStream().EOF();//im not gonna write into this anymore
+					Process.this.getOutputStream().EOF();//im not gonna write into this anymore
+					Process.this.getErrorStream().EOF();//im not gonna write into this anymore
 					Process.this.setChanged();
 					Process.this.notifyObservers(Process.STATE_EXCEPTION);
 					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception " + ex.getMessage());
@@ -181,19 +183,21 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected void handleSignalSIGQUIT() {
+		this.getOutputStream().EOF();
+		this.getErrorStream().EOF();
 	}
 
 	protected void handleKeyboardEvent(KeyboardEvent e) {
 	}
 
 	/**
-	 * Implementation of observer pattern. Awaits special events from dispatcher and processes them.
+	 * Implementation of observer pattern. 
+	 * Awaits special events from dispatcher and resends it to apropriate process.
 	 */
 	@Override
 	public final void update(Observable o, Object arg) {
 		Interrupt interrupt = (Interrupt) arg;
 		if (this == interrupt.getReceiver()) {
-			Utilities.log(this.getClass().getSimpleName() + "got " + interrupt.getInterrupt().toString());
 			if (interrupt.getInterrupt() instanceof Signals) {
 				this.handleSignal((Signals) interrupt.getInterrupt());
 			} else if (interrupt.getInterrupt() instanceof KeyboardEvent) {

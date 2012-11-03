@@ -16,10 +16,6 @@ public class Echo extends Process {
 		this.getOutputStream().writeLine("start");
 		for (int i = 0; i < 1000000; i++) {
 			this.getOutputStream().writeLine(("PID " + (this.pid) + " " + i));
-//			Thread.sleep(400);
-
-			
-//			Thread.sleep(200);
 		}
 	}
 }

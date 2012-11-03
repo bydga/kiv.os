@@ -10,13 +10,10 @@ import cz.zcu.kiv.os.core.NoSuchProcessException;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.*;
+import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.terminal.InputParser;
 import cz.zcu.kiv.os.terminal.ParseException;
 import cz.zcu.kiv.os.terminal.ParseResult;
-import cz.zcu.kiv.os.terminal.SwingTerminal;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +27,8 @@ public class Shell extends Process {
 	private static final String EXIT_COMMAND = "exit";
 	private static final String CWD_COMMAND = "cd";
 	private List<String> history;
+	private int historyIndex = 0;
+	private String curentCommand;
 
 	/**
 	 * Initializes new instance of output device - suitable for forwarding process's output/error streams. If given path
@@ -128,29 +127,39 @@ public class Shell extends Process {
 
 		//this loop reads input from terminal
 		while (true) {
-			Utilities.log("reading");
+			Utilities.log("reading, cwd: " + this.getWorkingDir());
 			String command = this.getInputStream().readLine();
 			if (command != null) {
 				this.getOutputStream().writeLine(command);
 
 				this.history.add(command);
-
-				//special cases of input command
-				if (command.equals(Shell.EXIT_COMMAND)) {
-					return;
-				} else if (command.equals(Shell.CWD_COMMAND)) {
-					Utilities.log("changing directory");
-				}
-				if (command.equals("")) {
-					continue;
-				}
+				this.historyIndex++;
 
 				try {
 					//process command
 					ParseResult result = parser.parse(command);
+
+					//special cases of input command
+					if (result.args[0].equals(Shell.EXIT_COMMAND)) {
+						return; //return from the main loop - ends the process
+					} else if (result.args[0].equals(Shell.CWD_COMMAND)) {
+						if (result.args.length > 1) {
+							//resolve destinating path
+							String path = Core.getInstance().getServices().resolveRelativePath(result.args[1], this.getWorkingDir()); 
+							if (Core.getInstance().getServices().directoryExists(this, path)) {
+								this.setWorkingDir(path);
+							} else {
+								this.getOutputStream().writeLine("Desired path doesn't exist.");
+							}
+						}
+						
+						continue;
+					} else if (result.args[0].equals("")) {
+						continue;
+					}
+
 					Process p = this.createProcess(result);
 					if (!result.isBackgroundTask) {
-						Utilities.log("going to sleep");
 						p.join();
 					} else {
 						this.getOutputStream().writeLine("[1] " + p.getPid());
@@ -162,6 +171,31 @@ public class Shell extends Process {
 				}
 			} else {
 				this.getOutputStream().writeLine("");
+			}
+		}
+	}
+
+	@Override
+	protected void handleKeyboardEvent(KeyboardEvent e) {
+
+		if (e == KeyboardEvent.ARROW_DOWN) {
+			if (this.historyIndex < this.history.size() - 1) {
+				this.historyIndex++;
+				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
+			} else {
+				Core.getInstance().getServices().setTerminalCommand(this.curentCommand);
+
+			}
+		} else if (e == KeyboardEvent.ARROW_UP) {
+
+			if (this.historyIndex == this.history.size()) {
+				this.curentCommand = Core.getInstance().getServices().getTerminalCommand();
+			}
+
+			if (this.historyIndex > 0) {
+				this.historyIndex--;
+				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
+
 			}
 		}
 	}

@@ -40,7 +40,11 @@ public interface ICoreServices {
 
 	public void setTerminalCommand(String command);
 	
+	public String getTerminalCommand();
+	
 	public void dispatchSystemSignal(Signals sig);
 	
 	public void dispatchKeyboardEvent(KeyboardEvent evt);
+	
+	public String resolveRelativePath(String path, String cwd);
 }

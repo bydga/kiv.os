@@ -44,6 +44,10 @@ public class SwingTerminal extends InOutDevice {
 	public void setText(String text) {
 		this.inputField.setText(text);
 	}
+	
+	public String getText() {
+		return this.inputField.getText();
+	}
 
 	private void runGui() {
 		SwingUtilities.invokeLater(new Runnable() {
