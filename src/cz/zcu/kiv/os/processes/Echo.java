@@ -1,60 +1,39 @@
 package cz.zcu.kiv.os.processes;
 
-import cz.zcu.kiv.os.Utilities;
-import cz.zcu.kiv.os.core.Process;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import cz.zcu.kiv.os.core.ProcessArgs;
+import cz.zcu.kiv.os.core.ProcessDefinedOptions;
 
 /**
  *
  * @author Jiri Zikmund
  */
-public class Echo extends cz.zcu.kiv.os.core.ProcessWithOptions {
+public class Echo extends cz.zcu.kiv.os.core.ProcessWithArgs {
 
-	/* @Override */
-	protected String helpText =
-		  "------------------------------"
-		+ "This is help for cat process  "
-		+ "This help is not completed yet"
-		+ "This is help for cat process  "
-		+ "This help is not completed yet"
-		+ "This is help for cat process  "
-		+ "This help is not completed yet"
-		+ "------------------------------";
-	
-	/* @Override */
-	protected String[] definedOptions = {
-		"-n",
-		"-r"
-	};
+	@Override
+	protected String getHelpText() {
+		return	"------------------------------\n"+
+				"This is help for ECHO process \n"+
+				"This help is not completed yet\n"+
+				"This is help for ECHO process \n"+
+				"This help is not completed yet\n"+
+				"This is help for ECHO process \n"+
+				"This help is not completed yet\n"+
+				"------------------------------\n";
+	}
+
+	@Override
+	protected ProcessDefinedOptions getDefinedOptions() {		
+		ProcessDefinedOptions options = new ProcessDefinedOptions();
+		options.addOption("-a");
+		options.addOption("-b", 2);
+		options.addOption("-c", 4);
+		return options;
+	}
 	
 	@Override
-	protected void runWithOptions(String[] args, String[] names, String[] options) throws Exception {
-		
-		for (int i = 0; i < names.length; i++) {
-			
-			this.writeln("Jmeno souboru " + i + ": '" +  names[i] + "'");
-			
-		}
-		
-	}
+	protected void runWithArgs(ProcessArgs processArgs) throws Exception {
 
-	private void writeln(String line) {
-		try {
-			this.stdOut.writeLine(line);
-		} catch (Exception ex) {
-			this.stop("stdOut writeLine exception: " + ex.getMessage());
-		}
+		this.writeln("ARGUNENTY OK");
+		
 	}
-	
-	private String readln() {
-		try {
-			return this.stdIn.readLine();
-		} catch (Exception ex) {
-			this.stop("stdIn readLine exception: " + ex.getMessage());
-			return null;
-		}
-	}
-	
-	
 }

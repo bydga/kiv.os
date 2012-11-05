@@ -2,7 +2,8 @@
 package cz.zcu.kiv.os.core;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * To change this template, choose Tools | Templates
@@ -16,24 +17,47 @@ import java.util.List;
 public final class ProcessArgs {
 
 	private String processName;
+	private String[] args;
 	private String[] names;
-	private String[] options;
-	private String[] definedOptions;
+	private Map<String,ProcessOption> options;
 	
-	public ProcessArgs(String[] args, String[] definedOptions) {
+	public ProcessArgs(String[] args, ProcessDefinedOptions definedOptions) {
 		
-		this.definedOptions = definedOptions;
-		
-		List<String> namesList = new ArrayList<String>();
-		List<String> optionsList = new ArrayList<String>();
-		
+		this.args = args;
 		this.processName = args[0];
+		
+		this.options = new HashMap<String, ProcessOption>();
+		ArrayList<String> namesList = new ArrayList<String>();
 		
 		String arg;
 		for (int i = 1; i < args.length; i++) {
 			arg = args[i];
-			if( arg.charAt(0) == '-' && arg.length() > 1 ) {
-				optionsList.add(arg);
+			
+			if(arg.length() > 1 && arg.charAt(0) == '-') {
+				
+				boolean defined = definedOptions.isDefined(arg);
+				int optionArgsCount = definedOptions.getOptionArgsCount(arg);
+				
+				String[] optionArgs = new String[optionArgsCount];
+				int missingArgPos = 0;
+				
+				if(defined == true && optionArgsCount > 0) {
+					for (int j = 0; j < optionArgsCount; j++) {
+						i++;
+						if(i >= args.length ) {
+							missingArgPos = j+1;
+							break;
+						}
+						if(args[i].charAt(0) == '-' && args[i].length() > 1){
+							i--;
+							missingArgPos = j+1;
+							break;
+						}
+						optionArgs[j] = args[i];
+					}
+				}
+				ProcessOption option = new ProcessOption(arg, optionArgs, defined, missingArgPos);
+				this.options.put(arg, option);
 			}
 			else {
 				namesList.add(arg);
@@ -42,42 +66,47 @@ public final class ProcessArgs {
 		
 		this.names = new String[ namesList.size() ];
 		namesList.toArray( this.names );
-		
-		this.options = new String[ optionsList.size() ];
-		optionsList.toArray( this.options );
 	}
 	
 	public ProcessArgs(String[] args) {
-		this(args, new String[0]);
-	}
-	
-	public void setDefinedOptions(String[] definedOptions) {
-		this.definedOptions = definedOptions;
+		this(args, new ProcessDefinedOptions());
 	}
 	
 	public String getProcessName() {
 		return this.processName;
 	}
 	
-	public String[] getNames() {
+	public ProcessOption getOption(String optionName) {
+		return this.options.get(optionName);
+	}
+	
+	public String[] getAllArgs() {
+		return this.args;
+	}
+	public String[] getAllNames() {
 		return this.names;
 	}
 	
-	public String[] getOptions() {
-		return this.options;
-	}
-	
-	public boolean validOption(String option) {
-		return this.inOptions(this.definedOptions, option);
-	}
-	
-	private boolean inOptions( String[] haystack, String needle ) {
-		for (int i = 0; i < haystack.length; i++) {
-			if( haystack[i].equals(needle) ) {
-				return true;
-			}
+	public String[] getAllOptionNames() {
+		
+		ArrayList<String> allOptionNames = new ArrayList<String>();
+		for (String key : this.options.keySet()) {
+			allOptionNames.add(key);
 		}
-		return false;
+		
+		String[] namesArray = new String[ allOptionNames.size() ];
+		allOptionNames.toArray( namesArray );
+		
+		return namesArray;
 	}
 	
+	public ProcessOption[] getAllOptions() {
+		
+		ProcessOption[] optionsArray = new ProcessOption[this.options.size()];
+		int i = 0;
+		for (String key : this.options.keySet()) {
+			optionsArray[i] = this.options.get(key);
+		}
+		return optionsArray;
+	}
 }

@@ -5,65 +5,51 @@
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.core.ProcessArgs;
+import cz.zcu.kiv.os.core.ProcessDefinedOptions;
+import cz.zcu.kiv.os.core.ProcessOption;
 import java.io.*;
-
-import cz.zcu.kiv.os.core.Process;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Observer;
 
 /**
  *
  * @author Jiri Zikmund
  */
-public class Cat extends cz.zcu.kiv.os.core.Process{
-	
-// 	
-//	TODO!!! Error outputs in whole process
-//	
-	private final String[] definedOptions = {
-		"-n",
-		"--help"
-	};
-	
+public class Cat extends cz.zcu.kiv.os.core.ProcessWithArgs{
+
 	private boolean optionNumberLine = false;
 	
 	@Override
-	public void run(String[] args) throws Exception {
+	protected String getHelpText() {
+		return	"------------------------------\n"+
+				"This is help for CAT process  \n"+
+				"This help is not completed yet\n"+
+				"This is help for CAT process  \n"+
+				"This help is not completed yet\n"+
+				"This is help for CAT process  \n"+
+				"This help is not completed yet\n"+
+				"------------------------------\n";
+	}
+
+	@Override
+	protected ProcessDefinedOptions getDefinedOptions() {
+		ProcessDefinedOptions options = new ProcessDefinedOptions();
+		options.addOption("-n", 0);
+		return options;
+	}
+
+	@Override
+	protected void runWithArgs(ProcessArgs processArgs) throws Exception {
 		
-		// no arguments
-		if( args.length < 2 ) {
-			repeatMode();
-			return;
-		}
-		
-		ProcessArgs processArgs = new ProcessArgs(args, this.definedOptions);
+		ProcessOption[] options = processArgs.getAllOptions();
 		
 		// apply all options
-		String[] options = processArgs.getOptions();
-		//
 		for (int i = 0; i < options.length; i++) {
-			
-			if( options[i].equals("--help") ) {
-				showHelp();
-				return;
-			}
-			
-			if(!processArgs.validOption(options[i])) {
-				writeln( processArgs.getProcessName() + ": invalid option " + options[i] );
-				writeln( "Try 'cat --help' for more information.");
-				this.stop();
-				return;
-				// TODO: this.stop or return?
-			}
-			
-			if( options[i].equals("-n") ) {
+			if(options[i].getOptionName().equals("-n")) {
 				this.optionNumberLine = true;
-			}	
+			}
 		}
 		
 		// write all files
-		String[] names = processArgs.getNames();
+		String[] names = processArgs.getAllNames();
 		//
 		for (int i = 0; i < names.length; i++) {
 			
@@ -77,15 +63,15 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 				} catch (Exception e) {
 					// TODO: pokračovat nebo ukončit proces?
 					writeln("Error while opening file: '" + names[i] + "'");
-					this.stop( );
+					//this.stop( "Error while opening file: " + e.getMessage() );
 					return;
 				}
 				
 			}
 		}
-	
 		
 	}
+	
 	
 	private void repeatMode() {
 		String line = readln();
@@ -114,37 +100,6 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		}
 		in.close();
 	}
-	
-	// TODO: finish help
-	private void showHelp() {
-		writeln("------------------------------");
-		writeln("This is help for cat process");
-		writeln("This help is not completed yet");
-		writeln("This is help for cat process");
-		writeln("This help is not completed yet");
-		writeln("This is help for cat process");
-		writeln("This help is not completed yet");
-		writeln("------------------------------");
-	}
-	
-	
-	private void writeln(String line) {
-		try {
-			this.getOutputStream().writeLine(line);
-		} catch (Exception ex) {
-			this.stop();
-		}
-	}
-	
-	private String readln() {
-		try {
-			return this.getInputStream().readLine();
-		} catch (Exception ex) {
-			this.stop();
-			return null;
-		}
-	}
-	
 	
 	
 }
