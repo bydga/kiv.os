@@ -51,7 +51,7 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	public void setWorkingDir(String workingDir) {
-		this.properties.workingDir = workingDir;
+		this.properties.workingDir = FileManager.resolveRelativePath(this.getWorkingDir(), workingDir);
 	}
 
 	public void setInputStream(IInputDevice stream) {

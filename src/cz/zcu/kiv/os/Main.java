@@ -22,7 +22,7 @@ public class Main {
 
 		Utilities.log("starting OS");
 
-		ProcessProperties props = new ProcessProperties(null, null, new InputDevice(System.in), new OutputDevice(System.out), new OutputDevice(System.err), "/", new ProcessGroup(new ThreadGroup("initgroup")));
+		ProcessProperties props = new ProcessProperties(null, null, new InputDevice(System.in, false), new OutputDevice(System.out, false), new OutputDevice(System.err, false), "/", new ProcessGroup(new ThreadGroup("initgroup")));
 		Process p = Core.getInstance().getServices().createProcess("Init", props);
 
 	}
