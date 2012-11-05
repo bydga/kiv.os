@@ -104,7 +104,7 @@ public class FileManager {
      */
     public String resolveRelativePath(String workingDir, String path) {
         StringBuffer result = new StringBuffer(workingDir);
-        StringBuffer tmp = new StringBuffer();
+        StringBuilder tmp = new StringBuilder();
         char character;
 
         for(int i = 0; i < path.length(); i++) {
@@ -112,7 +112,7 @@ public class FileManager {
             switch(character) {
                 case '/': //dirname end
                     if(tmp.length() > 0) {//any dirname, otherwise just skip
-                        resolveDirName(result, tmp.toString());
+                        resolveFileName(result, tmp.toString(), true);
                         tmp.delete(0, tmp.length()); //clean temp buffer
                     }
                     break;
@@ -123,7 +123,7 @@ public class FileManager {
         }
 
         if(tmp.length() > 0) {//filename
-            result.append(tmp);
+            resolveFileName(result, tmp.toString(), false);
         }
 
         return result.toString();
@@ -134,14 +134,16 @@ public class FileManager {
      * @param result buffer to which the changes are saved
      * @param dirname dirname to be processed
      */
-    private void resolveDirName(StringBuffer result, String dirname) {
+    private void resolveFileName(StringBuffer result, String dirname, boolean apendDirEnd) {
         if(dirname.equals(".")) {
             //do nothing, same directory
         } else if (dirname.equals("..")) {
             levelUpDir(result);
         } else {
             result.append(dirname);
-            result.append("/");
+            if(apendDirEnd) {
+                result.append("/");
+            }
         }
     }
 

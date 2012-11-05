@@ -116,4 +116,26 @@ public class FileManagerTest {
         assertEquals("Resolved path doesnt match the expected result!", result, resolved);
     }
 
+    @Test
+    public void testDirUpOnlyPath() throws Exception {
+        String testPath = "..";
+        String result = "/workingDir/";
+
+        String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/");
+        assertEquals("Resolved path doesnt match the expected result!", result, resolved);
+    }
+
+    @Test
+    public void testCurrentDirOnlyPath() throws Exception {
+        String testPath = ".";
+        String result = "/workingDir/workingSubdir/";
+
+        String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/");
+        assertEquals("Resolved path doesnt match the expected result!", result, resolved);
+
+        testPath = "/";
+        assertEquals("Resolved path doesnt match the expected result!", result, resolved);
+
+    }
+
 }
