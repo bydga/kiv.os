@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
  */
 public class FileManager {
 
-    public static final String SEPARATOR = System.getProperty("file.separator");
+    public static final String SEPARATOR = Matcher.quoteReplacement(System.getProperty("file.separator"));
     
     private final String rootPath;
 
@@ -93,7 +93,7 @@ public class FileManager {
     }
 
     private String substituteFileSeparators(String path) {
-        return path.replaceAll("/", Matcher.quoteReplacement(SEPARATOR));
+        return path.replaceAll("/", SEPARATOR);
     }
 
     /**
@@ -104,6 +104,11 @@ public class FileManager {
      */
     public static String resolveRelativePath(String workingDir, String path) {
         StringBuffer result = new StringBuffer(workingDir);
+
+        if(!workingDir.endsWith(SEPARATOR)) {
+            result.append(SEPARATOR); //end working dir with dir separator
+        }
+
         StringBuilder tmp = new StringBuilder();
         char character;
 

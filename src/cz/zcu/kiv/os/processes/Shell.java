@@ -132,7 +132,7 @@ public class Shell extends Process {
 		while (true) {
 			Utilities.log("reading, cwd: " + this.getWorkingDir());
 			String command = this.getInputStream().readLine();
-			if (command != null) {
+			if (command != null && !command.isEmpty()) {
 				this.getOutputStream().writeLine(command);
 
 				this.history.add(command);

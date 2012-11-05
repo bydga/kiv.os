@@ -90,7 +90,9 @@ public class SwingTerminal extends InOutDevice {
 				while (stdout.isOpen()) {
 					try {
 						String s = stdout.readLine();
-						historyArea.append(s + "\n");
+                                                if(s != null) {
+                                                    historyArea.append(s + "\n");
+                                                }
 					} catch (Exception ex) {
 						//TODO handle exception
 						Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);

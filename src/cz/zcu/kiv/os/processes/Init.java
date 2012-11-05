@@ -20,7 +20,7 @@ import java.io.IOException;
 public class Init extends cz.zcu.kiv.os.core.Process {
 
 	private AbstractIODevice createStdDevice() throws IOException {
-		return Core.getInstance().getServices().createPipe();
+		return new PipeDevice(true);
 	}
 
 	@Override
