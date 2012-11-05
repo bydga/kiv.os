@@ -11,4 +11,8 @@ package cz.zcu.kiv.os.core.device;
  */
 public abstract class AbstractIODevice extends AbstractDevice implements IInputDevice, IOutputDevice{
 
+    public AbstractIODevice(boolean stdStream) {
+        super(stdStream);
+    }
+
 }

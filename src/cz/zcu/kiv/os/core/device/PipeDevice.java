@@ -6,19 +6,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * IODevice based on Queue implementation, storing Strings.
- *
- * Serves as thread-safe replacement for IODevice backed by PipedStreams.
- * Typical usage as STDIO or PIPE between processes.
+ * Pipe is an IO device with buffer for storing data.
  *
  * @author Jakub Danek
  */
-public class IOQueueDevice extends AbstractIODevice {
+public class PipeDevice extends AbstractIODevice {
 
     private Queue<String> buffer;
 
-    public IOQueueDevice() {
+    /**
+     * Constructor which enables setting the device as standard stream (which is not
+     * closed on regular process end)
+     *
+     * @param stdStream
+     */
+    public PipeDevice(boolean stdStream) {
+        super(stdStream);
         buffer = new LinkedList<String>();
+    }
+
+    /**
+     * Default constructor. Sets stdStream flag on false.
+     */
+    public PipeDevice() {
+        this(false);
     }
 
     @Override
@@ -38,7 +49,7 @@ public class IOQueueDevice extends AbstractIODevice {
                         buffer.wait();
                     } catch (InterruptedException ex) {
                         //TODO handle exception
-                        Logger.getLogger(IOQueueDevice.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(PipeDevice.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 if(!isOpen()) {

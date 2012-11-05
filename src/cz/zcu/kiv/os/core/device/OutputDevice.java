@@ -18,7 +18,8 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
      * Default constructor
      * @param outputStream open output stream that can be written to.
      */
-    public OutputDevice(OutputStream outputStream) {
+    public OutputDevice(OutputStream outputStream, boolean stdStream) {
+        super(stdStream);
         OutputStreamWriter osw = new OutputStreamWriter(outputStream);
         writer = new BufferedWriter(osw, 1024);
     }

@@ -19,7 +19,8 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
 	 * Basic constructor
 	 * @param inputStream open input stream that can be read from
 	 */
-	public InputDevice(InputStream inputStream) {
+	public InputDevice(InputStream inputStream, boolean stdStream) {
+                super(stdStream);
 		this.is = inputStream;
 		InputStreamReader isr = new InputStreamReader(inputStream);
 		reader = new BufferedReader(isr);

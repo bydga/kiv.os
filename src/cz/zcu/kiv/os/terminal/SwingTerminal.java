@@ -35,7 +35,7 @@ public class SwingTerminal extends InOutDevice {
 	 * Default constructor.
 	 */
 	public SwingTerminal(IInputDevice stdout, IOutputDevice stdin) {
-		super(stdout, stdin);
+		super(stdout, stdin, false);
 		this.stdin = stdin;
 		this.stdout = stdout;
 		runGui();

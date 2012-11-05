@@ -10,6 +10,8 @@ import java.io.IOException;
  */
 public interface IDevice {
 
+    public boolean isStdStream();
+
     public boolean isOpen();
 
     public void detach() throws IOException;

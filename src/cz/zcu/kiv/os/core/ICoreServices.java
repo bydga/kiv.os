@@ -1,10 +1,10 @@
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.core.device.AbstractIODevice;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -47,4 +47,6 @@ public interface ICoreServices {
 	public void dispatchKeyboardEvent(KeyboardEvent evt);
 	
 	public String resolveRelativePath(String path, String cwd);
+
+        public AbstractIODevice createPipe();
 }

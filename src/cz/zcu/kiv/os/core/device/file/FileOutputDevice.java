@@ -14,7 +14,7 @@ public class FileOutputDevice extends OutputDevice {
 
 
     public FileOutputDevice(FileOutputStream outputStream, String path) {
-        super(outputStream);
+        super(outputStream, false);
         this.path = path;
     }
 

@@ -13,7 +13,7 @@ public class FileInputDevice extends InputDevice {
     private final String path;
 
     public FileInputDevice(FileInputStream inputStream, String path) {
-        super(inputStream);
+        super(inputStream, false);
         this.path = path;
     }
 

@@ -11,9 +11,11 @@ import java.io.IOException;
 public abstract class AbstractDevice implements IDevice {
 
     private boolean open;
+    private boolean stdStream;
 
-    protected AbstractDevice() {
+    protected AbstractDevice(boolean stdStream) {
         open = true;
+        this.stdStream = stdStream;
     }
 
     /**
@@ -34,6 +36,11 @@ public abstract class AbstractDevice implements IDevice {
             open = false;
             this.detachAction();
         }
+    }
+
+    @Override
+    public boolean isStdStream() {
+        return stdStream;
     }
 
     /**

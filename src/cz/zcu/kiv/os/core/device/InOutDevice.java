@@ -22,9 +22,8 @@ public class InOutDevice extends AbstractDevice implements IInputDevice, IOutput
      * @param inputStream open input stream that can be read from
      * @param outputStream  open output stream that can be written to
      */
-    public InOutDevice(InputStream inputStream, OutputStream outputStream) {
-        reader = new InputDevice(inputStream);
-        writer = new OutputDevice(outputStream);
+    public InOutDevice(InputStream inputStream, OutputStream outputStream, boolean stdStream) {
+        this(new InputDevice(inputStream, stdStream), new OutputDevice(outputStream, stdStream), stdStream);
     }
 
     /**
@@ -32,7 +31,8 @@ public class InOutDevice extends AbstractDevice implements IInputDevice, IOutput
      * @param reader
      * @param writer
      */
-    public InOutDevice(IInputDevice reader, IOutputDevice writer) {
+    public InOutDevice(IInputDevice reader, IOutputDevice writer, boolean stdStream) {
+        super(stdStream);
         this.reader = reader;
         this.writer = writer;
     }

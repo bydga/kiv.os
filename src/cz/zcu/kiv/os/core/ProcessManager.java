@@ -6,6 +6,7 @@ package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.device.IDevice;
+import cz.zcu.kiv.os.core.device.PipeDevice;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -50,6 +51,8 @@ public class ProcessManager implements Observer {
 			p.init(this.counter, properties);
 			ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess);
 			this.processTable.put(this.counter, record);
+                        addStreamsToProcessTable(p);
+
 			p.addObserver(this);
 			p.start();
 
@@ -66,6 +69,30 @@ public class ProcessManager implements Observer {
 
 		}
 	}
+
+        /**
+         * Puts references of streams owned by the process (IO) into the process table.
+         * @param p
+         */
+        private void addStreamsToProcessTable(Process p) {
+            IDevice dev = p.getInputStream();
+            //std stream and inputpipeend are not owned by the process
+            if(!dev.isStdStream() && !(dev instanceof PipeDevice)) {
+                this.addStreamToProcess(p.getPid(), dev);
+            }
+
+            //stdStreams arent owned by the process
+            dev = p.getOutputStream();
+            if(!dev.isStdStream()) {
+                this.addStreamToProcess(p.getPid(), dev);
+            }
+
+            //stdStreams arent owned by the process
+            dev = p.getErrorStream();
+            if(!dev.isStdStream()) {
+                this.addStreamToProcess(p.getPid(), dev);
+            }
+        }
 
 	public synchronized void killProcess(int pid) throws Exception {
 		ProcessTableRecord p = this.processTable.remove(pid);

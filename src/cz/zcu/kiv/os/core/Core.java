@@ -1,8 +1,7 @@
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.core.Process;
-import cz.zcu.kiv.os.core.device.IInputDevice;
-import cz.zcu.kiv.os.core.device.IOutputDevice;
+import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.filesystem.FileMode;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
@@ -108,5 +107,10 @@ public class Core {
 		public String resolveRelativePath(String path, String cwd) {
 			return Core.this.fileManager.resolveRelativePath(cwd, path);
 		}
+
+                @Override
+                public AbstractIODevice createPipe() {
+                    return new PipeDevice(false);
+                }
 	}
 }
