@@ -102,7 +102,7 @@ public class FileManager {
      * @param path the path
      * @return minimal path to the file
      */
-    public String resolveRelativePath(String workingDir, String path) {
+    public static String resolveRelativePath(String workingDir, String path) {
         StringBuffer result = new StringBuffer(workingDir);
         StringBuilder tmp = new StringBuilder();
         char character;
@@ -134,7 +134,7 @@ public class FileManager {
      * @param result buffer to which the changes are saved
      * @param dirname dirname to be processed
      */
-    private void resolveFileName(StringBuffer result, String dirname, boolean apendDirEnd) {
+    private static void resolveFileName(StringBuffer result, String dirname, boolean apendDirEnd) {
         if(dirname.equals(".")) {
             //do nothing, same directory
         } else if (dirname.equals("..")) {
@@ -151,7 +151,7 @@ public class FileManager {
      * Moves one directory up the path, unless its root already
      * @param path
      */
-    private void levelUpDir(StringBuffer path) {
+    private static void levelUpDir(StringBuffer path) {
         if(path.length() == 1) { //root only
             return;
         }

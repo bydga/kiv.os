@@ -103,11 +103,6 @@ public class Core {
 			return Core.this.terminal.getText();
 		}
 
-		@Override
-		public String resolveRelativePath(String path, String cwd) {
-			return Core.this.fileManager.resolveRelativePath(cwd, path);
-		}
-
                 @Override
                 public AbstractIODevice createPipe() {
                     return new PipeDevice(false);

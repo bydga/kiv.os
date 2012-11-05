@@ -46,7 +46,5 @@ public interface ICoreServices {
 	
 	public void dispatchKeyboardEvent(KeyboardEvent evt);
 	
-	public String resolveRelativePath(String path, String cwd);
-
         public AbstractIODevice createPipe();
 }
