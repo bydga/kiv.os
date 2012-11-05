@@ -22,13 +22,16 @@ import java.util.Observer;
  */
 public abstract class Process extends Observable implements Observer {
 
-	public static final int STATE_STOP = 0;
-	public static final int STATE_FINISH = 1;
-	public static final int STATE_EXCEPTION = 2;
+	protected enum ProcessState {
+
+		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,
+	}
 	protected Thread workingThread;
 	protected int pid;
 	protected List<Process> children;
 	private ProcessProperties properties;
+	protected ProcessState processState = ProcessState.PREPARED;
+	protected int exitCode = 0;
 
 	public String getWorkingDir() {
 		return this.properties.workingDir;
@@ -36,6 +39,14 @@ public abstract class Process extends Observable implements Observer {
 
 	public Process getParent() {
 		return this.properties.parent;
+	}
+
+	public int getExitCode() {
+		return this.exitCode;
+	}
+
+	public ProcessState getProcessState() {
+		return this.processState;
 	}
 
 	public void setWorkingDir(String workingDir) {
@@ -79,7 +90,7 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	public ThreadGroup getProcessGroup() {
-		return this.properties.processGroup;
+		return this.properties.processGroup.getGroup();
 	}
 
 	public int getPid() {
@@ -92,59 +103,52 @@ public abstract class Process extends Observable implements Observer {
 		this.children = new ArrayList<Process>();
 		this.pid = pid;
 		this.properties = properties;
-		this.workingThread = new Thread(this.properties.processGroup, new Runnable() {
+		this.workingThread = new Thread(this.properties.processGroup.getGroup(), new Runnable() {
 			@Override
 			public void run() {
 				try {
+					Process.this.processState = ProcessState.RUNNING;
 					Utilities.log("Process " + Process.this.getClass().getName() + " starting");
 					Process.this.run(Process.this.properties.args);
 
 					Process.this.getOutputStream().EOF();//im not gonna write into this anymore
 					Process.this.getErrorStream().EOF();//im not gonna write into this anymore
+
+					if (Process.this.processState != Process.ProcessState.FINISHED_KILLED) {
+						Process.this.processState = Process.ProcessState.FINISHED_OK;
+					}
 					Process.this.setChanged();
-					Process.this.notifyObservers(Process.STATE_FINISH);
+					Process.this.notifyObservers();
 					synchronized (Process.this) {
 						Process.this.notifyAll();
 					}
 					Utilities.log("Process " + Process.this.getClass().getName() + " finished");
+
 				} catch (Exception ex) {
 					Process.this.getOutputStream().EOF();//im not gonna write into this anymore
 					Process.this.getErrorStream().EOF();//im not gonna write into this anymore
 					Process.this.setChanged();
-					Process.this.notifyObservers(Process.STATE_EXCEPTION);
+					Process.this.notifyObservers();
 					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception " + ex.getMessage());
 				}
 			}
 		}, "process-" + this.getClass().getName());
 	}
 
-	protected final void stop(String reason) {
-		if (this.workingThread.isAlive()) {
-			this.workingThread.stop();
-			this.setChanged();
-			this.notifyObservers(Process.STATE_STOP);
-			String message = "Process " + Process.this.getClass().getName() + " was manually stopped";
-			if (reason != null) {
-				message += ", because " + reason;
-			}
-			Utilities.log(message);
-		} else {
-			Utilities.log("Killing dead process" + Process.this.getClass().getSimpleName());
-			String message = "Process " + Process.this.getClass().getName() + " was stopped";
-			if (reason != null) {
-				message += ", because " + reason;
-			}
-			Utilities.log(message);
+	protected void checkForStop() throws InterruptedException
+	{
+		if (this.properties.processGroup.getShouldStop()) {
+			throw new InterruptedException("manual termination");
 		}
 	}
-
 	protected final void stop() {
-		this.stop(null);
+		this.properties.processGroup.stop();
+		this.processState = ProcessState.FINISHED_KILLED;
+		Utilities.log("Process " + this.getClass().getSimpleName() + " killed manually");
 	}
 
 	protected final void start() {
 		this.workingThread.start();
-
 	}
 
 	/**
@@ -191,8 +195,7 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	/**
-	 * Implementation of observer pattern. 
-	 * Awaits special events from dispatcher and resends it to apropriate process.
+	 * Implementation of observer pattern. Awaits special events from dispatcher and resends it to apropriate process.
 	 */
 	@Override
 	public final void update(Observable o, Object arg) {

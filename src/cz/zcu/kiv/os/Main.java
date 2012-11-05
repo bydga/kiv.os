@@ -2,6 +2,7 @@ package cz.zcu.kiv.os;
 
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.Process;
+import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.InputDevice;
 import cz.zcu.kiv.os.core.device.OutputDevice;
@@ -21,7 +22,7 @@ public class Main {
 
 		Utilities.log("starting OS");
 
-		ProcessProperties props = new ProcessProperties(null, null, new InputDevice(System.in), new OutputDevice(System.out), new OutputDevice(System.err), "/", new ThreadGroup("initgroup"));
+		ProcessProperties props = new ProcessProperties(null, null, new InputDevice(System.in), new OutputDevice(System.out), new OutputDevice(System.err), "/", new ProcessGroup(new ThreadGroup("initgroup")));
 		Process p = Core.getInstance().getServices().createProcess("Init", props);
 
 	}

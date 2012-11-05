@@ -8,6 +8,7 @@ import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.NoSuchProcessException;
 import cz.zcu.kiv.os.core.Process;
+import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
@@ -17,6 +18,8 @@ import cz.zcu.kiv.os.terminal.ParseResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -83,7 +86,7 @@ public class Shell extends Process {
 	 */
 	private Process createProcess(ParseResult parseResult) throws NoSuchProcessException {
 
-		ThreadGroup group = new ThreadGroup("group_" + parseResult.args[0]);
+		ProcessGroup group = new ProcessGroup(new ThreadGroup("group_" + parseResult.args[0]));
 		//only for debugging reasons
 		List<Process> list = new ArrayList<Process>();
 		IInputDevice in = this.createInput(parseResult.stdIn, this.getInputStream());
@@ -175,6 +178,15 @@ public class Shell extends Process {
 		}
 	}
 
+	@Override
+	protected void handleSignalSIGTERM() {
+		try {
+			this.getOutputStream().writeLine("");
+		} catch (Exception ex) {
+			Logger.getLogger(Shell.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+	
 	@Override
 	protected void handleKeyboardEvent(KeyboardEvent e) {
 

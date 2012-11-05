@@ -15,6 +15,7 @@ public class Echo extends Process {
 	public void run(String[] args) throws Exception {
 		this.getOutputStream().writeLine("start");
 		for (int i = 0; i < 1000000; i++) {
+			this.checkForStop();
 			this.getOutputStream().writeLine(("PID " + (this.pid) + " " + i));
 		}
 	}

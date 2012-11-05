@@ -52,7 +52,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 			if(!processArgs.validOption(options[i])) {
 				writeln( processArgs.getProcessName() + ": invalid option " + options[i] );
 				writeln( "Try 'cat --help' for more information.");
-				this.stop( "undefined option " + options[i] );
+				this.stop();
 				return;
 				// TODO: this.stop or return?
 			}
@@ -77,7 +77,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 				} catch (Exception e) {
 					// TODO: pokračovat nebo ukončit proces?
 					writeln("Error while opening file: '" + names[i] + "'");
-					this.stop( "Error while opening file: " + e.getMessage() );
+					this.stop( );
 					return;
 				}
 				
@@ -132,7 +132,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		try {
 			this.getOutputStream().writeLine(line);
 		} catch (Exception ex) {
-			this.stop("stdOut writeLine exception " + ex.getMessage());
+			this.stop();
 		}
 	}
 	
@@ -140,7 +140,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		try {
 			return this.getInputStream().readLine();
 		} catch (Exception ex) {
-			this.stop("stdIn readLine exception " + ex.getMessage());
+			this.stop();
 			return null;
 		}
 	}

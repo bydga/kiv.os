@@ -19,13 +19,13 @@ public class ProcessProperties {
 	public IOutputDevice outputStream;
 	public IOutputDevice errorStream;
 	public String workingDir;
-	public ThreadGroup processGroup;
+	public ProcessGroup processGroup;
 	public boolean isBackgroundProcess;
 
-	public ProcessProperties(Process parent, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ThreadGroup processGroup) {
+	public ProcessProperties(Process parent, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ProcessGroup processGroup) {
 		this(parent, args, inputStream, outputStream, errorStream, workingDir, processGroup, false);	
 	}
-	public ProcessProperties(Process parent, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ThreadGroup processGroup, boolean  isBackgroundProcess) {
+	public ProcessProperties(Process parent, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ProcessGroup processGroup, boolean  isBackgroundProcess) {
 		this.parent = parent;
 		this.args = args;
 		this.inputStream = inputStream;

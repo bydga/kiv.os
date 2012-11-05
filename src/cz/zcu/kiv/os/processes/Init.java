@@ -7,6 +7,7 @@ package cz.zcu.kiv.os.processes;
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.Process;
+import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
@@ -33,7 +34,7 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 
 		while (true) {
 			
-			ProcessProperties props = new ProcessProperties(this, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ThreadGroup("initgroup"));
+			ProcessProperties props = new ProcessProperties(this, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("initgroup")));
 			Process login = Core.getInstance().getServices().createProcess("Login", props);
 			login.join();
 		}

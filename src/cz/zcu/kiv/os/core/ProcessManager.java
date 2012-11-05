@@ -85,7 +85,7 @@ public class ProcessManager implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		Utilities.log("process manager got from " + o + ": " + arg);
+		Utilities.log("process manager got from " + o + ": ");
 		Process finished = (Process) o;
                 cleanUpProcess(finished);
 		// TODO: handle change of Observable object (stopped process etc)
