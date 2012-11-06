@@ -25,8 +25,7 @@ public abstract class Process extends Observable implements Observer {
 
 	protected enum ProcessState {
 
-		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,
-	}
+		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,}
 	protected Thread workingThread;
 	protected int pid;
 	protected List<Process> children;
@@ -50,8 +49,19 @@ public abstract class Process extends Observable implements Observer {
 		return this.processState;
 	}
 
-	public void setWorkingDir(String workingDir) {
-		this.properties.workingDir = FileManager.resolveRelativePath(this.getWorkingDir(), workingDir);
+	public void setWorkingDir(String workingDir) throws Exception {
+		//resolve destinating path
+		if (Core.getInstance().getServices().directoryExists(this, workingDir)) {
+			String root;
+			if(workingDir.startsWith("/")) {
+				root = "/";
+			} else {
+				root = this.getWorkingDir();
+			}
+			this.properties.workingDir = FileManager.resolveRelativePath(root, workingDir);
+		} else {
+			this.getOutputStream().writeLine("Desired path doesn't exist.");
+		}
 	}
 
 	public void setInputStream(IInputDevice stream) {
@@ -136,12 +146,12 @@ public abstract class Process extends Observable implements Observer {
 		}, "process-" + this.getClass().getName());
 	}
 
-	protected void checkForStop() throws InterruptedException
-	{
+	protected void checkForStop() throws InterruptedException {
 		if (this.properties.processGroup.getShouldStop()) {
 			throw new InterruptedException("manual termination");
 		}
 	}
+
 	protected final void stop() {
 		this.properties.processGroup.stop();
 		this.processState = ProcessState.FINISHED_KILLED;

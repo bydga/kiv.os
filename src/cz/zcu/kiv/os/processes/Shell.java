@@ -147,12 +147,7 @@ public class Shell extends Process {
 						return; //return from the main loop - ends the process
 					} else if (result.args[0].equals(Shell.CWD_COMMAND)) {
 						if (result.args.length > 1) {
-							//resolve destinating path
-							if (Core.getInstance().getServices().directoryExists(this, result.args[1])) {
-								this.setWorkingDir(result.args[1]);
-							} else {
-								this.getOutputStream().writeLine("Desired path doesn't exist.");
-							}
+							this.setWorkingDir(result.args[1]);
 						}
 						
 						continue;

@@ -4,7 +4,6 @@
  */
 package cz.zcu.kiv.os.core.interrupts;
 
-
 import cz.zcu.kiv.os.core.Process;
 
 /**
@@ -14,15 +13,13 @@ import cz.zcu.kiv.os.core.Process;
 public class Interrupt {
 
 	protected Process receiver;
-	
-	protected  Enum data;
+	protected Enum data;
 
 	public Process getReceiver() {
 		return this.receiver;
 	}
 
-	public Enum getInterrupt()
-	{
+	public Enum getInterrupt() {
 		return this.data;
 	}
 
@@ -30,10 +27,9 @@ public class Interrupt {
 		this.receiver = receiver;
 		this.data = data;
 	}
-	
+
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "Interrupt " + this.getInterrupt().toString() + " for " + this.receiver.getClass().getSimpleName();
 	}
 }
