@@ -7,6 +7,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 
 /**
@@ -53,6 +56,24 @@ public class FileManager {
 
         return isDir(realPath);
     }
+
+	public List<File> listFiles(String path, String workingDir) {
+		String realPath = resolveRealPath(path, workingDir);
+
+		File dir = new File(realPath);
+		List<File> l = new ArrayList<File>();
+		if(dir.isDirectory()) {
+			l.add(new File(dir, "."));
+			l.add(new File(dir, ".."));
+			l.addAll(Arrays.asList(dir.listFiles()));
+			return l;
+		} else if (dir.isFile()) {
+			l.add(dir);
+			return l;
+		} else {
+			return null;
+		}
+	}
 
     private boolean isDir(String realPath) {
         File dir = new File(realPath);

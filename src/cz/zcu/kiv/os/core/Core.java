@@ -128,5 +128,10 @@ public class Core {
 		public int readProcessExitCode(Process p) {
 			return Core.this.processManager.readProcessExitCode(p);
 		}
+
+		@Override
+		public List<File> listFiles(Process caller, String dir) {
+			return Core.this.fileManager.listFiles(dir, caller.getWorkingDir());
+		}
 	}
 }
