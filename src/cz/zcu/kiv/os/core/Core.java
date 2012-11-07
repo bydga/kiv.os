@@ -7,6 +7,7 @@ import cz.zcu.kiv.os.core.filesystem.FileMode;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

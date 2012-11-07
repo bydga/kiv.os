@@ -5,6 +5,7 @@ import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -38,6 +39,8 @@ public interface ICoreServices {
 	public boolean createDirectory(Process caller, String dirName);
 
 	public boolean directoryExists(Process caller, String filename);
+
+	public List<File> listFiles(Process caller, String dir);
 
 	public void setTerminalCommand(String command);
 
