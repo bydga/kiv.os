@@ -25,7 +25,8 @@ public abstract class Process extends Observable implements Observer {
 
 	protected enum ProcessState {
 
-		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,}
+		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,
+	}
 	protected Thread workingThread;
 	protected int pid;
 	protected List<Process> children;
@@ -41,7 +42,10 @@ public abstract class Process extends Observable implements Observer {
 		return this.properties.parent;
 	}
 
-	public int getExitCode() {
+	protected int getExitCode() {
+		if (this.processState == ProcessState.PREPARED || this.processState == ProcessState.RUNNING) {
+			throw new RuntimeException("Process is still running, can't read exitCode");
+		}
 		return this.exitCode;
 	}
 
@@ -53,7 +57,7 @@ public abstract class Process extends Observable implements Observer {
 		//resolve destinating path
 		if (Core.getInstance().getServices().directoryExists(this, workingDir)) {
 			String root;
-			if(workingDir.startsWith("/")) {
+			if (workingDir.startsWith("/")) {
 				root = "/";
 			} else {
 				root = this.getWorkingDir();

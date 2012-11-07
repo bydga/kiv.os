@@ -22,15 +22,18 @@ public class ProcessManager implements Observer {
 	private static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
 	private Map<Integer, ProcessTableRecord> processTable;
 	private int counter;
-	private  Process foregroundProcess = null;
+	private Process foregroundProcess = null;
 
 	public ProcessManager() {
 		this.processTable = new HashMap<Integer, ProcessTableRecord>();
 		this.counter = -1;
 	}
-	
-	public Process getForegroundProcess()
-	{
+
+	public Map<Integer, ProcessTableRecord> getProcessTable() {
+		return this.processTable;
+	}
+
+	public Process getForegroundProcess() {
 		return this.foregroundProcess;
 	}
 
@@ -51,7 +54,7 @@ public class ProcessManager implements Observer {
 			p.init(this.counter, properties);
 			ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess);
 			this.processTable.put(this.counter, record);
-                        addStreamsToProcessTable(p);
+			addStreamsToProcessTable(p);
 
 			p.addObserver(this);
 			p.start();
@@ -70,36 +73,39 @@ public class ProcessManager implements Observer {
 		}
 	}
 
-        /**
-         * Puts references of streams owned by the process (IO) into the process table.
-         * @param p
-         */
-        private void addStreamsToProcessTable(Process p) {
-            IDevice dev = p.getInputStream();
-            //std stream and inputpipeend are not owned by the process
-            if(!dev.isStdStream() && !(dev instanceof PipeDevice)) {
-                this.addStreamToProcess(p.getPid(), dev);
-            }
-
-            //stdStreams arent owned by the process
-            dev = p.getOutputStream();
-            if(!dev.isStdStream()) {
-                this.addStreamToProcess(p.getPid(), dev);
-            }
-
-            //stdStreams arent owned by the process
-            dev = p.getErrorStream();
-            if(!dev.isStdStream()) {
-                this.addStreamToProcess(p.getPid(), dev);
-            }
-        }
-
-	public synchronized void killProcess(int pid) throws Exception {
-		ProcessTableRecord p = this.processTable.remove(pid);
-		p.getProcess().stop();
-		for (IDevice stream : p.getOpenedStreams()) {
-                    stream.detach();
+	/**
+	 * Puts references of streams owned by the process (IO) into the process table.
+	 *
+	 * @param p
+	 */
+	private void addStreamsToProcessTable(Process p) {
+		IDevice dev = p.getInputStream();
+		//std stream and inputpipeend are not owned by the process
+		if (!dev.isStdStream() && !(dev instanceof PipeDevice)) {
+			this.addStreamToProcess(p.getPid(), dev);
 		}
+
+		//stdStreams arent owned by the process
+		dev = p.getOutputStream();
+		if (!dev.isStdStream()) {
+			this.addStreamToProcess(p.getPid(), dev);
+		}
+
+		//stdStreams arent owned by the process
+		dev = p.getErrorStream();
+		if (!dev.isStdStream()) {
+			this.addStreamToProcess(p.getPid(), dev);
+		}
+	}
+	
+	public synchronized int readProcessExitCode(Process p)
+	{
+		if (!this.processTable.containsKey(p.getPid())) {
+			throw new RuntimeException("Process with pid " + p.getPid() + " doesn't exist in the process table." );
+		}
+		
+		this.processTable.remove(p.getPid());
+		return p.getExitCode();
 	}
 
 	public synchronized void addStreamToProcess(int pid, IDevice stream) {
@@ -114,23 +120,23 @@ public class ProcessManager implements Observer {
 	public void update(Observable o, Object arg) {
 		Utilities.log("process manager got from " + o + ": ");
 		Process finished = (Process) o;
-                cleanUpProcess(finished);
+		this.cleanUpProcess(finished);
 		// TODO: handle change of Observable object (stopped process etc)
 		this.foregroundProcess = finished.getParent();
 	}
 
-        private void cleanUpProcess(Process p) {
-            closeStreams(p.getPid());
-        }
+	private void cleanUpProcess(Process p) {
+		closeStreams(p.getPid());
+	}
 
-        private void closeStreams(int pid) {
-            List<IDevice> devs = processTable.get(pid).getOpenedStreams();
-            for(IDevice device : devs) {
-                try {
-                    device.detach();
-                } catch (IOException ex) {
-                    Logger.getLogger(ProcessManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+	private void closeStreams(int pid) {
+		List<IDevice> devs = processTable.get(pid).getOpenedStreams();
+		for (IDevice device : devs) {
+			try {
+				device.detach();
+			} catch (IOException ex) {
+				Logger.getLogger(ProcessManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+	}
 }

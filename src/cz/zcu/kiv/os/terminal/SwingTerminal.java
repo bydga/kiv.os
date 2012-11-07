@@ -9,6 +9,7 @@ import cz.zcu.kiv.os.core.device.InOutDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.*;
 import java.util.logging.Level;
@@ -114,6 +115,7 @@ public class SwingTerminal extends InOutDevice {
 
 		historyArea = new JTextArea();
 		historyArea.setEditable(false);
+		 historyArea.setFont(new Font("Monospaced",Font.PLAIN,15));
 
 		JScrollPane scroll = new JScrollPane(historyArea);
 		scroll.setPreferredSize(new Dimension(640, 450));

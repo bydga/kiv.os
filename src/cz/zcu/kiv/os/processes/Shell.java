@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * @author bydga
  */
 public class Shell extends Process {
-
+	
 	private static final String EXIT_COMMAND = "exit";
 	private static final String CWD_COMMAND = "cd";
 	private List<String> history;
@@ -44,14 +44,14 @@ public class Shell extends Process {
 	 */
 	private IOutputDevice createOutput(String path, boolean append, IOutputDevice nullValue) {
 		if (path != null) {
-
+			
 			try {
 				return Core.getInstance().getServices().openFileForWrite(this, path, append);
 			} catch (IOException ex) {
 				Utilities.log("Error when moving output to " + path);
 			}
 		}
-
+		
 		return nullValue;
 	}
 
@@ -65,14 +65,14 @@ public class Shell extends Process {
 	 */
 	private IInputDevice createInput(String path, IInputDevice nullValue) {
 		if (path != null) {
-
+			
 			try {
 				return Core.getInstance().getServices().openFileForRead(this, path);
 			} catch (IOException ex) {
 				Utilities.log("Error when moving stdout to " + path);
 			}
 		}
-
+		
 		return nullValue;
 	}
 
@@ -84,8 +84,8 @@ public class Shell extends Process {
 	 * @return The newly created process, or in case there is the pipeline, the latest process.
 	 * @throws NoSuchProcessException
 	 */
-	private Process createProcess(ParseResult parseResult) throws NoSuchProcessException {
-
+	private List<Process> createProcess(ParseResult parseResult) throws NoSuchProcessException {
+		
 		ProcessGroup group = new ProcessGroup(new ThreadGroup("group_" + parseResult.args[0]));
 		//only for debugging reasons
 		List<Process> list = new ArrayList<Process>();
@@ -101,13 +101,13 @@ public class Shell extends Process {
 			out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, pipe);
 			err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 			in = this.createInput(parseResult.stdIn, in);
-
+			
 			ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
 			Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
 			list.add(p);
 			//pipe was used as an output device here, remember it for next iteration, where it will stand as an input
 			in = pipe;
-
+			
 			parseResult = parseResult.pipeline;
 		}
 
@@ -115,14 +115,14 @@ public class Shell extends Process {
 		in = this.createInput(parseResult.stdIn, in);
 		out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, this.getOutputStream());
 		err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
-
+		
 		ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
 		Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
-
+		
 		list.add(p);
-		return p;
+		return list;
 	}
-
+	
 	@Override
 	protected void run(String[] args) throws Exception {
 		InputParser parser = new InputParser();
@@ -134,10 +134,10 @@ public class Shell extends Process {
 			String command = this.getInputStream().readLine();
 			if (command != null && !command.isEmpty()) {
 				this.getOutputStream().writeLine(command);
-
+				
 				this.history.add(command);
 				this.historyIndex++;
-
+				
 				try {
 					//process command
 					ParseResult result = parser.parse(command);
@@ -154,12 +154,16 @@ public class Shell extends Process {
 					} else if (result.args[0].equals("")) {
 						continue;
 					}
-
-					Process p = this.createProcess(result);
+					
+					List<Process> processes = this.createProcess(result);
 					if (!result.isBackgroundTask) {
-						p.join();
+						for (Process p : processes) {
+							p.join();
+							int ret = Core.getInstance().getServices().readProcessExitCode(p);
+							Utilities.log("exit code: " + ret);
+						}
 					} else {
-						this.getOutputStream().writeLine("[1] " + p.getPid());
+						this.getOutputStream().writeLine("[1] " + processes.get(processes.size()-1).getPid());
 					}
 				} catch (ParseException e) {
 					this.getOutputStream().writeLine("Invalid input: " + e.getMessage());
@@ -171,7 +175,7 @@ public class Shell extends Process {
 			}
 		}
 	}
-
+	
 	@Override
 	protected void handleSignalSIGTERM() {
 		try {
@@ -183,25 +187,25 @@ public class Shell extends Process {
 	
 	@Override
 	protected void handleKeyboardEvent(KeyboardEvent e) {
-
+		
 		if (e == KeyboardEvent.ARROW_DOWN) {
 			if (this.historyIndex < this.history.size() - 1) {
 				this.historyIndex++;
 				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
 			} else {
 				Core.getInstance().getServices().setTerminalCommand(this.curentCommand);
-
+				
 			}
 		} else if (e == KeyboardEvent.ARROW_UP) {
-
+			
 			if (this.historyIndex == this.history.size()) {
 				this.curentCommand = Core.getInstance().getServices().getTerminalCommand();
 			}
-
+			
 			if (this.historyIndex > 0) {
 				this.historyIndex--;
 				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
-
+				
 			}
 		}
 	}

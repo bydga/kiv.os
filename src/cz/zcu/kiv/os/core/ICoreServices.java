@@ -6,6 +6,7 @@ import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.io.IOException;
+import java.util.List;
 
 /**
  *
@@ -39,12 +40,16 @@ public interface ICoreServices {
 	public boolean directoryExists(Process caller, String filename);
 
 	public void setTerminalCommand(String command);
-	
+
 	public String getTerminalCommand();
-	
+
 	public void dispatchSystemSignal(Signals sig);
-	
+
 	public void dispatchKeyboardEvent(KeyboardEvent evt);
+
+	public AbstractIODevice createPipe();
 	
-        public AbstractIODevice createPipe();
+	public List<ProcessInfo> getProcessTableData();
+	
+	public int readProcessExitCode(Process p);
 }

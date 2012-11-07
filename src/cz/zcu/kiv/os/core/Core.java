@@ -8,6 +8,9 @@ import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -107,5 +110,22 @@ public class Core {
                 public AbstractIODevice createPipe() {
                     return new PipeDevice(false);
                 }
+
+		@Override
+		public List<ProcessInfo> getProcessTableData() {
+			List<ProcessInfo> output = new ArrayList<ProcessInfo>();
+			Map<Integer, ProcessTableRecord> processTable = Core.this.processManager.getProcessTable();
+			for (Map.Entry<Integer, ProcessTableRecord> entry : processTable.entrySet())
+			{
+				output.add(new ProcessInfo(entry.getValue()));
+			}
+			
+			return output;
+		}
+
+		@Override
+		public int readProcessExitCode(Process p) {
+			return Core.this.processManager.readProcessExitCode(p);
+		}
 	}
 }
