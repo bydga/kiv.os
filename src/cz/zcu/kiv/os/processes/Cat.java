@@ -7,19 +7,23 @@ package cz.zcu.kiv.os.processes;
 import cz.zcu.kiv.os.core.ProcessArgs;
 import cz.zcu.kiv.os.core.ProcessDefinedOptions;
 import cz.zcu.kiv.os.core.ProcessOption;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
 
 /**
  *
  * @author Jiri Zikmund
  */
-public class Cat extends cz.zcu.kiv.os.core.ProcessWithArgs{
+public class Cat extends cz.zcu.kiv.os.core.Process{
 
 	private boolean optionNumberLine = false;
+	private int lineNumber = 0;
 	
-	@Override
-	protected String getHelpText() {
-		return	"------------------------------\n"+
+	private final String helpText =
+				"------------------------------\n"+
 				"This is help for CAT process  \n"+
 				"This help is not completed yet\n"+
 				"This is help for CAT process  \n"+
@@ -27,17 +31,13 @@ public class Cat extends cz.zcu.kiv.os.core.ProcessWithArgs{
 				"This is help for CAT process  \n"+
 				"This help is not completed yet\n"+
 				"------------------------------\n";
-	}
 
 	@Override
-	protected ProcessDefinedOptions getDefinedOptions() {
-		ProcessDefinedOptions options = new ProcessDefinedOptions();
-		options.addOption("-n", 0);
-		return options;
-	}
-
-	@Override
-	protected void runWithArgs(ProcessArgs processArgs) throws Exception {
+	protected void run(String[] args) throws Exception {
+		
+		ProcessDefinedOptions definedOptions = new ProcessDefinedOptions();
+		definedOptions.addOption("-n", 0);
+		ProcessArgs processArgs = new ProcessArgs(args, definedOptions);	
 		
 		ProcessOption[] options = processArgs.getAllOptions();
 		
@@ -62,7 +62,7 @@ public class Cat extends cz.zcu.kiv.os.core.ProcessWithArgs{
 					this.readFile(names[i]);
 				} catch (Exception e) {
 					// TODO: pokračovat nebo ukončit proces?
-					writeln("Error while opening file: '" + names[i] + "'");
+					this.stdOut.writeLine("Error while opening file: '" + names[i] + "'");
 					//this.stop( "Error while opening file: " + e.getMessage() );
 					return;
 				}
@@ -73,30 +73,32 @@ public class Cat extends cz.zcu.kiv.os.core.ProcessWithArgs{
 	}
 	
 	
-	private void repeatMode() {
-		String line = readln();
+	private void repeatMode() throws Exception {
+		String line = this.stdIn.readLine();
 		//TODO: null instead of exit
 		//while(line != null) {
 		while(!line.equals("")) {
-			writeln(line);
-			line = readln();
+			this.lineNumber++;
+			if(this.optionNumberLine == true) {
+				line = "   " +this.lineNumber +  "  " + line;
+			}
+			this.stdOut.writeLine(line);
+			line = this.stdIn.readLine();
 		}
 	}
 	
-	private void readFile(String fileName) throws FileNotFoundException, IOException {
-
-		int lineNumber = 0;
+	private void readFile(String fileName) throws Exception {
 		
 		FileInputStream fstream = new FileInputStream(fileName);
 		DataInputStream in = new DataInputStream(fstream);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		while ((line = br.readLine()) != null) {
-			lineNumber++;
+			this.lineNumber++;
 			if(this.optionNumberLine == true) {
-				line = "  " +lineNumber +  ": " + line;
+				line = "   " +this.lineNumber +  "  " + line;
 			}
-			writeln(line);
+			this.stdOut.writeLine(line);
 		}
 		in.close();
 	}

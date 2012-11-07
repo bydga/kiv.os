@@ -32,10 +32,9 @@ public final class ProcessArgs {
 		String arg;
 		for (int i = 1; i < args.length; i++) {
 			arg = args[i];
+			boolean defined = definedOptions.isDefined(arg);
 			
-			if(arg.length() > 1 && arg.charAt(0) == '-') {
-				
-				boolean defined = definedOptions.isDefined(arg);
+			if(defined == true) {
 				int optionArgsCount = definedOptions.getOptionArgsCount(arg);
 				
 				String[] optionArgs = new String[optionArgsCount];
@@ -48,7 +47,7 @@ public final class ProcessArgs {
 							missingArgPos = j+1;
 							break;
 						}
-						if(args[i].charAt(0) == '-' && args[i].length() > 1){
+						if(definedOptions.isDefined(args[i])){
 							i--;
 							missingArgPos = j+1;
 							break;
@@ -106,6 +105,7 @@ public final class ProcessArgs {
 		int i = 0;
 		for (String key : this.options.keySet()) {
 			optionsArray[i] = this.options.get(key);
+			i++;
 		}
 		return optionsArray;
 	}

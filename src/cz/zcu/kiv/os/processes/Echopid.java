@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Jirka
+ * @author Jiri Zikmund
  */
 public class Echopid extends cz.zcu.kiv.os.core.Process {
 
