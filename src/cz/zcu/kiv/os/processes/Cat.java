@@ -4,13 +4,13 @@
  */
 package cz.zcu.kiv.os.processes;
 
+import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.ProcessArgs;
 import cz.zcu.kiv.os.core.ProcessDefinedOptions;
 import cz.zcu.kiv.os.core.ProcessOption;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import cz.zcu.kiv.os.core.device.IInputDevice;
+import java.io.FileNotFoundException;
 
 
 /**
@@ -19,32 +19,58 @@ import java.io.InputStreamReader;
  */
 public class Cat extends cz.zcu.kiv.os.core.Process{
 
-	private boolean optionNumberLine = false;
+	private boolean optionLineNumber = false;
+	private boolean optionShowEnds = false;
 	private int lineNumber = 0;
 	
 	private final String helpText =
-				"------------------------------\n"+
-				"This is help for CAT process  \n"+
-				"This help is not completed yet\n"+
-				"This is help for CAT process  \n"+
-				"This help is not completed yet\n"+
-				"This is help for CAT process  \n"+
-				"This help is not completed yet\n"+
-				"------------------------------\n";
-
+				"Usage: cat [OPTION] [FILE]...\n"+
+				"Concatenate FILE(s), or standard input, to standard output.\n"+
+				"  -E, --show-ends          display $ at end of each line\n"+
+				"  -n, --number             number all output lines\n"+
+				"      --help               display this help and exit\n"+
+				"\n"+
+				"With no FILE, or when FILE is -, read standard input.\n"+
+				""+
+				"Examples:\n"+
+				"  cat f - g  Output f's contents, then standard input, then g's contents.\n"+
+				"  cat        Copy standard input to standard output.";
+	
 	@Override
 	protected void run(String[] args) throws Exception {
 		
 		ProcessDefinedOptions definedOptions = new ProcessDefinedOptions();
 		definedOptions.addOption("-n", 0);
-		ProcessArgs processArgs = new ProcessArgs(args, definedOptions);	
+		definedOptions.addOption("--number", 0);
+		definedOptions.addOption("-E", 0);
+		definedOptions.addOption("--show-ends", 0);
+		definedOptions.addOption("--help", 0);
+		ProcessArgs processArgs = new ProcessArgs(args, definedOptions, "-");
 		
 		ProcessOption[] options = processArgs.getAllOptions();
 		
+		//Utilities.echoArgs(processArgs, this.getOutputStream());
+		
 		// apply all options
 		for (int i = 0; i < options.length; i++) {
-			if(options[i].getOptionName().equals("-n")) {
-				this.optionNumberLine = true;
+			if(options[i].notRecognized()) {
+				StringBuilder bf = new StringBuilder();
+				bf.append("cat: invalid option ");
+				bf.append(options[i].getOptionName());
+				bf.append("\n");
+				bf.append("Try 'cat --help' for more information.");
+				this.getOutputStream().writeLine(bf.toString());
+				return;
+			}
+			else if(options[i].getOptionName().equals("-n") || options[i].getOptionName().equals("--number")) {
+				this.optionLineNumber = true;
+			}
+			else if(options[i].getOptionName().equals("-E") || options[i].getOptionName().equals("--show-ends")) {
+				this.optionShowEnds = true;
+			}
+			else if(options[i].getOptionName().equals("--help")) {
+				this.getOutputStream().writeLine(this.helpText);
+				return; //exit
 			}
 		}
 		
@@ -54,17 +80,17 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		for (int i = 0; i < names.length; i++) {
 			
 			if( names[i].equals("-") ) {
-				repeatMode();
-				continue;
+				String userInput = this.readUserInput();
+				if(userInput != null) {
+					this.getOutputStream().writeLine(userInput);
+				}
 			}
 			else {
 				try {
-					this.readFile(names[i]);
-				} catch (Exception e) {
-					// TODO: pokračovat nebo ukončit proces?
-					this.stdOut.writeLine("Error while opening file: '" + names[i] + "'");
-					//this.stop( "Error while opening file: " + e.getMessage() );
-					return;
+					IInputDevice file = Core.getInstance().getServices().openFileForRead(this, names[i]);
+					this.readFile(file);
+				} catch (FileNotFoundException e) {
+					this.getOutputStream().writeLine("cat: " + names[i] + ": No such file");
 				}
 				
 			}
@@ -72,36 +98,56 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		
 	}
 	
-	
-	private void repeatMode() throws Exception {
-		String line = this.stdIn.readLine();
-		//TODO: null instead of exit
-		//while(line != null) {
-		while(!line.equals("")) {
-			this.lineNumber++;
-			if(this.optionNumberLine == true) {
-				line = "   " +this.lineNumber +  "  " + line;
-			}
-			this.stdOut.writeLine(line);
-			line = this.stdIn.readLine();
-		}
-	}
-	
-	private void readFile(String fileName) throws Exception {
+	private void readFile(IInputDevice input) throws Exception {
 		
-		FileInputStream fstream = new FileInputStream(fileName);
-		DataInputStream in = new DataInputStream(fstream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
-		while ((line = br.readLine()) != null) {
-			this.lineNumber++;
-			if(this.optionNumberLine == true) {
-				line = "   " +this.lineNumber +  "  " + line;
-			}
-			this.stdOut.writeLine(line);
+		while ((line = input.readLine()) != null) {
+			line = this.editLineByOptions(line);
+			this.getOutputStream().writeLine(line);
 		}
-		in.close();
+		input.detach();
 	}
 	
+	
+	private String readUserInput() throws Exception {
+		
+		StringBuilder bf = new StringBuilder();
+		String newLineChar = "";
+		String line = this.getInputStream().readLine();
+		
+		// TODO: compare with null, not with ""
+		while(!line.equals("")) {
+			this.getOutputStream().writeLine(line);
+			line = this.editLineByOptions(line);
+			if(this.optionLineNumber == true) {
+				bf.append(newLineChar);
+				bf.append(line);
+				newLineChar = "\n";
+			}
+			else {
+				this.getOutputStream().writeLine(line);
+			}
+			line = this.getInputStream().readLine();
+		}
+		if(this.optionLineNumber == true) {
+			return bf.toString();
+		}
+		else return null;
+	}
+
+	
+	private String editLineByOptions(String line) {
+		
+		if(this.optionShowEnds == true) {
+			line += '$';
+		}
+		
+		if(this.optionLineNumber == true) {
+			this.lineNumber++;
+			line = "   " + this.lineNumber +  "  " + line;
+		}
+		
+		return line;
+	}
 	
 }
