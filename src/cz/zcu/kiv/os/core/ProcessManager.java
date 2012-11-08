@@ -19,7 +19,6 @@ import java.util.logging.Logger;
  */
 public class ProcessManager implements Observer {
 
-	private static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
 	private Map<Integer, ProcessTableRecord> processTable;
 	private int counter;
 	private Process foregroundProcess = null;
@@ -46,7 +45,7 @@ public class ProcessManager implements Observer {
 		try {
 			//class name begins with Capital letter
 			String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
-			String fullClassName = ProcessManager.PROCESS_PACKAGE + "." + className;
+			String fullClassName = Process.PROCESS_PACKAGE + "." + className;
 			Class procClass = Class.forName(fullClassName);
 			Constructor constructor = procClass.getConstructor();
 

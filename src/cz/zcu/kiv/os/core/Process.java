@@ -27,6 +27,9 @@ public abstract class Process extends Observable implements Observer {
 
 		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,
 	}
+
+	public static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
+
 	protected Thread workingThread;
 	protected int pid;
 	protected List<Process> children;
