@@ -11,23 +11,22 @@ package cz.zcu.kiv.os.core;
 public class ProcessGroup {
 
 	private boolean shouldStop = false;
+	private ThreadGroup group;
 
+	public ProcessGroup(ThreadGroup group) {
+		this.group = group;
+	}
+	
 	public boolean getShouldStop() {
 		return this.shouldStop;
 	}
 	
-	private ThreadGroup group;
-
-	public void stop() {
-		this.shouldStop = true;
-		this.group.interrupt();
-	}
-
 	public ThreadGroup getGroup() {
 		return group;
 	}
 
-	public ProcessGroup(ThreadGroup group) {
-		this.group = group;
+	public void stop() {
+		this.shouldStop = true;
+		this.group.interrupt();
 	}
 }

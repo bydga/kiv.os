@@ -42,9 +42,9 @@ public abstract class Process extends Observable implements Observer {
 		return this.properties.parent;
 	}
 
-	protected int getExitCode() {
+	protected int getExitCode() throws InterruptedException {
 		if (this.processState == ProcessState.PREPARED || this.processState == ProcessState.RUNNING) {
-			throw new RuntimeException("Process is still running, can't read exitCode");
+			this.workingThread.join();
 		}
 		return this.exitCode;
 	}
@@ -82,10 +82,6 @@ public abstract class Process extends Observable implements Observer {
 
 	public boolean isRunning() {
 		return this.workingThread == null ? false : this.workingThread.isAlive();
-	}
-
-	public void join() throws InterruptedException {
-		this.workingThread.join();
 	}
 
 	public IInputDevice getInputStream() {
@@ -144,7 +140,8 @@ public abstract class Process extends Observable implements Observer {
 					Process.this.getErrorStream().EOF();//im not gonna write into this anymore
 					Process.this.setChanged();
 					Process.this.notifyObservers();
-					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception " + ex.getMessage());
+					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception:\n ");
+					ex.printStackTrace();
 				}
 			}
 		}, "process-" + this.getClass().getName());

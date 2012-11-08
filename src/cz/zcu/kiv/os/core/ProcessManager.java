@@ -79,14 +79,14 @@ public class ProcessManager implements Observer {
 	 * @param p
 	 */
 	private void addStreamsToProcessTable(Process p) {
-		IDevice dev = p.getInputStream();
+		IDevice dev = p.getOutputStream();
 		//std stream and inputpipeend are not owned by the process
 		if (!dev.isStdStream() && !(dev instanceof PipeDevice)) {
 			this.addStreamToProcess(p.getPid(), dev);
 		}
 
 		//stdStreams arent owned by the process
-		dev = p.getOutputStream();
+		dev = p.getInputStream();
 		if (!dev.isStdStream()) {
 			this.addStreamToProcess(p.getPid(), dev);
 		}
@@ -97,15 +97,22 @@ public class ProcessManager implements Observer {
 			this.addStreamToProcess(p.getPid(), dev);
 		}
 	}
-	
-	public synchronized int readProcessExitCode(Process p)
-	{
-		if (!this.processTable.containsKey(p.getPid())) {
-			throw new RuntimeException("Process with pid " + p.getPid() + " doesn't exist in the process table." );
+
+	public int readProcessExitCode(Process p) {
+		try {
+			if (!this.processTable.containsKey(p.getPid())) {
+				throw new RuntimeException("Process with pid " + p.getPid() + " doesn't exist in the process table.");
+			}
+
+			int res = p.getExitCode();
+			this.cleanUpProcess(p);
+			return res;
+		} catch (InterruptedException ex) {
+			Logger.getLogger(ProcessManager.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		
-		this.processTable.remove(p.getPid());
-		return p.getExitCode();
+
+
+		return -1;
 	}
 
 	public synchronized void addStreamToProcess(int pid, IDevice stream) {
@@ -118,15 +125,16 @@ public class ProcessManager implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		Utilities.log("process manager got from " + o + ": ");
+		Utilities.log("process manager got update from " + o.getClass().getSimpleName());
 		Process finished = (Process) o;
-		this.cleanUpProcess(finished);
 		// TODO: handle change of Observable object (stopped process etc)
 		this.foregroundProcess = finished.getParent();
 	}
 
 	private void cleanUpProcess(Process p) {
 		closeStreams(p.getPid());
+		this.processTable.remove(p.getPid());
+
 	}
 
 	private void closeStreams(int pid) {

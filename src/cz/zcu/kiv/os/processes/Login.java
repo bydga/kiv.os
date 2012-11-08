@@ -34,7 +34,7 @@ public class Login extends cz.zcu.kiv.os.core.Process {
 		}
 		ProcessProperties props = new ProcessProperties(this, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), path, new ProcessGroup(new ThreadGroup("shellgroup")));
 		cz.zcu.kiv.os.core.Process shell = Core.getInstance().getServices().createProcess("shell", props);
-		shell.join();
+		Core.getInstance().getServices().readProcessExitCode(shell);
 
 	}
 }

@@ -126,7 +126,8 @@ public class Core {
 
 		@Override
 		public int readProcessExitCode(Process p) {
-			return Core.this.processManager.readProcessExitCode(p);
+			int exit = Core.this.processManager.readProcessExitCode(p);
+			return exit;
 		}
 
 		@Override

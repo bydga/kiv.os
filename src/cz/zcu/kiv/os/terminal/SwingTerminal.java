@@ -144,6 +144,7 @@ public class SwingTerminal extends InOutDevice {
 		promptLabel = new JLabel("uzivatel  /path/to/dest/ $");
 		bottomPanel.add(promptLabel, BorderLayout.WEST);
 		inputField = new JTextField();
+		inputField.setFont(new Font("Monospaced",Font.PLAIN,15));
 		inputField.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

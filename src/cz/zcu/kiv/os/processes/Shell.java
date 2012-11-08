@@ -158,7 +158,6 @@ public class Shell extends Process {
 					List<Process> processes = this.createProcess(result);
 					if (!result.isBackgroundTask) {
 						for (Process p : processes) {
-							p.join();
 							int ret = Core.getInstance().getServices().readProcessExitCode(p);
 							Utilities.log("exit code: " + ret);
 						}
