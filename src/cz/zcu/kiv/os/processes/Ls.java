@@ -11,6 +11,9 @@ import java.util.*;
  */
 public class Ls extends cz.zcu.kiv.os.core.Process {
 
+	private static final String IS_DIR = "d";
+	private static final String NOT_DIR = "-";
+
 	private List<String> paths;
 	private boolean showHidden = false;
 	private boolean showImpliedHidden = false;
@@ -83,7 +86,13 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 			}
 
 			DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
-			for(File f : files) { //create outpu-
+			for(File f : files) { //create output
+				if(f.isDirectory()) {
+					builder.append(IS_DIR);
+				} else {
+					builder.append(NOT_DIR);
+				}
+				builder.append(" ");
 				builder.append(String.format("%" + maxLength + "s", Long.toString(f.length())));
 				builder.append(" ");
 				builder.append(format.format(new Date(f.lastModified())));
