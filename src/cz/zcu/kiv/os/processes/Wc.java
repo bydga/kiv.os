@@ -4,44 +4,254 @@
  */
 package cz.zcu.kiv.os.processes;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.Core;
+import cz.zcu.kiv.os.core.ProcessArgs;
+import cz.zcu.kiv.os.core.ProcessDefinedOptions;
+import cz.zcu.kiv.os.core.ProcessOption;
+import cz.zcu.kiv.os.core.device.IInputDevice;
+import java.io.FileNotFoundException;
 
 /**
  *
- * @author bydga
+ * @author Jiri Zikmund
  */
 public class Wc extends cz.zcu.kiv.os.core.Process {
 	
-	private boolean includeNumbers = false;
-	private String path;
+	private boolean optionChars = false;
+	private boolean optionLines = false;
+	private boolean optionMaxLineLength = false;
+	private boolean optionWords = false;
+
+	private int countChars = 0;
+	private int countLines = 0;
+	private int countMaxLineLength = 0;
+	private int countWords = 0;
+	
+	private int totalCountChars = 0;
+	private int totalCountLines = 0;
+	private int totalCountMaxLineLength = 0;
+	private int totalCountWords = 0;
+	
+	private final String helpText =
+		"Usage: wc [OPTION]... [FILE]..."+
+		"Print newline, word, and byte counts for each FILE, and a total line if"+
+		"more than one FILE is specified.  With no FILE, or when FILE is -,"+
+		"read standard input."+
+		"  -m, --chars            print the character counts"+
+		"  -l, --lines            print the newline counts"+
+		"  -L, --max-line-length  print the length of the longest line"+
+		"  -w, --words            print the word counts"+
+		"      --help             display this help and exit";
 	
 	@Override
 	public void run(String[] args) throws Exception {
-		List<String> argList = Arrays.asList(args);
+			
+		// set options
+		ProcessDefinedOptions definedOptions = new ProcessDefinedOptions();
+		definedOptions.addOption("-m", 0);
+		definedOptions.addOption("--chars", 0);
+		definedOptions.addOption("-l", 0);
+		definedOptions.addOption("--lines", 0);
+		definedOptions.addOption("-L", 0);
+		definedOptions.addOption("--max-line-length", 0);
+		definedOptions.addOption("-w", 0);
+		definedOptions.addOption("--words", 0);
+		definedOptions.addOption("--help", 0);
+		ProcessArgs processArgs = new ProcessArgs(args, definedOptions, "-");
 		
-		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("-h")) {
-				this.includeNumbers = true;
-				i++;
-				if (i < args.length) {
-					this.path = args[i];
-				} else {
-					this.getErrorStream().writeLine("chybi dalsi param za -h");
-				}
-				continue;
+		//Utilities.echoArgs(processArgs, this.getOutputStream());
+		ProcessOption[] options = processArgs.getAllOptions();
+		// apply options
+		for (int i = 0; i < options.length; i++) {
+			if(options[i].notRecognized()) {
+				StringBuilder bf = new StringBuilder();
+				bf.append("wc: invalid option ");
+				bf.append(options[i].getOptionName());
+				bf.append("\n");
+				bf.append("Try 'wc --help' for more information.");
+				this.getOutputStream().writeLine(bf.toString());
+				return; //exit
+			}
+			else if(options[i].getOptionName().equals("--help")) {
+				this.getOutputStream().writeLine(this.helpText);
+				return; //exit
+			}
+			else if(options[i].getOptionName().equals("-m") || options[i].getOptionName().equals("--chars")) {
+				this.optionChars = true;
+			}
+			else if(options[i].getOptionName().equals("-l") || options[i].getOptionName().equals("--lines")) {
+				this.optionLines = true;
+			}
+			else if(options[i].getOptionName().equals("-L") || options[i].getOptionName().equals("--max-line-length")) {
+				this.optionMaxLineLength = true;
+			}
+			else if(options[i].getOptionName().equals("-w") || options[i].getOptionName().equals("--words")) {
+				this.optionWords = true;
 			}
 		}
 		
-		int i = 0;
-		String line = null;
-		while ((line = this.getInputStream().readLine()) != null) {
-			i++;
+		// count all files
+		String[] names = processArgs.getAllNames();
+		
+		// read from standard input or pipe
+		if(names.length == 0) {
+			this.readPipe();
+			this.echoCounts();
+			return;
 		}
 		
-		this.getOutputStream().writeLine("Total of " + i + " lines.");
+		for (int i = 0; i < names.length; i++) {
+			
+			if( names[i].equals("-") ) {
+				this.readStandardInput();
+				this.echoCounts(names[i]);
+				this.resetCounts();
+			}
+			else {
+				try {
+					IInputDevice file = Core.getInstance().getServices().openFileForRead(this, names[i]);
+					this.readFile(file);
+					this.echoCounts(names[i]);
+					this.resetCounts();
+				} catch (FileNotFoundException e) {
+					this.getOutputStream().writeLine("cat: " + names[i] + ": No such file");
+				}
+			}
+		}
 		
+		if(names.length>1) {
+			this.echoTotalCounts();
+		}
 	}
+	
+	private void readFile(IInputDevice input) throws Exception {
+		
+		String line;
+		while ((line = input.readLine()) != null) {
+			this.getCountsFromLine(line);
+		}
+		input.detach();
+	}
+	
+	private void readStandardInput() throws Exception {
+		
+		String line = this.getInputStream().readLine();
+		// TODO: compare with null, not with ""
+		while(!line.equals("")) {
+			this.getOutputStream().writeLine(line);
+			this.getCountsFromLine(line);
+			line = this.getInputStream().readLine();
+		}
+	}
+	
+	private void readPipe() throws Exception {
+		
+		String line = this.getInputStream().readLine();
+		while(line != null) {
+			this.getCountsFromLine(line);
+			line = this.getInputStream().readLine();
+		}
+	}
+	
+	private void getCountsFromLine(String line) {
+		
+		int lineLength = line.length();
+		int words = this.getCountWords(line);
+		
+		this.countLines++;
+		this.totalCountLines++;
+		this.countChars += lineLength + 1;
+		this.totalCountChars += lineLength + 1;
+		this.countWords += words;
+		this.totalCountWords += words;
+		
+		if(lineLength > this.countMaxLineLength) {
+			this.countMaxLineLength = lineLength;
+		}
+		
+		if(line.length() > this.totalCountMaxLineLength) {
+			this.totalCountMaxLineLength = lineLength;
+		}
+	}
+	
+	private void echoCounts(int countLines, int countWords, int countChars, int countMaxLineLength, String inputName) throws Exception {
+		
+		StringBuilder bf = new StringBuilder();
+		int padding = 7;
+		// default without options
+		if(!this.optionChars && !this.optionLines && !this.optionMaxLineLength && !this.optionWords) {
+			bf.append(this.padLeft(Integer.toString(countLines),padding));
+			bf.append(this.padLeft(Integer.toString(countWords),padding));
+			bf.append(this.padLeft(Integer.toString(countChars),padding));
+		}
+		// with options
+		else {
+			if( this.optionLines == true ) {
+				bf.append(this.padLeft(Integer.toString(countLines),padding));
+			}
+			if( this.optionWords == true ) {
+				bf.append(this.padLeft(Integer.toString(countWords),padding));
+			}
+			if( this.optionChars == true ) {
+				bf.append(this.padLeft(Integer.toString(countChars),padding));
+			}
+			if( this.optionMaxLineLength == true ) {
+				bf.append(this.padLeft(Integer.toString(countMaxLineLength),padding));
+			}
+		}
+		// add name of file
+		if(inputName != null) {
+			bf.append("    ");
+			bf.append(inputName);
+		}
+		this.getOutputStream().writeLine(bf.toString());
+	}
+	
+	private void echoCounts() throws Exception {
+		this.echoCounts(null);
+	}
+	
+	private void echoCounts(String inputName) throws Exception {
+		this.echoCounts(this.countLines, this.countWords, this.countChars, this.countMaxLineLength, inputName);
+	}
+	
+	private void echoTotalCounts() throws Exception {
+		this.echoCounts(this.totalCountLines, this.totalCountWords, this.totalCountChars, this.totalCountMaxLineLength, "total");
+	}
+	
+	private void resetCounts() {
+		this.countChars = 0;
+		this.countLines = 0;
+		this.countMaxLineLength = 0;
+		this.countWords = 0;
+	}
+	
+	private int getCountWords(String s){
+
+		int counter = 0;
+		boolean word = false;
+		int endOfLine = s.length() - 1;
+
+		for (int i = 0; i < s.length(); i++) {
+			if (Character.isLetter(s.charAt(i)) == true && i != endOfLine) {
+				word = true;
+			} else if (Character.isLetter(s.charAt(i)) == false && word == true) {
+				counter++;
+				word = false;
+			} else if (Character.isLetter(s.charAt(i)) && i == endOfLine) {
+				counter++;
+			}
+		}
+		return counter;
+	}
+	
+	private String padRight(String s, int n) {
+		return String.format("%1$-" + n + "s", s);  
+	}
+	
+	private String padLeft(String s, int n) {
+		return String.format("%1$" + n + "s", s);  
+	}
+	
 }

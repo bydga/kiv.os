@@ -60,17 +60,17 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 				bf.append("\n");
 				bf.append("Try 'cat --help' for more information.");
 				this.getOutputStream().writeLine(bf.toString());
-				return;
+				return; // exit
+			}
+			else if(options[i].getOptionName().equals("--help")) {
+				this.getOutputStream().writeLine(this.helpText);
+				return; //exit
 			}
 			else if(options[i].getOptionName().equals("-n") || options[i].getOptionName().equals("--number")) {
 				this.optionLineNumber = true;
 			}
 			else if(options[i].getOptionName().equals("-E") || options[i].getOptionName().equals("--show-ends")) {
 				this.optionShowEnds = true;
-			}
-			else if(options[i].getOptionName().equals("--help")) {
-				this.getOutputStream().writeLine(this.helpText);
-				return; //exit
 			}
 		}
 		
@@ -80,7 +80,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		for (int i = 0; i < names.length; i++) {
 			
 			if( names[i].equals("-") ) {
-				String userInput = this.readUserInput();
+				String userInput = this.readStandardInput();
 				if(userInput != null) {
 					this.getOutputStream().writeLine(userInput);
 				}
@@ -109,7 +109,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 	}
 	
 	
-	private String readUserInput() throws Exception {
+	private String readStandardInput() throws Exception {
 		
 		StringBuilder bf = new StringBuilder();
 		String newLineChar = "";
