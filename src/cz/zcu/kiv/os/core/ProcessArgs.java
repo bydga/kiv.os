@@ -21,7 +21,15 @@ public final class ProcessArgs {
 	private String[] names;
 	private Map<String,ProcessOption> options;
 	
+	public ProcessArgs(String[] args) {
+		this(args, new ProcessDefinedOptions(), null);
+	}
+	
 	public ProcessArgs(String[] args, ProcessDefinedOptions definedOptions) {
+		this(args, definedOptions, null);
+	}
+	
+	public ProcessArgs(String[] args, ProcessDefinedOptions definedOptions, String optionPrefix) {
 		
 		this.args = args;
 		this.processName = args[0];
@@ -34,6 +42,7 @@ public final class ProcessArgs {
 			arg = args[i];
 			boolean defined = definedOptions.isDefined(arg);
 			
+			// defined option
 			if(defined == true) {
 				int optionArgsCount = definedOptions.getOptionArgsCount(arg);
 				
@@ -59,16 +68,20 @@ public final class ProcessArgs {
 				this.options.put(arg, option);
 			}
 			else {
-				namesList.add(arg);
+				// undefined option
+				if(optionPrefix != null && arg.startsWith(optionPrefix) && arg.length()>optionPrefix.length()) {
+					ProcessOption option = new ProcessOption(arg, new String[0], defined, 0);
+					this.options.put(arg, option);
+				}
+				// name
+				else {
+					namesList.add(arg);
+				}
 			}
 		}
 		
 		this.names = new String[ namesList.size() ];
 		namesList.toArray( this.names );
-	}
-	
-	public ProcessArgs(String[] args) {
-		this(args, new ProcessDefinedOptions());
 	}
 	
 	public String getProcessName() {

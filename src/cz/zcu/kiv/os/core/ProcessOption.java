@@ -38,6 +38,10 @@ public final class ProcessOption {
 		return this.defined;
 	}
 	
+	public boolean notRecognized() {
+		return !this.defined;
+	}
+	
 	public boolean isArgMissing() {
 		return (this.missingArgPos > 0) ? true : false;
 	}
