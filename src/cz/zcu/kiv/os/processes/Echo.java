@@ -12,47 +12,26 @@ import cz.zcu.kiv.os.core.ProcessOption;
 public class Echo extends cz.zcu.kiv.os.core.Process {
 
 	private final String helpText =
-				"------------------------------\n"+
-				"This is help for ECHO process \n"+
-				"This help is not completed yet\n"+
-				"This is help for ECHO process \n"+
-				"This help is not completed yet\n"+
-				"This is help for ECHO process \n"+
-				"This help is not completed yet\n"+
-				"------------------------------\n";
+				"Usage: echo [OPTION]... [STRINGS]...\n"+
+				" Echo the STRING(s) to standard output.\n"+
+				"      --help               display this help and exit";
 	
 	@Override
 	protected void run(String[] args) throws Exception {
-
-		ProcessDefinedOptions definedOptions = new ProcessDefinedOptions();
-		definedOptions.addOption("-e", 0);
-		ProcessArgs processArgs = new ProcessArgs(args, definedOptions);	
 		
-		Utilities.echoArgs(processArgs, this.stdOut);
-		
-		ProcessOption[] options = processArgs.getAllOptions();
-		
-		for (int i = 0; i < options.length; i++) {
-			
-			if(options[i].getOptionName().equals("--help")) {
-				this.stdOut.writeLine(this.helpText);
-				return;
-			}
-			else if(options[i].getOptionName().equals("-n")) {
-			
-			}
+		if(args[1].equals("--help") && args.length < 3) {
+			this.getOutputStream().writeLine(this.helpText);
+			return;
 		}
 		
-		String[] names = processArgs.getAllNames();
-		
-		String echoText = "";
-		for (int i = 0; i < names.length; i++) {
-			echoText += names[i];
+		StringBuilder bf = new StringBuilder();
+		String space = "";
+		for (int i = 1; i < args.length; i++) {
+			bf.append(space);
+			bf.append(args[i]);
+			space = " ";
 		}
-		this.stdOut.writeLine(echoText);
+		this.getOutputStream().writeLine(bf.toString());
 	}
-	
-	
-	
 	
 }
