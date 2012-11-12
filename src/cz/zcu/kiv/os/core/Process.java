@@ -27,9 +27,7 @@ public abstract class Process extends Observable implements Observer {
 
 		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,
 	}
-
 	public static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
-
 	protected Thread workingThread;
 	protected int pid;
 	protected List<Process> children;
@@ -83,10 +81,6 @@ public abstract class Process extends Observable implements Observer {
 		this.properties.errorStream = stream;
 	}
 
-	public boolean isRunning() {
-		return this.workingThread == null ? false : this.workingThread.isAlive();
-	}
-
 	public IInputDevice getInputStream() {
 		return this.properties.inputStream;
 	}
@@ -124,27 +118,19 @@ public abstract class Process extends Observable implements Observer {
 					Process.this.processState = ProcessState.RUNNING;
 					Utilities.log("Process " + Process.this.getClass().getName() + " starting");
 					Process.this.run(Process.this.properties.args);
+					Process.this.processState = Process.ProcessState.FINISHED_OK;
+					Utilities.log("Process " + Process.this.getClass().getName() + " finished successfully");
 
-					Process.this.getOutputStream().EOF();//im not gonna write into this anymore
-					Process.this.getErrorStream().EOF();//im not gonna write into this anymore
-
-					if (Process.this.processState != Process.ProcessState.FINISHED_KILLED) {
-						Process.this.processState = Process.ProcessState.FINISHED_OK;
-					}
-					Process.this.setChanged();
-					Process.this.notifyObservers();
-					synchronized (Process.this) {
-						Process.this.notifyAll();
-					}
-					Utilities.log("Process " + Process.this.getClass().getName() + " finished");
-
+				} catch (InterruptedException ex) {
+					Process.this.processState = Process.ProcessState.FINISHED_KILLED;
+					Utilities.log("Process " + Process.this.getClass().getSimpleName() + " stopped manually (got InterruptedException).");
 				} catch (Exception ex) {
+					Utilities.log("Process " + Process.this.getClass().getSimpleName() + " exited with unhandled exception: " + ex.getClass().getSimpleName() + ", message: " + ex.getMessage() + "\n ");
+				} finally {
 					Process.this.getOutputStream().EOF();//im not gonna write into this anymore
 					Process.this.getErrorStream().EOF();//im not gonna write into this anymore
 					Process.this.setChanged();
 					Process.this.notifyObservers();
-					Utilities.log("Process " + Process.this.getClass().getName() + " exited with exception:\n ");
-					ex.printStackTrace();
 				}
 			}
 		}, "process-" + this.getClass().getName());
@@ -158,8 +144,6 @@ public abstract class Process extends Observable implements Observer {
 
 	protected final void stop() {
 		this.properties.processGroup.stop();
-		this.processState = ProcessState.FINISHED_KILLED;
-		Utilities.log("Process " + this.getClass().getSimpleName() + " killed manually");
 	}
 
 	protected final void start() {

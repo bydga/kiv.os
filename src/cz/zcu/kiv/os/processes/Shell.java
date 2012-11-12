@@ -17,6 +17,7 @@ import cz.zcu.kiv.os.terminal.ParseException;
 import cz.zcu.kiv.os.terminal.ParseResult;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,7 +27,7 @@ import java.util.logging.Logger;
  * @author bydga
  */
 public class Shell extends Process {
-	
+
 	private static final String EXIT_COMMAND = "exit";
 	private static final String CWD_COMMAND = "cd";
 	private List<String> history;
@@ -44,14 +45,14 @@ public class Shell extends Process {
 	 */
 	private IOutputDevice createOutput(String path, boolean append, IOutputDevice nullValue) {
 		if (path != null) {
-			
+
 			try {
 				return Core.getInstance().getServices().openFileForWrite(this, path, append);
 			} catch (IOException ex) {
 				Utilities.log("Error when moving output to " + path);
 			}
 		}
-		
+
 		return nullValue;
 	}
 
@@ -65,14 +66,14 @@ public class Shell extends Process {
 	 */
 	private IInputDevice createInput(String path, IInputDevice nullValue) {
 		if (path != null) {
-			
+
 			try {
 				return Core.getInstance().getServices().openFileForRead(this, path);
 			} catch (IOException ex) {
 				Utilities.log("Error when moving stdout to " + path);
 			}
 		}
-		
+
 		return nullValue;
 	}
 
@@ -85,7 +86,7 @@ public class Shell extends Process {
 	 * @throws NoSuchProcessException
 	 */
 	private List<Process> createProcess(ParseResult parseResult) throws NoSuchProcessException {
-		
+
 		ProcessGroup group = new ProcessGroup(new ThreadGroup("group_" + parseResult.args[0]));
 		//only for debugging reasons
 		List<Process> list = new ArrayList<Process>();
@@ -101,13 +102,13 @@ public class Shell extends Process {
 			out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, pipe);
 			err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 			in = this.createInput(parseResult.stdIn, in);
-			
+
 			ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
 			Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
 			list.add(p);
 			//pipe was used as an output device here, remember it for next iteration, where it will stand as an input
 			in = pipe;
-			
+
 			parseResult = parseResult.pipeline;
 		}
 
@@ -115,14 +116,14 @@ public class Shell extends Process {
 		in = this.createInput(parseResult.stdIn, in);
 		out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, this.getOutputStream());
 		err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
-		
+
 		ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
 		Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
-		
+
 		list.add(p);
 		return list;
 	}
-	
+
 	@Override
 	protected void run(String[] args) throws Exception {
 		InputParser parser = new InputParser();
@@ -133,11 +134,21 @@ public class Shell extends Process {
 			Utilities.log("reading, cwd: " + this.getWorkingDir());
 			String command = this.getInputStream().readLine();
 			if (command != null && !command.isEmpty()) {
+
+				//check for finished children
+
+				for (Process p : new ArrayList<Process>(this.children)) {
+					if (p.getProcessState() == Process.ProcessState.FINISHED_KILLED || p.getProcessState() == Process.ProcessState.FINISHED_OK) {
+						int res = Core.getInstance().getServices().readProcessExitCode(p);
+						this.getOutputStream().writeLine("Process " + p.getPid() + " " + p.getClass().getSimpleName() + " exited: " + res);
+					}
+				}
+
 				this.getOutputStream().writeLine(command);
-				
+
 				this.history.add(command);
-				this.historyIndex++;
-				
+				this.historyIndex = this.history.size();
+
 				try {
 					//process command
 					ParseResult result = parser.parse(command);
@@ -149,12 +160,12 @@ public class Shell extends Process {
 						if (result.args.length > 1) {
 							this.setWorkingDir(result.args[1]);
 						}
-						
+
 						continue;
 					} else if (result.args[0].equals("")) {
 						continue;
 					}
-					
+
 					List<Process> processes = this.createProcess(result);
 					if (!result.isBackgroundTask) {
 						for (Process p : processes) {
@@ -162,7 +173,7 @@ public class Shell extends Process {
 							Utilities.log("exit code: " + ret);
 						}
 					} else {
-						this.getOutputStream().writeLine("[1] " + processes.get(processes.size()-1).getPid());
+						this.getOutputStream().writeLine("[1] " + processes.get(processes.size() - 1).getPid());
 					}
 				} catch (ParseException e) {
 					this.getOutputStream().writeLine("Invalid input: " + e.getMessage());
@@ -174,7 +185,7 @@ public class Shell extends Process {
 			}
 		}
 	}
-	
+
 	@Override
 	protected void handleSignalSIGTERM() {
 		try {
@@ -183,28 +194,26 @@ public class Shell extends Process {
 			Logger.getLogger(Shell.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-	
+
 	@Override
 	protected void handleKeyboardEvent(KeyboardEvent e) {
-		
+
 		if (e == KeyboardEvent.ARROW_DOWN) {
-			if (this.historyIndex < this.history.size() - 1) {
-				this.historyIndex++;
-				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
-			} else {
+			this.historyIndex++;
+			if (this.historyIndex >= this.history.size()) {
 				Core.getInstance().getServices().setTerminalCommand(this.curentCommand);
-				
+				this.historyIndex = this.history.size();
+			} else {
+				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
 			}
 		} else if (e == KeyboardEvent.ARROW_UP) {
-			
 			if (this.historyIndex == this.history.size()) {
 				this.curentCommand = Core.getInstance().getServices().getTerminalCommand();
 			}
-			
+
 			if (this.historyIndex > 0) {
 				this.historyIndex--;
 				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
-				
 			}
 		}
 	}

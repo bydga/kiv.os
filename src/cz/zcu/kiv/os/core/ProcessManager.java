@@ -104,12 +104,15 @@ public class ProcessManager implements Observer {
 			}
 
 			int res = p.getExitCode();
-			this.cleanUpProcess(p);
+			if (p.getParent() != null) {
+				p.getParent().removeChildren(p);
+			}
 			return res;
 		} catch (InterruptedException ex) {
 			Logger.getLogger(ProcessManager.class.getName()).log(Level.SEVERE, null, ex);
+		} finally {
+			this.cleanUpProcess(p);
 		}
-
 
 		return -1;
 	}

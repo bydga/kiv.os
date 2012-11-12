@@ -55,4 +55,6 @@ public interface ICoreServices {
 	public List<ProcessInfo> getProcessTableData();
 	
 	public int readProcessExitCode(Process p);
+	
+	public void killProcess(int pid);
 }

@@ -15,17 +15,12 @@ public class Echopid extends cz.zcu.kiv.os.core.Process {
 
 	@Override
 	protected void run(String[] args) throws Exception {
-		try {
-			Thread.sleep(1000);
-			this.getOutputStream().writeLine("start");
-			for (int i = 0; i < 1000000; i++) {
-				this.getOutputStream().writeLine(("PID " + (this.pid)) + ", iteration " + i);
-				Thread.sleep(20);
-			}
-			this.getOutputStream().writeLine("finish");
-		} catch (Exception ex) {
-			Logger.getLogger(Echo.class.getName()).log(Level.SEVERE, null, ex);
+		this.getOutputStream().writeLine("start");
+		for (int i = 0; i < 2000; i++) {
+			this.getOutputStream().writeLine(("PID " + (this.pid)) + ", iteration " + i);
+			Thread.sleep(10);
 		}
+		this.getOutputStream().writeLine("finish");
+
 	}
-	
 }

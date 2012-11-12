@@ -107,20 +107,19 @@ public class Core {
 			return Core.this.terminal.getText();
 		}
 
-                @Override
-                public AbstractIODevice createPipe() {
-                    return new PipeDevice(false);
-                }
+		@Override
+		public AbstractIODevice createPipe() {
+			return new PipeDevice(false);
+		}
 
 		@Override
 		public List<ProcessInfo> getProcessTableData() {
 			List<ProcessInfo> output = new ArrayList<ProcessInfo>();
 			Map<Integer, ProcessTableRecord> processTable = Core.this.processManager.getProcessTable();
-			for (Map.Entry<Integer, ProcessTableRecord> entry : processTable.entrySet())
-			{
+			for (Map.Entry<Integer, ProcessTableRecord> entry : processTable.entrySet()) {
 				output.add(new ProcessInfo(entry.getValue()));
 			}
-			
+
 			return output;
 		}
 
@@ -134,5 +133,15 @@ public class Core {
 		public List<File> listFiles(Process caller, String dir) {
 			return Core.this.fileManager.listFiles(dir, caller.getWorkingDir());
 		}
+
+		@Override
+		public void killProcess(int pid) {
+			ProcessTableRecord record = processManager.getProcessTable().get(pid);
+			if (record != null) {
+				record.getProcess().stop();
+
+			}
+		}
+
 	}
 }

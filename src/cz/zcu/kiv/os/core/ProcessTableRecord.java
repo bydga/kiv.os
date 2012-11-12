@@ -28,10 +28,6 @@ public class ProcessTableRecord {
 		return this.openedStreams;
 	}
 
-	public boolean isRunning() {
-		return this.process.isRunning();
-	}
-
 	public Process getProcess() {
 		return this.process;
 	}
