@@ -17,17 +17,16 @@ import java.util.Observer;
  */
 public class SignalDispatcher extends Observable {
 
-	public void dispatchSystemSignal(Process receiver,Signals sig) {
+	public synchronized void dispatchSystemSignal(Process receiver,Signals sig) {
 		this.call(new Interrupt(receiver, sig));
 	}
 
-	public void dispatchKeyboardEvent(Process receiver, KeyboardEvent evt) {
+	public synchronized void dispatchKeyboardEvent(Process receiver, KeyboardEvent evt) {
 		this.call(new Interrupt(receiver, evt));
 	}
 	
 	
-	private void call(Interrupt interrupt)
-	{
+	private void call(Interrupt interrupt) {
 		this.setChanged();
 		this.notifyObservers(interrupt);
 	}

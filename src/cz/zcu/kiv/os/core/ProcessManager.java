@@ -36,7 +36,7 @@ public class ProcessManager implements Observer {
 		return this.foregroundProcess;
 	}
 
-	public synchronized Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
+	public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
 
 		do {
 			this.counter = (counter + 1 <= 0) ? 0 : counter + 1;
@@ -117,11 +117,11 @@ public class ProcessManager implements Observer {
 		return -1;
 	}
 
-	public synchronized void addStreamToProcess(int pid, IDevice stream) {
+	public void addStreamToProcess(int pid, IDevice stream) {
 		this.processTable.get(pid).getOpenedStreams().add(stream);
 	}
 
-	public synchronized void removeStreamFromProcess(int pid, IDevice stream) {
+	public void removeStreamFromProcess(int pid, IDevice stream) {
 		this.processTable.get(pid).getOpenedStreams().remove(stream);
 	}
 
