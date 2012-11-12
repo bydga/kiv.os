@@ -12,8 +12,6 @@ import java.util.logging.Logger;
 public class InputDevice extends AbstractDevice implements IInputDevice {
 
 	private BufferedReader reader;
-	
-	private InputStream is;
 
 	/**
 	 * Basic constructor
@@ -21,7 +19,6 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
 	 */
 	public InputDevice(InputStream inputStream, boolean stdStream) {
                 super(stdStream);
-		this.is = inputStream;
 		InputStreamReader isr = new InputStreamReader(inputStream);
 		reader = new BufferedReader(isr);
 	}

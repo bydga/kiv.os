@@ -7,7 +7,6 @@ package cz.zcu.kiv.os.core;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.Utilities;
-import cz.zcu.kiv.os.core.device.AbstractDevice;
 import cz.zcu.kiv.os.core.device.AbstractIODevice;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
@@ -33,7 +32,7 @@ public abstract class Process extends Observable implements Observer {
 	protected Thread workingThread;
 	protected int pid;
 	protected List<Process> children;
-	private ProcessProperties properties;
+	ProcessProperties properties;
 	protected ProcessState processState = ProcessState.PREPARED;
 	protected int exitCode = 0;
 
@@ -83,7 +82,19 @@ public abstract class Process extends Observable implements Observer {
 		this.properties.errorStream = stream;
 	}
 
-	public IInputDevice getInputStream() {
+	public synchronized IInputDevice getInputStream() {
+		while(!this.isForegroundProcess() && this.properties.inputStream.isStdStream()) { //only foreground process can read from stdin
+			try {
+				this.wait();
+			} catch (InterruptedException ex) {
+				Process.this.processState = Process.ProcessState.FINISHED_KILLED;
+				Utilities.log("Process " + Process.this.getClass().getSimpleName() + " stopped manually (got InterruptedException).");
+				Process.this.getOutputStream().EOF();//im not gonna write into this anymore
+				Process.this.getErrorStream().EOF();//im not gonna write into this anymore
+				Process.this.setChanged();
+				Process.this.notifyObservers();
+			}
+		}
 		return this.properties.inputStream;
 	}
 
@@ -150,6 +161,14 @@ public abstract class Process extends Observable implements Observer {
 
 	protected final void start() {
 		this.workingThread.start();
+	}
+
+	protected boolean isForegroundProcess() {
+		return !this.properties.isBackgroundProcess;
+	}
+
+	protected void setForegroundProcess(boolean value) {
+		this.properties.isBackgroundProcess = !value;
 	}
 
 	/**

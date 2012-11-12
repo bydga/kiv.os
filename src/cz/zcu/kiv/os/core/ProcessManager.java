@@ -78,20 +78,20 @@ public class ProcessManager implements Observer {
 	 * @param p
 	 */
 	private void addStreamsToProcessTable(Process p) {
-		IDevice dev = p.getOutputStream();
+		IDevice dev = p.properties.outputStream;
 		//std stream and inputpipeend are not owned by the process
 		if (!dev.isStdStream() && !(dev instanceof PipeDevice)) {
 			this.addStreamToProcess(p.getPid(), dev);
 		}
 
 		//stdStreams arent owned by the process
-		dev = p.getInputStream();
+		dev = p.properties.inputStream;
 		if (!dev.isStdStream()) {
 			this.addStreamToProcess(p.getPid(), dev);
 		}
 
 		//stdStreams arent owned by the process
-		dev = p.getErrorStream();
+		dev = p.properties.errorStream;
 		if (!dev.isStdStream()) {
 			this.addStreamToProcess(p.getPid(), dev);
 		}
@@ -130,7 +130,15 @@ public class ProcessManager implements Observer {
 		Utilities.log("process manager got update from " + o.getClass().getSimpleName());
 		Process finished = (Process) o;
 		// TODO: handle change of Observable object (stopped process etc)
-		this.foregroundProcess = finished.getParent();
+		switchForegroundProcess(finished.getParent());
+	}
+
+	private void switchForegroundProcess(Process newFg) {
+		synchronized(newFg) {
+			this.foregroundProcess = newFg;
+			newFg.setForegroundProcess(true);
+			newFg.notifyAll();
+		}
 	}
 
 	private void cleanUpProcess(Process p) {
