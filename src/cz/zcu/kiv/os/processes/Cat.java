@@ -23,7 +23,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 	private boolean optionShowEnds = false;
 	private int lineNumber = 0;
 	
-	private final String helpText =
+	private static final String helpText =
 				"Usage: cat [OPTION] [FILE]...\n"+
 				"Concatenate FILE(s), or standard input, to standard output.\n"+
 				"  -E, --show-ends          display $ at end of each line\n"+
@@ -115,8 +115,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		String newLineChar = "";
 		String line = this.getInputStream().readLine();
 		
-		// TODO: compare with null, not with ""
-		while(!line.equals("")) {
+		while(line != null) {
 			this.getOutputStream().writeLine(line);
 			line = this.editLineByOptions(line);
 			if(this.optionLineNumber == true) {
@@ -148,6 +147,10 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		}
 		
 		return line;
+	}
+
+	public static String getManualPage() {
+		return helpText;
 	}
 	
 }

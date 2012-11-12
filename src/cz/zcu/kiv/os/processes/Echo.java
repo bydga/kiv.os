@@ -11,7 +11,7 @@ import cz.zcu.kiv.os.core.ProcessOption;
  */
 public class Echo extends cz.zcu.kiv.os.core.Process {
 
-	private final String helpText =
+	private static final String helpText =
 				"Usage: echo [OPTION]... [STRINGS]...\n"+
 				" Echo the STRING(s) to standard output.\n"+
 				"      --help               display this help and exit";
@@ -19,7 +19,7 @@ public class Echo extends cz.zcu.kiv.os.core.Process {
 	@Override
 	protected void run(String[] args) throws Exception {
 		
-		if(args[1].equals("--help") && args.length < 3) {
+		if(args.length == 2 && args[1].equals("--help")) {
 			this.getOutputStream().writeLine(this.helpText);
 			return;
 		}
@@ -32,6 +32,10 @@ public class Echo extends cz.zcu.kiv.os.core.Process {
 			space = " ";
 		}
 		this.getOutputStream().writeLine(bf.toString());
+	}
+
+	public static String getManualPage() {
+		return helpText;
 	}
 	
 }

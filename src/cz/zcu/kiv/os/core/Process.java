@@ -7,6 +7,8 @@ package cz.zcu.kiv.os.core;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.device.AbstractDevice;
+import cz.zcu.kiv.os.core.device.AbstractIODevice;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
@@ -186,8 +188,12 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected void handleSignalSIGQUIT() {
-		this.getOutputStream().EOF();
-		this.getErrorStream().EOF();
+		if(this.getInputStream() instanceof AbstractIODevice) { //if input device writable
+			AbstractIODevice io = (AbstractIODevice) this.getInputStream();
+			if(io.isStdStream()) { //and if input device standard input
+				io.EOF(); //stop reading from this point
+			}
+		}
 	}
 
 	protected void handleKeyboardEvent(KeyboardEvent e) {
