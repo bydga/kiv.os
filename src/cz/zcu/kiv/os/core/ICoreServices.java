@@ -48,15 +48,21 @@ public interface ICoreServices {
 
 	public void dispatchSystemSignal(Signals sig);
 
+	public void dispatchSystemSignal(int pid, Signals sig);
+
 	public void dispatchKeyboardEvent(KeyboardEvent evt);
 
 	public AbstractIODevice createPipe();
-	
+
 	public List<ProcessInfo> getProcessTableData();
-	
-	public int readProcessExitCode(Process p);
-	
+
+	public int readProcessExitCode(Process p) throws InterruptedException;
+
 	public void killProcess(int pid);
-	
+
 	public void switchForegroundProcess(Process caller);
+
+	public void shutdown(Process caller);
+	
+	public List<Process> getAllProcessess();
 }

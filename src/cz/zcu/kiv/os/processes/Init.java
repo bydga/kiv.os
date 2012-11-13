@@ -12,6 +12,7 @@ import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.IOException;
+import java.util.List;
 
 /**
  *
@@ -32,11 +33,32 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 		SwingTerminal terminal = new SwingTerminal((IInputDevice) this.getOutputStream(), (IOutputDevice) this.getInputStream());
 		Core.getInstance().setTerminal(terminal);
 
-		while (true) {
-			
-			ProcessProperties props = new ProcessProperties(this, this.getUser(), null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("initgroup")));
-			Process login = Core.getInstance().getServices().createProcess("Login", props);
-			Core.getInstance().getServices().readProcessExitCode(login);
+		try {
+			while (true) {
+				this.checkForStop();
+				ProcessProperties props = new ProcessProperties(this, this.getUser(), null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("initgroup")));
+				Process login = Core.getInstance().getServices().createProcess("Login", props);
+				Core.getInstance().getServices().readProcessExitCode(login);
+			}
+
+		} catch (InterruptedException ex) {
+
+			this.getOutputStream().writeLine("Init joining all remaining processess");
+			List<Process> processess = Core.getInstance().getServices().getAllProcessess();
+			for (Process p : processess) {
+				if (p == this) {
+					continue;
+				}
+				
+				this.getOutputStream().writeLine("Joining for " + p.getClass().getSimpleName() + ", pid " + p.getPid());
+				int i = Core.getInstance().getServices().readProcessExitCode(p);
+				this.getOutputStream().writeLine("Joined.");
+
+			}
+
+			Utilities.log("Bye!");
+
+			terminal.closeFrame();
 		}
 	}
 }

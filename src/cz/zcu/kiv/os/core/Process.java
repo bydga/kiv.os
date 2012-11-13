@@ -26,7 +26,8 @@ public abstract class Process extends Observable implements Observer {
 
 	protected enum ProcessState {
 
-		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,}
+		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,
+	}
 	public static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
 	protected Thread workingThread;
 	protected int pid;
@@ -42,10 +43,13 @@ public abstract class Process extends Observable implements Observer {
 	public Process getParent() {
 		return this.properties.parent;
 	}
-	
-	public String getUser()
-	{
+
+	public String getUser() {
 		return this.properties.user;
+	}
+
+	public List<Process> getChildren() {
+		return this.children;
 	}
 
 	protected int getExitCode() throws InterruptedException {
@@ -88,7 +92,7 @@ public abstract class Process extends Observable implements Observer {
 
 	protected synchronized IInputDevice getInputStream() throws InterruptedException {
 		while (!this.isForegroundProcess() && this.properties.inputStream.isStdStream()) { //only foreground process can read from stdin
-				this.wait();
+			this.wait();
 		}
 		return this.properties.inputStream;
 	}
@@ -195,6 +199,9 @@ public abstract class Process extends Observable implements Observer {
 				this.handleSignalSIGPAUSE();
 				break;
 
+			case SIGKILL:
+				this.handleSignalSIGKILL();
+
 			default:
 
 				break;
@@ -205,11 +212,15 @@ public abstract class Process extends Observable implements Observer {
 		this.stop();
 	}
 
+	private void handleSignalSIGKILL() {
+		this.stop();
+	}
+
 	protected void handleSignalSIGQUIT() {
 		try {
-			if(this.getInputStream() instanceof AbstractIODevice) { //if input device writable
+			if (this.getInputStream() instanceof AbstractIODevice) { //if input device writable
 				AbstractIODevice io = (AbstractIODevice) this.getInputStream();
-				if(io.isStdStream()) { //stop reading from this point
+				if (io.isStdStream()) { //stop reading from this point
 					io.EOF(); //stop reading from this point
 				}
 			}

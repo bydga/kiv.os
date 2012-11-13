@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -98,6 +100,14 @@ public class Core {
 		}
 
 		@Override
+		public void dispatchSystemSignal(int pid, Signals sig) {
+			ProcessTableRecord record = Core.this.processManager.getProcessTable().get(pid);
+			if (record != null) {
+				Core.this.dispatcher.dispatchSystemSignal(record.getProcess(), sig);
+			}
+		}
+
+		@Override
 		public void dispatchKeyboardEvent(KeyboardEvent evt) {
 			Process p = Core.this.processManager.getForegroundProcess();
 			Core.this.dispatcher.dispatchKeyboardEvent(p, evt);
@@ -105,7 +115,7 @@ public class Core {
 
 		@Override
 		public String getTerminalCommand() {
-			return Core.this.terminal.getText();
+			return Core.this.terminal.getLastLine();
 		}
 
 		@Override
@@ -125,7 +135,7 @@ public class Core {
 		}
 
 		@Override
-		public int readProcessExitCode(Process p) {
+		public int readProcessExitCode(Process p) throws InterruptedException {
 			int exit = Core.this.processManager.readProcessExitCode(p);
 			return exit;
 		}
@@ -147,16 +157,34 @@ public class Core {
 		@Override
 		public void switchForegroundProcess(Process caller) {
 			if (caller.getParent() != null) {
-			  Core.this.processManager.switchForegroundProcess(caller.getParent());
-			  Utilities.log("Switched fg process");
-			}
-			else
-			{
+//			  Core.this.processManager.switchForegroundProcess(caller.getParent());
+				Utilities.log("Switched fg process");
+			} else {
 				Utilities.log("null parent when switching process");
 			}
 		}
-		
-		
 
+		@Override
+		public void shutdown(Process caller) {
+			Utilities.log("System received shutdown request.");
+			Utilities.log("Terminating all processess");
+			List<ProcessInfo> info = Core.this.getServices().getProcessTableData();
+			for (ProcessInfo i : info) {
+				if (i.pid == caller.getPid()) {
+					continue;
+				}
+				Core.getInstance().getServices().dispatchSystemSignal(i.pid, Signals.SIGKILL);
+			}
+			Utilities.log("Signals sent.");
+		}
+
+		@Override
+		public List<Process> getAllProcessess() {
+			List<Process> output = new ArrayList<Process>();
+			for (ProcessTableRecord rec : Core.this.processManager.getProcessTable().values()) {
+				output.add(rec.getProcess());
+			}
+			return output;
+		}
 	}
 }

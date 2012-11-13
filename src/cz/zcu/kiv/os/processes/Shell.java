@@ -142,10 +142,6 @@ public class Shell extends Process {
 				}
 			}
 			if (command != null && !command.isEmpty()) {
-
-
-
-
 				this.history.add(command);
 				this.historyIndex = this.history.size();
 
@@ -170,7 +166,6 @@ public class Shell extends Process {
 					if (!result.isBackgroundTask) {
 						for (Process p : processes) {
 							int ret = Core.getInstance().getServices().readProcessExitCode(p);
-							Utilities.log("exit code: " + ret);
 						}
 					} else {
 						this.getOutputStream().writeLine("[1] " + processes.get(processes.size() - 1).getPid());

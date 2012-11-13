@@ -16,9 +16,7 @@ import java.util.logging.Logger;
 public class ProcessManager implements Observer {
 
 	private final Map<Integer, ProcessTableRecord> processTable;
-	
 	private int lastPID;
-
 	private final Object foregroundProcessLock = new Object();
 	private Process foregroundProcess = null;
 
@@ -32,19 +30,19 @@ public class ProcessManager implements Observer {
 	}
 
 	public Process getForegroundProcess() {
-		synchronized(foregroundProcessLock) {
+		synchronized (foregroundProcessLock) {
 			return this.foregroundProcess;
 		}
 	}
 
 	public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
-		synchronized(this.processTable) {
+		synchronized (this.processTable) {
 			int pid;
 			do {
 				this.lastPID = (lastPID + 1 <= 0) ? 0 : lastPID + 1;
 				pid = lastPID;
 			} while (this.processTable.containsKey(this.lastPID));
-		
+
 
 			try {
 				//class name begins with Capital letter
@@ -104,60 +102,58 @@ public class ProcessManager implements Observer {
 		}
 	}
 
-	public int readProcessExitCode(Process p) {
+	public int readProcessExitCode(Process p) throws InterruptedException {
 		try {
-			synchronized(this.processTable) {
-				if (!this.processTable.containsKey(p.getPid())) {
-					throw new RuntimeException("Process with pid " + p.getPid() + " doesn't exist in the process table.");
-				}
-			}
-
 			int res = p.getExitCode();
 			if (p.getParent() != null) {
 				p.getParent().removeChildren(p);
 			}
 			return res;
 		} catch (InterruptedException ex) {
-			Logger.getLogger(ProcessManager.class.getName()).log(Level.SEVERE, null, ex);
+			throw ex;
 		} finally {
-			this.cleanUpProcess(p);
+			synchronized (this.processTable) {
+				if (this.processTable.containsKey(p.getPid())) {
+					this.cleanUpProcess(p);
+				}
+			}
 		}
-
-		return -1;
 	}
 
 	public void addStreamToProcess(int pid, IDevice stream) {
-		synchronized(this.processTable) {
+		synchronized (this.processTable) {
 			this.processTable.get(pid).getOpenedStreams().add(stream);
 		}
 	}
 
 	public void removeStreamFromProcess(int pid, IDevice stream) {
-		synchronized(this.processTable) {
+		synchronized (this.processTable) {
 			this.processTable.get(pid).getOpenedStreams().remove(stream);
 		}
 	}
 
 	@Override
 	public void update(Observable o, Object arg) {
-		Utilities.log("process manager got update from " + o.getClass().getSimpleName());
 		Process finished = (Process) o;
 		// TODO: handle change of Observable object (stopped process etc)
 		switchForegroundProcess(finished.getParent());
 	}
 
 	private void switchForegroundProcess(Process newFg) {
-		synchronized(foregroundProcessLock) {
+		synchronized (foregroundProcessLock) {
 			this.foregroundProcess = newFg;
 		}
-		synchronized(newFg) {
-			newFg.setForegroundProcess(true);
-			newFg.notifyAll();
+
+		if (newFg != null) {
+			synchronized (newFg) {
+				newFg.setForegroundProcess(true);
+				newFg.notifyAll();
+			}
 		}
 	}
 
 	private void cleanUpProcess(Process p) {
-		synchronized(this.processTable) {
+		synchronized (this.processTable) {
 			closeStreams(p.getPid());
 			this.processTable.remove(p.getPid());
 		}

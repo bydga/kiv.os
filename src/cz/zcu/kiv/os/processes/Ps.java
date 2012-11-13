@@ -25,7 +25,6 @@ public class Ps extends cz.zcu.kiv.os.core.Process {
 			String s = "" + info.pid;
 			maxLength = s.length() > maxLength ? s.length() : maxLength;
 		}
-		Utilities.log("maxlen " + maxLength);
 		String header = String.format("%" + maxLength + "s CMD", "PID");
 		for (ProcessInfo info : list) {
 			builder.append(String.format("%" + maxLength + "s", "" +info.pid)).append(" ").append(info.processName).append("\n");

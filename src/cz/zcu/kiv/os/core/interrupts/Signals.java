@@ -24,4 +24,9 @@ public enum Signals {
 	 */
 	SIGPAUSE,
 	
+	/**
+	 * 
+	 */
+	SIGKILL,
+	
 }

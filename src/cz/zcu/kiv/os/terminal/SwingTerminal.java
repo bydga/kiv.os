@@ -15,6 +15,9 @@ import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 
 /**
@@ -30,7 +33,7 @@ public class SwingTerminal extends InOutDevice {
 	private Thread messageListener;
 	private IInputDevice stdout;
 	private IOutputDevice stdin;
-	private int charsWrittenOnLine = 0;
+//	private int charsWrittenOnLine = 0;
 
 	/**
 	 * Default constructor.
@@ -43,19 +46,28 @@ public class SwingTerminal extends InOutDevice {
 	}
 
 	public void setText(String text) {
-		this.historyArea.append(text);
-		this.charsWrittenOnLine = text.length();
+//		try {
+//			int end = this.historyArea.getLineEndOffset(this.historyArea.getLineCount() - 1);
+//			this.historyArea.setText(this.historyArea.getText(0, end) + text);
+//		} catch (BadLocationException ex) {
+//		}		
 	}
 
-	public String getText() {
+	public String getLastLine() {
 		try {
-			int start = this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1) + this.charsWrittenOnLine;
+			int start = this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1); //+ this.charsWrittenOnLine;
 			int end = this.historyArea.getLineEndOffset(this.historyArea.getLineCount() - 1);
 			String lineText = this.historyArea.getText(start, end - start);
 			return lineText;
 		} catch (BadLocationException ex) {
 			return "";
 		}
+	}
+
+	public void closeFrame() {
+		Utilities.log("closing frame");
+		WindowEvent wev = new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING);
+		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
 	}
 
 	private void runGui() {
@@ -101,13 +113,13 @@ public class SwingTerminal extends InOutDevice {
 						if (s != null) {
 							historyArea.append(s + "\n");
 							SwingTerminal.this.setCaretToEnd();
-						
+
 						}
 					} catch (Exception ex) {
-						//TODO handle exception
-						Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
+//						Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
+				Utilities.log("messagelistener finishing");
 			}
 		});
 		messageListener.start();
@@ -143,7 +155,8 @@ public class SwingTerminal extends InOutDevice {
 
 					case KeyEvent.VK_ENTER:
 						try {
-							SwingTerminal.this.stdin.writeLine(SwingTerminal.this.getText());
+							String cmd = SwingTerminal.this.getLastLine();
+							SwingTerminal.this.stdin.writeLine(cmd);
 							SwingTerminal.this.setText("");
 						} catch (Exception ex) {
 							//TODO handle exception
