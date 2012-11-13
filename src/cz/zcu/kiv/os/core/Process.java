@@ -82,18 +82,9 @@ public abstract class Process extends Observable implements Observer {
 		this.properties.errorStream = stream;
 	}
 
-	public synchronized IInputDevice getInputStream() {
+	protected synchronized IInputDevice getInputStream() throws InterruptedException {
 		while(!this.isForegroundProcess() && this.properties.inputStream.isStdStream()) { //only foreground process can read from stdin
-			try {
 				this.wait();
-			} catch (InterruptedException ex) {
-				Process.this.processState = Process.ProcessState.FINISHED_KILLED;
-				Utilities.log("Process " + Process.this.getClass().getSimpleName() + " stopped manually (got InterruptedException).");
-				Process.this.getOutputStream().EOF();//im not gonna write into this anymore
-				Process.this.getErrorStream().EOF();//im not gonna write into this anymore
-				Process.this.setChanged();
-				Process.this.notifyObservers();
-			}
 		}
 		return this.properties.inputStream;
 	}
@@ -207,11 +198,15 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected void handleSignalSIGQUIT() {
-		if(this.getInputStream() instanceof AbstractIODevice) { //if input device writable
-			AbstractIODevice io = (AbstractIODevice) this.getInputStream();
-			if(io.isStdStream()) { //and if input device standard input
-				io.EOF(); //stop reading from this point
+		try {
+			if(this.getInputStream() instanceof AbstractIODevice) { //if input device writable
+				AbstractIODevice io = (AbstractIODevice) this.getInputStream();
+				if(io.isStdStream()) { //stop reading from this point
+					io.EOF(); //stop reading from this point
+				}
 			}
+		} catch (InterruptedException ex) {
+			Utilities.log("dafuq?");
 		}
 	}
 

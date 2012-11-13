@@ -85,7 +85,7 @@ public class Shell extends Process {
 	 * @return The newly created process, or in case there is the pipeline, the latest process.
 	 * @throws NoSuchProcessException
 	 */
-	private List<Process> createProcess(ParseResult parseResult) throws NoSuchProcessException {
+	private List<Process> createProcess(ParseResult parseResult) throws NoSuchProcessException, InterruptedException {
 
 		ProcessGroup group = new ProcessGroup(new ThreadGroup("group_" + parseResult.args[0]));
 		//only for debugging reasons

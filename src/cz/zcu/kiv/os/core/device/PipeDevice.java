@@ -2,8 +2,6 @@ package cz.zcu.kiv.os.core.device;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Pipe is an IO device with buffer for storing data.
@@ -45,12 +43,7 @@ public class PipeDevice extends AbstractIODevice {
         if(isOpen()) {
             synchronized(buffer) {
                 while(buffer.isEmpty() && isOpen()) {
-                    try { //sleep if no messages to pass on
-                        buffer.wait();
-                    } catch (InterruptedException ex) {
-                        //TODO handle exception
-                        Logger.getLogger(PipeDevice.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+					buffer.wait();//sleep if no messages to pass on
                 }
                 if(!isOpen()) {
                     return null;

@@ -47,7 +47,7 @@ public class Core {
 		this.dispatcher = new SignalDispatcher();
 	}
 
-	public synchronized ICoreServices getServices() {
+	public ICoreServices getServices() {
 		return this.services;
 	}
 

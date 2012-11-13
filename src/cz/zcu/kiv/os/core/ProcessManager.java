@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
@@ -19,13 +15,16 @@ import java.util.logging.Logger;
  */
 public class ProcessManager implements Observer {
 
-	private Map<Integer, ProcessTableRecord> processTable;
-	private int counter;
+	private final Map<Integer, ProcessTableRecord> processTable;
+	
+	private int lastPID;
+
+	private final Object foregroundProcessLock = new Object();
 	private Process foregroundProcess = null;
 
 	public ProcessManager() {
 		this.processTable = new HashMap<Integer, ProcessTableRecord>();
-		this.counter = -1;
+		this.lastPID = -1;
 	}
 
 	public Map<Integer, ProcessTableRecord> getProcessTable() {
@@ -33,42 +32,50 @@ public class ProcessManager implements Observer {
 	}
 
 	public Process getForegroundProcess() {
-		return this.foregroundProcess;
+		synchronized(foregroundProcessLock) {
+			return this.foregroundProcess;
+		}
 	}
 
 	public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
+		synchronized(this.processTable) {
+			int pid;
+			do {
+				this.lastPID = (lastPID + 1 <= 0) ? 0 : lastPID + 1;
+				pid = lastPID;
+			} while (this.processTable.containsKey(this.lastPID));
+		
 
-		do {
-			this.counter = (counter + 1 <= 0) ? 0 : counter + 1;
-		} while (this.processTable.containsKey(this.counter));
+			try {
+				//class name begins with Capital letter
+				String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
+				String fullClassName = Process.PROCESS_PACKAGE + "." + className;
+				Class procClass = Class.forName(fullClassName);
+				Constructor constructor = procClass.getConstructor();
 
-		try {
-			//class name begins with Capital letter
-			String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
-			String fullClassName = Process.PROCESS_PACKAGE + "." + className;
-			Class procClass = Class.forName(fullClassName);
-			Constructor constructor = procClass.getConstructor();
+				Process p = (Process) constructor.newInstance();
+				p.init(pid, properties);
 
-			Process p = (Process) constructor.newInstance();
-			p.init(this.counter, properties);
-			ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess);
-			this.processTable.put(this.counter, record);
-			addStreamsToProcessTable(p);
+				ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess);
+				this.processTable.put(pid, record);
+				addStreamsToProcessTable(p);
 
-			p.addObserver(this);
-			p.start();
+				if (properties.parent != null) { //because of init
+					properties.parent.addChildren(p);
+				}
+				if (!properties.isBackgroundProcess) {
+					this.foregroundProcess = p;
+				}
+				Utilities.log("FG: " + p.getClass().getName());
 
-			if (properties.parent != null) { //because of init
-				properties.parent.addChildren(p);
+				p.addObserver(this);
+				p.start();
+
+				return p;
+			} catch (Exception ex) {
+				throw new NoSuchProcessException("Process " + processName + " failed to create: " + ex.getClass().getName() + ": " + ex.getMessage());
+
 			}
-			if (!properties.isBackgroundProcess) {
-				this.foregroundProcess = p;
-			}
-			Utilities.log("FG: " + p.getClass().getName());
-			return p;
-		} catch (Exception ex) {
-			throw new NoSuchProcessException("Process " + processName + " failed to create: " + ex.getClass().getName() + ": " + ex.getMessage());
-
 		}
 	}
 
@@ -99,8 +106,10 @@ public class ProcessManager implements Observer {
 
 	public int readProcessExitCode(Process p) {
 		try {
-			if (!this.processTable.containsKey(p.getPid())) {
-				throw new RuntimeException("Process with pid " + p.getPid() + " doesn't exist in the process table.");
+			synchronized(this.processTable) {
+				if (!this.processTable.containsKey(p.getPid())) {
+					throw new RuntimeException("Process with pid " + p.getPid() + " doesn't exist in the process table.");
+				}
 			}
 
 			int res = p.getExitCode();
@@ -118,11 +127,15 @@ public class ProcessManager implements Observer {
 	}
 
 	public void addStreamToProcess(int pid, IDevice stream) {
-		this.processTable.get(pid).getOpenedStreams().add(stream);
+		synchronized(this.processTable) {
+			this.processTable.get(pid).getOpenedStreams().add(stream);
+		}
 	}
 
 	public void removeStreamFromProcess(int pid, IDevice stream) {
-		this.processTable.get(pid).getOpenedStreams().remove(stream);
+		synchronized(this.processTable) {
+			this.processTable.get(pid).getOpenedStreams().remove(stream);
+		}
 	}
 
 	@Override
@@ -134,16 +147,20 @@ public class ProcessManager implements Observer {
 	}
 
 	private void switchForegroundProcess(Process newFg) {
-		synchronized(newFg) {
+		synchronized(foregroundProcessLock) {
 			this.foregroundProcess = newFg;
+		}
+		synchronized(newFg) {
 			newFg.setForegroundProcess(true);
 			newFg.notifyAll();
 		}
 	}
 
 	private void cleanUpProcess(Process p) {
-		closeStreams(p.getPid());
-		this.processTable.remove(p.getPid());
+		synchronized(this.processTable) {
+			closeStreams(p.getPid());
+			this.processTable.remove(p.getPid());
+		}
 
 	}
 
