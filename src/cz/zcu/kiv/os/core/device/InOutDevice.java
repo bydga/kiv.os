@@ -48,6 +48,12 @@ public class InOutDevice extends AbstractDevice implements IInputDevice, IOutput
     public void writeLine(String input) throws Exception {
         writer.writeLine(input);
     }
+	
+	 @Override
+    //TODO better exception
+    public void write(String input) throws Exception {
+        writer.write(input);
+    }
 
     @Override
     protected void detachAction() throws IOException {

@@ -32,7 +32,7 @@ public class Login extends cz.zcu.kiv.os.core.Process {
 			this.getOutputStream().writeLine("Creating home directory " + path);
 			Core.getInstance().getServices().createDirectory(this, path);
 		}
-		ProcessProperties props = new ProcessProperties(this, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), path, new ProcessGroup(new ThreadGroup("shellgroup")));
+		ProcessProperties props = new ProcessProperties(this, login, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), path, new ProcessGroup(new ThreadGroup("shellgroup")));
 		cz.zcu.kiv.os.core.Process shell = Core.getInstance().getServices().createProcess("shell", props);
 		Core.getInstance().getServices().readProcessExitCode(shell);
 

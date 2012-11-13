@@ -1,5 +1,6 @@
 package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
@@ -142,6 +143,20 @@ public class Core {
 
 			}
 		}
+
+		@Override
+		public void switchForegroundProcess(Process caller) {
+			if (caller.getParent() != null) {
+			  Core.this.processManager.switchForegroundProcess(caller.getParent());
+			  Utilities.log("Switched fg process");
+			}
+			else
+			{
+				Utilities.log("null parent when switching process");
+			}
+		}
+		
+		
 
 	}
 }

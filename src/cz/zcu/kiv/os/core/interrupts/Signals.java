@@ -19,4 +19,9 @@ public enum Signals {
 	 */
 	SIGQUIT,
 	
+	/**
+	 * CTRL+Z
+	 */
+	SIGPAUSE,
+	
 }

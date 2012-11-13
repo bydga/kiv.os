@@ -34,7 +34,7 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 
 		while (true) {
 			
-			ProcessProperties props = new ProcessProperties(this, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("initgroup")));
+			ProcessProperties props = new ProcessProperties(this, this.getUser(), null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("initgroup")));
 			Process login = Core.getInstance().getServices().createProcess("Login", props);
 			Core.getInstance().getServices().readProcessExitCode(login);
 		}

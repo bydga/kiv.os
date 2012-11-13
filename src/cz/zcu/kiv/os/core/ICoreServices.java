@@ -57,4 +57,6 @@ public interface ICoreServices {
 	public int readProcessExitCode(Process p);
 	
 	public void killProcess(int pid);
+	
+	public void switchForegroundProcess(Process caller);
 }

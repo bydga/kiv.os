@@ -79,4 +79,9 @@ public class PipeDevice extends AbstractIODevice {
         }
     }
 
+	@Override
+	public void write(String input) throws Exception {
+		this.writeLine(input);
+	}
+
 }

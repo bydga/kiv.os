@@ -116,7 +116,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		String line = this.getInputStream().readLine();
 		
 		while(line != null) {
-			this.getOutputStream().writeLine(line);
+//			this.getOutputStream().writeLine(line);
 			line = this.editLineByOptions(line);
 			if(this.optionLineNumber == true) {
 				bf.append(newLineChar);

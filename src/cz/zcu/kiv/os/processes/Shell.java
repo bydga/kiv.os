@@ -103,7 +103,7 @@ public class Shell extends Process {
 			err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 			in = this.createInput(parseResult.stdIn, in);
 
-			ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+			ProcessProperties properties = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
 			Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
 			list.add(p);
 			//pipe was used as an output device here, remember it for next iteration, where it will stand as an input
@@ -117,7 +117,7 @@ public class Shell extends Process {
 		out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, this.getOutputStream());
 		err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 
-		ProcessProperties properties = new ProcessProperties(this, parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+		ProcessProperties properties = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
 		Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
 
 		list.add(p);
@@ -131,20 +131,20 @@ public class Shell extends Process {
 
 		//this loop reads input from terminal
 		while (true) {
-			Utilities.log("reading, cwd: " + this.getWorkingDir());
+			this.getOutputStream().write(this.getUser() + " " + this.getWorkingDir() + " $");
 			String command = this.getInputStream().readLine();
+
+			//check for finished children
+			for (Process p : new ArrayList<Process>(this.children)) {
+				if (p.getProcessState() == Process.ProcessState.FINISHED_KILLED || p.getProcessState() == Process.ProcessState.FINISHED_OK) {
+					int res = Core.getInstance().getServices().readProcessExitCode(p);
+					this.getOutputStream().writeLine("Process " + p.getPid() + " " + p.getClass().getSimpleName() + " exited: " + res);
+				}
+			}
 			if (command != null && !command.isEmpty()) {
 
-				//check for finished children
 
-				for (Process p : new ArrayList<Process>(this.children)) {
-					if (p.getProcessState() == Process.ProcessState.FINISHED_KILLED || p.getProcessState() == Process.ProcessState.FINISHED_OK) {
-						int res = Core.getInstance().getServices().readProcessExitCode(p);
-						this.getOutputStream().writeLine("Process " + p.getPid() + " " + p.getClass().getSimpleName() + " exited: " + res);
-					}
-				}
 
-				this.getOutputStream().writeLine(command);
 
 				this.history.add(command);
 				this.historyIndex = this.history.size();
@@ -180,8 +180,6 @@ public class Shell extends Process {
 				} catch (NoSuchProcessException ex) {
 					this.getOutputStream().writeLine("Invalid process name");
 				}
-			} else {
-				this.getOutputStream().writeLine("");
 			}
 		}
 	}

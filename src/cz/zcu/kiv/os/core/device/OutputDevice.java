@@ -55,4 +55,15 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
             Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+	@Override
+	public void write(String input) throws Exception {
+		try {
+            writer.write(input);
+            writer.flush();
+        } catch (IOException ex) {
+            //TODO handle exception
+            Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+	}
 }

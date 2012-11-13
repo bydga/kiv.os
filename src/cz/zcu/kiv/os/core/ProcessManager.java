@@ -169,8 +169,13 @@ public class ProcessManager implements Observer {
 		for (IDevice device : devs) {
 			try {
 				device.detach();
+
+
+
+
 			} catch (IOException ex) {
-				Logger.getLogger(ProcessManager.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(ProcessManager.class
+						.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 	}

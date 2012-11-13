@@ -15,6 +15,7 @@ import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 
 /**
  * Terminal window implemented in Swing API.
@@ -26,11 +27,10 @@ public class SwingTerminal extends InOutDevice {
 	public static final char KEY_UP = 0x16;
 	private JFrame frame;
 	private JTextArea historyArea;
-	private JTextField inputField;
 	private Thread messageListener;
-	private JLabel promptLabel;
 	private IInputDevice stdout;
 	private IOutputDevice stdin;
+	private int charsWrittenOnLine = 0;
 
 	/**
 	 * Default constructor.
@@ -43,11 +43,19 @@ public class SwingTerminal extends InOutDevice {
 	}
 
 	public void setText(String text) {
-		this.inputField.setText(text);
+		this.historyArea.append(text);
+		this.charsWrittenOnLine = text.length();
 	}
-	
+
 	public String getText() {
-		return this.inputField.getText();
+		try {
+			int start = this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1) + this.charsWrittenOnLine;
+			int end = this.historyArea.getLineEndOffset(this.historyArea.getLineCount() - 1);
+			String lineText = this.historyArea.getText(start, end - start);
+			return lineText;
+		} catch (BadLocationException ex) {
+			return "";
+		}
 	}
 
 	private void runGui() {
@@ -77,8 +85,7 @@ public class SwingTerminal extends InOutDevice {
 		JPanel outer = new JPanel(new BorderLayout());
 		outer.setPreferredSize(new Dimension(640, 480));
 
-		outer.add(createTopPanel(), BorderLayout.NORTH);
-		outer.add(createBottomPanel(), BorderLayout.SOUTH);
+		outer.add(createTopPanel(), BorderLayout.CENTER);
 
 		frame.getContentPane().add(outer);
 		startListening();
@@ -91,9 +98,11 @@ public class SwingTerminal extends InOutDevice {
 				while (stdout.isOpen()) {
 					try {
 						String s = stdout.readLine();
-                                                if(s != null) {
-                                                    historyArea.append(s + "\n");
-                                                }
+						if (s != null) {
+							historyArea.append(s + "\n");
+							SwingTerminal.this.setCaretToEnd();
+						
+						}
 					} catch (Exception ex) {
 						//TODO handle exception
 						Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,6 +111,11 @@ public class SwingTerminal extends InOutDevice {
 			}
 		});
 		messageListener.start();
+	}
+
+	private void setCaretToEnd() {
+		this.historyArea.setCaretPosition(SwingTerminal.this.historyArea.getText().length());
+
 	}
 
 	/**
@@ -114,60 +128,33 @@ public class SwingTerminal extends InOutDevice {
 		topPanel.setPreferredSize(new Dimension(640, 450));
 
 		historyArea = new JTextArea();
-		historyArea.setEditable(false);
-		 historyArea.setFont(new Font("Monospaced",Font.PLAIN,15));
+		historyArea.setFont(new Font("Monospaced", Font.PLAIN, 15));
 
-		JScrollPane scroll = new JScrollPane(historyArea);
-		scroll.setPreferredSize(new Dimension(640, 450));
-
-		scroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-			@Override
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				e.getAdjustable().setValue(e.getAdjustable().getMaximum());
-			}
-		});
-
-		topPanel.add(scroll);
-		return topPanel;
-	}
-
-	/**
-	 * Create prompt line.
-	 *
-	 * @return
-	 */
-	private JPanel createBottomPanel() {
-		JPanel bottomPanel = new JPanel(new BorderLayout());
-		bottomPanel.setPreferredSize(new Dimension(640, 30));
-
-		//TODO dummy data
-		promptLabel = new JLabel("uzivatel  /path/to/dest/ $");
-		bottomPanel.add(promptLabel, BorderLayout.WEST);
-		inputField = new JTextField();
-		inputField.setFont(new Font("Monospaced",Font.PLAIN,15));
-		inputField.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					SwingTerminal.this.stdin.writeLine(inputField.getText());
-					inputField.setText("");
-				} catch (Exception ex) {
-					//TODO handle exception
-					Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		});
-
-		inputField.addKeyListener(new KeyAdapter() {
+		historyArea.addKeyListener(new KeyAdapter() {
 			private boolean ctrlDown = false;
 			private boolean cDown = false;
 			private boolean dDown = false;
+			private boolean zDown = false;
 
 			@Override
 			public void keyPressed(KeyEvent e) {
+				SwingTerminal.this.setCaretToEnd();
 				switch (e.getKeyCode()) {
+
+					case KeyEvent.VK_ENTER:
+						try {
+							SwingTerminal.this.stdin.writeLine(SwingTerminal.this.getText());
+							SwingTerminal.this.setText("");
+						} catch (Exception ex) {
+							//TODO handle exception
+							Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
+						}
+						break;
 					case KeyEvent.VK_C:
 						this.cDown = true;
+						break;
+					case KeyEvent.VK_Z:
+						this.zDown = true;
 						break;
 					case KeyEvent.VK_D:
 						this.dDown = true;
@@ -179,21 +166,19 @@ public class SwingTerminal extends InOutDevice {
 				}
 
 				if (this.ctrlDown && this.cDown) {
-//					Utilities.log("ctrl c pressed");
 					Core.getInstance().getServices().dispatchSystemSignal(Signals.SIGTERM);
 					e.consume();
 				} else if (this.ctrlDown && this.dDown) {
-//					Utilities.log("ctrl d pressed");
 					Core.getInstance().getServices().dispatchSystemSignal(Signals.SIGQUIT);
+					e.consume();
+				} else if (this.ctrlDown && this.zDown) {
+					Core.getInstance().getServices().dispatchSystemSignal(Signals.SIGPAUSE);
 					e.consume();
 				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
 					Core.getInstance().getServices().dispatchKeyboardEvent(KeyboardEvent.ARROW_UP);
-//					Utilities.log("up pressed");
 					e.consume();
 				} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 					Core.getInstance().getServices().dispatchKeyboardEvent(KeyboardEvent.ARROW_DOWN);
-//					Utilities.log("down pressed");
-
 					e.consume();
 				}
 			}
@@ -203,6 +188,9 @@ public class SwingTerminal extends InOutDevice {
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_C:
 						this.cDown = false;
+						break;
+					case KeyEvent.VK_Z:
+						this.zDown = false;
 						break;
 					case KeyEvent.VK_D:
 						this.dDown = false;
@@ -214,7 +202,11 @@ public class SwingTerminal extends InOutDevice {
 			}
 		});
 
-		bottomPanel.add(inputField);
-		return bottomPanel;
+
+		JScrollPane scroll = new JScrollPane(historyArea);
+		scroll.setPreferredSize(new Dimension(640, 450));
+
+		topPanel.add(scroll);
+		return topPanel;
 	}
 }

@@ -26,8 +26,7 @@ public abstract class Process extends Observable implements Observer {
 
 	protected enum ProcessState {
 
-		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,
-	}
+		PREPARED, RUNNING, FINISHED_KILLED, FINISHED_OK,}
 	public static final String PROCESS_PACKAGE = "cz.zcu.kiv.os.processes";
 	protected Thread workingThread;
 	protected int pid;
@@ -42,6 +41,11 @@ public abstract class Process extends Observable implements Observer {
 
 	public Process getParent() {
 		return this.properties.parent;
+	}
+	
+	public String getUser()
+	{
+		return this.properties.user;
 	}
 
 	protected int getExitCode() throws InterruptedException {
@@ -83,7 +87,7 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected synchronized IInputDevice getInputStream() throws InterruptedException {
-		while(!this.isForegroundProcess() && this.properties.inputStream.isStdStream()) { //only foreground process can read from stdin
+		while (!this.isForegroundProcess() && this.properties.inputStream.isStdStream()) { //only foreground process can read from stdin
 				this.wait();
 		}
 		return this.properties.inputStream;
@@ -187,6 +191,10 @@ public abstract class Process extends Observable implements Observer {
 				this.handleSignalSIGTERM();
 				break;
 
+			case SIGPAUSE:
+				this.handleSignalSIGPAUSE();
+				break;
+
 			default:
 
 				break;
@@ -208,6 +216,11 @@ public abstract class Process extends Observable implements Observer {
 		} catch (InterruptedException ex) {
 			Utilities.log("dafuq?");
 		}
+	}
+
+	private void handleSignalSIGPAUSE() {
+//		this.getProcessGroup().interrupt();
+//		Core.getInstance().getServices().switchForegroundProcess(this);
 	}
 
 	protected void handleKeyboardEvent(KeyboardEvent e) {
