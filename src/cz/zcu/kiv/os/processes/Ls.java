@@ -56,8 +56,8 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 				builder.append("ls: Nelze přistoupit k ");
 				builder.append(entry.getKey());
 				builder.append(": soubor nebo adresář neexistuje");
+				builder.append("\n");
 			}
-			builder.append("\n");
 		}
 		
 		return builder.toString();
@@ -110,7 +110,7 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 				builder.append(f.getName());
 				builder.append(" ");
 			}
-			builder.append("\n");
+			//builder.append("\n");
 		}
 
 		return builder.toString();
