@@ -65,18 +65,17 @@ public class PipeDevice extends AbstractIODevice {
                 buffer.notifyAll(); //wake-up potential readers
             }
             
-        } else {
-            //TODO better exception
-            throw new Exception();
         }
     }
 
     @Override
     public void EOF() {
-        synchronized(buffer) {
-            buffer.add(null);
-            buffer.notifyAll();
-        }
+		if(isOpen()) {
+			synchronized(buffer) {
+				buffer.add(null);
+				buffer.notifyAll();
+			}
+		}
     }
 
 	@Override

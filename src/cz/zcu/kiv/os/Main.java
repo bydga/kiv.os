@@ -25,8 +25,6 @@ public class Main {
 		ProcessProperties props = new ProcessProperties(null, "root", null, new InputDevice(System.in, false), new OutputDevice(System.out, false), new OutputDevice(System.err, false), "/", new ProcessGroup(new ThreadGroup("initgroup")));
 		Process p = Core.getInstance().getServices().createProcess("Init", props);
 		Utilities.log("after init created");
-		Core.getInstance().getServices().readProcessExitCode(p);
-		Utilities.log("after init exit");
 
 	}
 }

@@ -17,7 +17,7 @@ import cz.zcu.kiv.os.core.ProcessOption;
 public class Utilities {
 	
 	
-	public static void log(String text)
+	public synchronized static void log(String text)
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 		System.out.println(sdf.format(new Date()) + ": " + text);

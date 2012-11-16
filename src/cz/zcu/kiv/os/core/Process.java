@@ -53,8 +53,8 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected int getExitCode() throws InterruptedException {
-		if (this.processState == ProcessState.PREPARED || this.processState == ProcessState.RUNNING) {
-			this.workingThread.join();
+		while (this.processState == ProcessState.PREPARED || this.processState == ProcessState.RUNNING) {
+			workingThread.join();
 		}
 		return this.exitCode;
 	}

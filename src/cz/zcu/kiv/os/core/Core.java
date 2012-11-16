@@ -11,10 +11,10 @@ import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -26,11 +26,11 @@ public class Core {
 	private ICoreServices services;
 	private ProcessManager processManager;
 	private FileManager fileManager;
-	private SwingTerminal terminal;
+	//private SwingTerminal terminal;
 	private SignalDispatcher dispatcher;
 
 	public void setTerminal(SwingTerminal t) {
-		this.terminal = t;
+		//this.terminal = t;
 	}
 
 	public static synchronized Core getInstance() {
@@ -90,7 +90,7 @@ public class Core {
 
 		@Override
 		public void setTerminalCommand(String command) {
-			Core.this.terminal.setText(command);
+			//Core.this.terminal.setText(command);
 		}
 
 		@Override
@@ -115,7 +115,8 @@ public class Core {
 
 		@Override
 		public String getTerminalCommand() {
-			return Core.this.terminal.getLastLine();
+			//return Core.this.terminal.getLastLine();
+			return "";
 		}
 
 		@Override
@@ -168,7 +169,19 @@ public class Core {
 		public void shutdown(Process caller) {
 			Utilities.log("System received shutdown request.");
 			Utilities.log("Terminating all processess");
+
 			List<ProcessInfo> info = Core.this.getServices().getProcessTableData();
+			Collections.sort(info, new Comparator<ProcessInfo>() {
+
+				@Override
+				public int compare(ProcessInfo o1, ProcessInfo o2) {
+					if(o1.pid > o2.pid) {
+						return -1;
+					} else {
+						return 1;
+					}
+				}
+			});
 			for (ProcessInfo i : info) {
 				if (i.pid == caller.getPid()) {
 					continue;

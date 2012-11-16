@@ -7,17 +7,11 @@ import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.InOutDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 
 /**
@@ -31,6 +25,7 @@ public class SwingTerminal extends InOutDevice {
 	private JFrame frame;
 	private JTextArea historyArea;
 	private Thread messageListener;
+	private boolean shouldListen;
 	private IInputDevice stdout;
 	private IOutputDevice stdin;
 //	private int charsWrittenOnLine = 0;
@@ -42,6 +37,7 @@ public class SwingTerminal extends InOutDevice {
 		super(stdout, stdin, false);
 		this.stdin = stdin;
 		this.stdout = stdout;
+		this.shouldListen = true;
 		runGui();
 	}
 
@@ -65,9 +61,16 @@ public class SwingTerminal extends InOutDevice {
 	}
 
 	public void closeFrame() {
-		Utilities.log("closing frame");
-		WindowEvent wev = new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING);
-		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
+		try {
+			Utilities.log("closing frame");
+			shouldListen = false;
+			messageListener.interrupt();
+			messageListener.join();
+			WindowEvent wev = new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING);
+			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
+		} catch (InterruptedException ex) {
+			Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	private void runGui() {
@@ -83,9 +86,22 @@ public class SwingTerminal extends InOutDevice {
 	 * Initialize frame parameters.
 	 */
 	private void initFrame() {
-		frame = new JFrame("OS simulation");
+		frame = new TerminalFrame("OS simulation") {
+
+			@Override
+			protected void processEvent(AWTEvent e) {
+				if(e instanceof MessageEvent) {
+					String s = ((MessageEvent) e).getMessage();
+					historyArea.append(s + "\n");
+					SwingTerminal.this.setCaretToEnd();
+				} else {
+					super.processEvent(e);
+				}
+			}
+
+		};
 		initComponents();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setVisible(true);
 		frame.pack();
 	}
@@ -107,15 +123,18 @@ public class SwingTerminal extends InOutDevice {
 		messageListener = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while (stdout.isOpen()) {
+				EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+				
+				while (stdout.isOpen() && shouldListen) {
 					try {
 						String s = stdout.readLine();
-						if (s != null) {
-							historyArea.append(s + "\n");
-							SwingTerminal.this.setCaretToEnd();
-
+						if (s != null && shouldListen) {
+							Thread.sleep(100);
+							queue.postEvent(new MessageEvent(frame, s));
+							Thread.sleep(100);
 						}
 					} catch (Exception ex) {
+						continue;
 //						Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
