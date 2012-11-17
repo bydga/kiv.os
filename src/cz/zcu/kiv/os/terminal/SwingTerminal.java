@@ -28,7 +28,7 @@ public class SwingTerminal extends InOutDevice {
 	private boolean shouldListen;
 	private IInputDevice stdout;
 	private IOutputDevice stdin;
-//	private int charsWrittenOnLine = 0;
+	private char lastChar = '\n';
 
 	/**
 	 * Default constructor.
@@ -42,20 +42,22 @@ public class SwingTerminal extends InOutDevice {
 	}
 
 	public void setText(String text) {
-//		try {
-//			int end = this.historyArea.getLineEndOffset(this.historyArea.getLineCount() - 1);
-//			this.historyArea.setText(this.historyArea.getText(0, end) + text);
-//		} catch (BadLocationException ex) {
-//		}		
+		try {
+			String original = this.historyArea.getText(0, this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1));
+			this.historyArea.setText( original + text);
+		} catch (BadLocationException ex) {
+			Utilities.log("setText error");
+		}		
 	}
 
 	public String getLastLine() {
 		try {
-			int start = this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1); //+ this.charsWrittenOnLine;
+			int start = this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1);
 			int end = this.historyArea.getLineEndOffset(this.historyArea.getLineCount() - 1);
 			String lineText = this.historyArea.getText(start, end - start);
 			return lineText;
 		} catch (BadLocationException ex) {
+			Utilities.log("getLastLine error");
 			return "";
 		}
 	}
@@ -87,10 +89,9 @@ public class SwingTerminal extends InOutDevice {
 	 */
 	private void initFrame() {
 		frame = new TerminalFrame("OS simulation") {
-
 			@Override
 			protected void processEvent(AWTEvent e) {
-				if(e instanceof MessageEvent) {
+				if (e instanceof MessageEvent) {
 					String s = ((MessageEvent) e).getMessage();
 					historyArea.append(s + "\n");
 					SwingTerminal.this.setCaretToEnd();
@@ -98,10 +99,9 @@ public class SwingTerminal extends InOutDevice {
 					super.processEvent(e);
 				}
 			}
-
 		};
 		initComponents();
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		frame.pack();
 	}
@@ -124,7 +124,7 @@ public class SwingTerminal extends InOutDevice {
 			@Override
 			public void run() {
 				EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-				
+
 				while (stdout.isOpen() && shouldListen) {
 					try {
 						String s = stdout.readLine();
@@ -168,7 +168,20 @@ public class SwingTerminal extends InOutDevice {
 			private boolean zDown = false;
 
 			@Override
+			public void keyTyped(KeyEvent e) {
+				try {
+					lastChar = SwingTerminal.this.historyArea.getText(SwingTerminal.this.historyArea.getText().length() - 1, 1).charAt(0);
+				} catch (BadLocationException ex) {
+				}
+			}
+
+			@Override
 			public void keyPressed(KeyEvent e) {
+				
+				if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && lastChar == '\n') {
+					e.consume();
+				}
+
 				SwingTerminal.this.setCaretToEnd();
 				switch (e.getKeyCode()) {
 
@@ -176,9 +189,7 @@ public class SwingTerminal extends InOutDevice {
 						try {
 							String cmd = SwingTerminal.this.getLastLine();
 							SwingTerminal.this.stdin.writeLine(cmd);
-							SwingTerminal.this.setText("");
 						} catch (Exception ex) {
-							//TODO handle exception
 							Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						break;
@@ -194,7 +205,6 @@ public class SwingTerminal extends InOutDevice {
 					case KeyEvent.VK_CONTROL:
 						this.ctrlDown = true;
 						break;
-
 				}
 
 				if (this.ctrlDown && this.cDown) {
@@ -217,6 +227,7 @@ public class SwingTerminal extends InOutDevice {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
+				
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_C:
 						this.cDown = false;
@@ -236,7 +247,9 @@ public class SwingTerminal extends InOutDevice {
 
 
 		JScrollPane scroll = new JScrollPane(historyArea);
-		scroll.setPreferredSize(new Dimension(640, 450));
+
+		scroll.setPreferredSize(
+				new Dimension(640, 450));
 
 		topPanel.add(scroll);
 		return topPanel;

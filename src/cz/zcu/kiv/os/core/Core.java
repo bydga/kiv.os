@@ -26,11 +26,11 @@ public class Core {
 	private ICoreServices services;
 	private ProcessManager processManager;
 	private FileManager fileManager;
-	//private SwingTerminal terminal;
+	private SwingTerminal terminal;
 	private SignalDispatcher dispatcher;
 
 	public void setTerminal(SwingTerminal t) {
-		//this.terminal = t;
+		this.terminal = t;
 	}
 
 	public static synchronized Core getInstance() {
@@ -90,7 +90,7 @@ public class Core {
 
 		@Override
 		public void setTerminalCommand(String command) {
-			//Core.this.terminal.setText(command);
+			Core.this.terminal.setText(command);
 		}
 
 		@Override
@@ -115,8 +115,7 @@ public class Core {
 
 		@Override
 		public String getTerminalCommand() {
-			//return Core.this.terminal.getLastLine();
-			return "";
+			return Core.this.terminal.getLastLine();
 		}
 
 		@Override
