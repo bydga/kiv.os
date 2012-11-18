@@ -4,8 +4,6 @@ import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
-import cz.zcu.kiv.os.core.device.InputDevice;
-import cz.zcu.kiv.os.core.device.OutputDevice;
 
 /**
  *
@@ -21,10 +19,15 @@ public class Main {
 				+ System.getProperty("user.home"));
 
 		Utilities.log("starting OS");
+		Core core = Core.getInstance();
 
-		ProcessProperties props = new ProcessProperties(null, "root", null, new InputDevice(System.in, false), new OutputDevice(System.out, false), new OutputDevice(System.err, false), "/", new ProcessGroup(new ThreadGroup("initgroup")));
+		ProcessProperties props = new ProcessProperties(null, "root", null, core.getStdIn(), core.getStdOut(), core.getStdErr(), "/", new ProcessGroup(new ThreadGroup("initgroup")));
 		Process p = Core.getInstance().getServices().createProcess("Init", props);
 		Utilities.log("after init created");
+		Core.getInstance().getServices().readProcessExitCode(p);
+		Utilities.log("Unloading remaining OS resources...");
+		Core.getInstance().detachOSResources();
+		Utilities.log("End of simulation. Bye!");
 
 	}
 }

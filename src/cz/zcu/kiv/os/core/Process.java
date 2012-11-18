@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * observable - because of process cleanup during process termination observer because of system/keyboard events
@@ -48,7 +50,7 @@ public abstract class Process extends Observable implements Observer {
 		return this.properties.user;
 	}
 
-	public List<Process> getChildren() {
+	public synchronized List<Process> getChildren() {
 		return this.children;
 	}
 
@@ -235,6 +237,22 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected void handleKeyboardEvent(KeyboardEvent e) {
+	}
+
+	protected void checkForFinishedChildren() throws InterruptedException {
+			//check for finished children
+			for (Process p : new ArrayList<Process>(this.children)) {
+				if (p.getProcessState() == Process.ProcessState.FINISHED_KILLED || p.getProcessState() == Process.ProcessState.FINISHED_OK) {
+					int res = Core.getInstance().getServices().readProcessExitCode(p);
+					try {
+						this.getOutputStream().writeLine("Process " + p.getPid() + " " + p.getClass().getSimpleName() + " exited: " + res);
+					} catch (Exception ex) {
+						//stdout is down, log the result
+					} finally {
+						Utilities.log("Process " + p.getPid() + " " + p.getClass().getSimpleName() + " exited: " + res);
+					}
+				}
+			}
 	}
 
 	/**

@@ -130,17 +130,18 @@ public class Shell extends Process {
 		this.history = new ArrayList<String>();
 
 		//this loop reads input from terminal
-		while (true) {
-			this.getOutputStream().write(this.getUser() + " " + this.getWorkingDir() + " $");
+		while (Core.getInstance().getServices().isRunning()) {
+			this.checkForStop();
+			try {
+				this.getOutputStream().write(this.getUser() + " " + this.getWorkingDir() + " $");
+			} catch(InterruptedException e) {
+				continue;
+			}
+			
 			String command = this.getInputStream().readLine();
 
-			//check for finished children
-			for (Process p : new ArrayList<Process>(this.children)) {
-				if (p.getProcessState() == Process.ProcessState.FINISHED_KILLED || p.getProcessState() == Process.ProcessState.FINISHED_OK) {
-					int res = Core.getInstance().getServices().readProcessExitCode(p);
-					this.getOutputStream().writeLine("Process " + p.getPid() + " " + p.getClass().getSimpleName() + " exited: " + res);
-				}
-			}
+			this.checkForFinishedChildren();
+			
 			if (command != null && !command.isEmpty()) {
 				this.history.add(command);
 				this.historyIndex = this.history.size();

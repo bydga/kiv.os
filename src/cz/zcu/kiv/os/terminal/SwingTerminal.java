@@ -9,6 +9,7 @@ import cz.zcu.kiv.os.core.device.InOutDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -62,16 +63,19 @@ public class SwingTerminal extends InOutDevice {
 		}
 	}
 
-	public void closeFrame() {
+	@Override
+	protected void detachAction() throws IOException {
 		try {
 			Utilities.log("closing frame");
 			shouldListen = false;
 			messageListener.interrupt();
 			messageListener.join();
+
+		} catch (InterruptedException ex) {
+			//close the window, listener died
+		} finally {
 			WindowEvent wev = new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING);
 			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
-		} catch (InterruptedException ex) {
-			Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
@@ -100,6 +104,20 @@ public class SwingTerminal extends InOutDevice {
 				}
 			}
 		};
+		frame.addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				super.windowClosing(e);
+				//shortcut to shutdown system correctly when terminal window closed
+				//manually via X button
+				if(Core.getInstance().getServices().isRunning()) {
+					Core.getInstance().getServices().shutdown(null);
+				}
+			}
+
+
+		});
 		initComponents();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
@@ -129,9 +147,9 @@ public class SwingTerminal extends InOutDevice {
 					try {
 						String s = stdout.readLine();
 						if (s != null && shouldListen) {
-							Thread.sleep(100);
+							//Thread.sleep(100);
 							queue.postEvent(new MessageEvent(frame, s));
-							Thread.sleep(100);
+							//Thread.sleep(100);
 						}
 					} catch (Exception ex) {
 						continue;

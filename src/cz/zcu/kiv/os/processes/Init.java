@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.Utilities;
@@ -9,9 +5,6 @@ import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
-import cz.zcu.kiv.os.core.device.*;
-import cz.zcu.kiv.os.terminal.SwingTerminal;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -20,21 +13,14 @@ import java.util.List;
  */
 public class Init extends cz.zcu.kiv.os.core.Process {
 
-	private AbstractIODevice createStdDevice() throws IOException {
-		return new PipeDevice(true);
-	}
-
 	@Override
 	public void run(String[] args) throws Exception {
 		Utilities.log("INIT running...");
-		this.setInputStream(this.createStdDevice());
-		this.setOutputStream(this.createStdDevice());
-		this.setErrorStream(this.createStdDevice());
-		final SwingTerminal terminal = new SwingTerminal((IInputDevice) this.getOutputStream(), (IOutputDevice) this.getInputStream());
-		Core.getInstance().setTerminal(terminal);
 
+		Core.getInstance().openTerminalWindow(this);
+		
 		try {
-			while (true) {
+			while (Core.getInstance().getServices().isRunning()) {
 				this.checkForStop();
 				ProcessProperties props = new ProcessProperties(this, this.getUser(), null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("logingroup")));
 				Process login = Core.getInstance().getServices().createProcess("Login", props);
@@ -42,28 +28,34 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 			}
 
 		} catch (InterruptedException ex) {
-			this.getOutputStream().writeLine("Init joining all remaining processess");
-			List<Process> processess = Core.getInstance().getServices().getAllProcessess();
-			for (Process p : processess) {
-				if (p == this) {
-					continue;
-				}
-				
-				this.getOutputStream().writeLine("Joining for " + p.getClass().getSimpleName() + ", pid " + p.getPid());
-				try {
-					int i = Core.getInstance().getServices().readProcessExitCode(p);
-				} catch (InterruptedException e) {
-					continue;
-				}
-				this.getOutputStream().writeLine("Joined.");
+			//cleanup only
+		} finally {
+			cleanup();
+		}
+	}
 
+	private void cleanup() throws Exception {
+		List<Process> processess = Core.getInstance().getServices().getAllProcessess();
+		boolean first = true;
+		for (Process p : processess) {
+			if(first) {
+				first = false;
+				this.getOutputStream().writeLine("Init joining all remaining processess");
+			}
+			if (p == this) {
+				continue;
 			}
 
-			Utilities.log("Bye!");
-			terminal.closeFrame();
-			this.getOutputStream().detach();
-			this.getInputStream().detach();
-			this.getErrorStream().detach();
+			this.getOutputStream().writeLine("Joining for " + p.getClass().getSimpleName() + ", pid " + p.getPid());
+			try {
+				int i = Core.getInstance().getServices().readProcessExitCode(p);
+			} catch (InterruptedException e) {
+				continue;
+			}
+			this.getOutputStream().writeLine("Joined.");
+
 		}
+		this.getOutputStream().writeLine("All processes killed. Shutting down...");
+		Thread.sleep(5000); //give user some time to read shutdown log from the terminal before init ends and devices get closed
 	}
 }

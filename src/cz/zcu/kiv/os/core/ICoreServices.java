@@ -65,4 +65,6 @@ public interface ICoreServices {
 	public void shutdown(Process caller);
 	
 	public List<Process> getAllProcessess();
+
+	public boolean isRunning();
 }

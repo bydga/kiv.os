@@ -1,7 +1,6 @@
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
-import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.filesystem.FileMode;
@@ -15,6 +14,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -26,12 +27,13 @@ public class Core {
 	private ICoreServices services;
 	private ProcessManager processManager;
 	private FileManager fileManager;
-	private SwingTerminal terminal;
 	private SignalDispatcher dispatcher;
+	private volatile boolean osrunning;
 
-	public void setTerminal(SwingTerminal t) {
-		this.terminal = t;
-	}
+	private SwingTerminal terminal;
+	private IOutputDevice stdOut;
+	private IInputDevice stdIn;
+	private IOutputDevice stdErr;
 
 	public static synchronized Core getInstance() {
 		if (Core.instance == null) {
@@ -42,19 +44,62 @@ public class Core {
 	}
 
 	private Core() {
+		this.osrunning = true;
 		this.services = new Core.CoreServices();
 		this.processManager = new ProcessManager();
 
 		String separator = System.getProperty("file.separator");
 		this.fileManager = new FileManager(System.getProperty("user.home") + separator + "os" + separator);
 		this.dispatcher = new SignalDispatcher();
+		try {
+			initStdStreams();
+		} catch (IOException ex) {
+			//fatal error TODO
+		}
+	}
+	
+	private AbstractIODevice createStdDevice() throws IOException {
+		return new PipeDevice(true);
+	}
+
+	private void initStdStreams() throws IOException {
+		stdIn = this.createStdDevice();
+		stdOut = this.createStdDevice();
+		stdErr = this.createStdDevice();
+	}
+
+	public void openTerminalWindow(Process caller) {
+		terminal = new SwingTerminal((IInputDevice) stdOut, (IOutputDevice) stdIn);
+		this.processManager.addStreamToProcess(caller.getPid(), terminal);
+	}
+
+	public IInputDevice getStdIn() {
+		return stdIn;
+	}
+
+	public IOutputDevice getStdOut() {
+		return stdOut;
+	}
+
+	public IOutputDevice getStdErr() {
+		return stdErr;
 	}
 
 	public ICoreServices getServices() {
 		return this.services;
 	}
 
+	public void detachOSResources() throws IOException {
+		this.getStdIn().detach();
+		this.getStdOut().detach();
+		this.getStdErr().detach();
+	}
+
 	private class CoreServices implements ICoreServices {
+
+		public synchronized boolean isRunning() {
+			return osrunning;
+		}
 
 		@Override
 		public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
@@ -166,28 +211,55 @@ public class Core {
 
 		@Override
 		public void shutdown(Process caller) {
-			Utilities.log("System received shutdown request.");
-			Utilities.log("Terminating all processess");
+			shutDownLogger("System received shutdown request.");
+			osrunning = false;
+			
+			Process init = processManager.getProcessTable().get(0).getProcess();
 
-			List<ProcessInfo> info = Core.this.getServices().getProcessTableData();
-			Collections.sort(info, new Comparator<ProcessInfo>() {
+			//send sigterm to all processes
+			Process login = init.getChildren().get(0);
+			Process shell = login.getChildren().get(0);
 
-				@Override
-				public int compare(ProcessInfo o1, ProcessInfo o2) {
-					if(o1.pid > o2.pid) {
-						return -1;
-					} else {
-						return 1;
-					}
-				}
-			});
-			for (ProcessInfo i : info) {
-				if (i.pid == caller.getPid()) {
+			shutDownLogger("Sending SIGTERM to user processes.");
+			for(Process p : shell.getChildren()) {
+				if(p.pid == caller.pid) {
 					continue;
 				}
-				Core.getInstance().getServices().dispatchSystemSignal(i.pid, Signals.SIGKILL);
+				Core.getInstance().getServices().dispatchSystemSignal(p.getPid(), Signals.SIGTERM);
 			}
-			Utilities.log("Signals sent.");
+
+			int j = 0;
+			while(shell.getChildren().size() > 1 && j < 3) {
+				try {
+					//wait for processes to terminate
+					shutDownLogger("Waiting for processes to die...");
+					j++;
+					Thread.sleep(2000);
+					shell.checkForFinishedChildren();
+				} catch (InterruptedException ex) {
+					//shutdown cannot be interrupted, go on
+				}
+			}
+
+			if(shell.getChildren().size() == 1 && shell.getChildren().get(0).getPid() == caller.getPid()) {
+				return;
+			}
+
+			//killing remaining processes
+			shutDownLogger("Killing remaining processes");
+			if(init.getChildren().size() > 0) {
+				Core.getInstance().getServices().dispatchSystemSignal(login.pid, Signals.SIGKILL);
+			}
+		
+		}
+
+		private void shutDownLogger(String msg) {
+			try {
+				stdOut.writeLine(msg);
+			} catch (Exception ex) {
+			} finally {
+				Utilities.log(msg);
+			}
 		}
 
 		@Override

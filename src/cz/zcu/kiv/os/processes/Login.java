@@ -7,12 +7,13 @@ package cz.zcu.kiv.os.processes;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
+import cz.zcu.kiv.os.core.Process;
 
 /**
  *
  * @author bydga
  */
-public class Login extends cz.zcu.kiv.os.core.Process {
+public class Login extends Process {
 
 	@Override
 	protected void run(String[] args) throws Exception {

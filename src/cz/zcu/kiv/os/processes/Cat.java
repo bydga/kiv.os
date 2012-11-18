@@ -116,6 +116,7 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		String line = this.getInputStream().readLine();
 		
 		while(line != null) {
+			this.checkForStop();
 //			this.getOutputStream().writeLine(line);
 			line = this.editLineByOptions(line);
 			if(this.optionLineNumber == true) {
@@ -152,5 +153,5 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 	public static String getManualPage() {
 		return helpText;
 	}
-	
+
 }
