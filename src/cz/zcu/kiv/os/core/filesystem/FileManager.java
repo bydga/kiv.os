@@ -45,32 +45,50 @@ public class FileManager {
         return prepareDevice(realPath, mode);
     }
 
+	/**
+	 * Creates directory/directory branch corresponding to the given path
+	 * @param path dirpath
+	 * @param workingDir working dir the path is relative to
+	 * @return
+	 */
     public boolean createDirectory(String path, String workingDir) {
         String realPath = resolveRealPath(path, workingDir);
 
         return mkDir(realPath);
     }
 
+	/**
+	 * Checks whether directory on the given path exists
+	 * @param path dirpath
+	 * @param workingDir working dir the path is relative to
+	 * @return
+	 */
     public boolean directoryExists(String path, String workingDir) {
         String realPath = resolveRealPath(path, workingDir);
 
         return isDir(realPath);
     }
 
+	/**
+	 * Lists all files on the given path
+	 * @param path dirpath
+	 * @param workingDir working dir the path is relative to
+	 * @return list of files in the dir given, or filename if path is file, or null otherwise
+	 */
 	public List<File> listFiles(String path, String workingDir) {
 		String realPath = resolveRealPath(path, workingDir);
 
 		File dir = new File(realPath);
 		List<File> l = new ArrayList<File>();
-		if(dir.isDirectory()) {
+		if(dir.isDirectory()) {//return dir filelist
 			l.add(new File(dir, "."));
 			l.add(new File(dir, ".."));
 			l.addAll(Arrays.asList(dir.listFiles()));
 			return l;
-		} else if (dir.isFile()) {
+		} else if (dir.isFile()) {//return filename
 			l.add(dir);
 			return l;
-		} else {
+		} else {//not a dir, not a file, invalid path
 			return null;
 		}
 	}
@@ -80,6 +98,11 @@ public class FileManager {
         return dir.isDirectory();
     }
 
+	/**
+	 * Create dir branch.
+	 * @param realPath
+	 * @return
+	 */
     private boolean mkDir(String realPath) {
         File dir = new File(realPath);
         return dir.mkdirs();
