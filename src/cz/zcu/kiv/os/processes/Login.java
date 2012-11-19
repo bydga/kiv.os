@@ -10,7 +10,7 @@ import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.Process;
 
 /**
- *
+ * Process that handles login procedure. It is usually run by init. After successfull login creates new Shell (on foreground).
  * @author bydga
  */
 public class Login extends Process {

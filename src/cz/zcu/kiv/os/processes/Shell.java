@@ -33,6 +33,7 @@ public class Shell extends Process {
 	private List<String> history;
 	private int historyIndex = 0;
 	private String curentCommand;
+	private IOutputDevice historyLog;
 
 	/**
 	 * Initializes new instance of output device - suitable for forwarding process's output/error streams. If given path
@@ -128,6 +129,7 @@ public class Shell extends Process {
 	protected void run(String[] args) throws Exception {
 		InputParser parser = new InputParser();
 		this.history = new ArrayList<String>();
+		this.historyLog = Core.getInstance().getServices().openFileForWrite(this, "history.txt", true);
 
 		//this loop reads input from terminal
 		while (Core.getInstance().getServices().isRunning()) {
@@ -144,6 +146,7 @@ public class Shell extends Process {
 			
 			if (command != null && !command.isEmpty()) {
 				this.history.add(command);
+				this.historyLog.writeLine(this.getWorkingDir() + " $ " + command);
 				this.historyIndex = this.history.size();
 
 				try {
@@ -151,6 +154,9 @@ public class Shell extends Process {
 					ParseResult result = parser.parse(command);
 
 					//special cases of input command
+					if (result.args.length == 0) {
+						continue;
+					}
 					if (result.args[0].equals(Shell.EXIT_COMMAND)) {
 						return; //return from the main loop - ends the process
 					} else if (result.args[0].equals(Shell.CWD_COMMAND)) {
@@ -169,7 +175,7 @@ public class Shell extends Process {
 							int ret = Core.getInstance().getServices().readProcessExitCode(p);
 						}
 					} else {
-						this.getOutputStream().writeLine("[1] " + processes.get(processes.size() - 1).getPid());
+						this.getOutputStream().writeLine("[" + processes.get(processes.size() - 1).getPid() + "] " + command);
 					}
 				} catch (ParseException e) {
 					this.getOutputStream().writeLine("Invalid input: " + e.getMessage());
@@ -182,11 +188,7 @@ public class Shell extends Process {
 
 	@Override
 	protected void handleSignalSIGTERM() {
-		try {
-			this.getOutputStream().writeLine("");
-		} catch (Exception ex) {
-			Logger.getLogger(Shell.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		this.handleSignalSIGQUIT();
 	}
 
 	@Override

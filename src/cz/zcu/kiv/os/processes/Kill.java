@@ -5,10 +5,11 @@
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.core.Core;
+import cz.zcu.kiv.os.core.interrupts.Signals;
 import java.text.ParseException;
 
 /**
- *
+ * Process for sending sigkill signal to other processess.
  * @author bydga
  */
 public class Kill extends cz.zcu.kiv.os.core.Process {
@@ -21,7 +22,7 @@ public class Kill extends cz.zcu.kiv.os.core.Process {
 			try {
 				int pid = Integer.parseInt(args[i]);
 				this.getOutputStream().writeLine("Killing process " + pid);
-				Core.getInstance().getServices().killProcess(pid);
+				Core.getInstance().getServices().dispatchSystemSignal(pid, Signals.SIGKILL);
 			} catch (NumberFormatException ex) {
 				this.getOutputStream().writeLine("Pid not a number");
 			}

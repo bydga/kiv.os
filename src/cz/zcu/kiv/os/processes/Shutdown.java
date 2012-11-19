@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.core.Core;
 
 /**
- *
+ * Process that initiates the core shutdown procedure.
  * @author bydga
  */
 public class Shutdown extends cz.zcu.kiv.os.core.Process {

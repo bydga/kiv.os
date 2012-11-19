@@ -45,10 +45,10 @@ public class SwingTerminal extends InOutDevice {
 	public void setText(String text) {
 		try {
 			String original = this.historyArea.getText(0, this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1));
-			this.historyArea.setText( original + text);
+			this.historyArea.setText(original + text);
 		} catch (BadLocationException ex) {
 			Utilities.log("setText error");
-		}		
+		}
 	}
 
 	public String getLastLine() {
@@ -105,7 +105,6 @@ public class SwingTerminal extends InOutDevice {
 			}
 		};
 		frame.addWindowListener(new WindowAdapter() {
-
 			@Override
 			public void windowClosed(WindowEvent e) {
 				frame.dispose();
@@ -114,7 +113,7 @@ public class SwingTerminal extends InOutDevice {
 
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if(Core.getInstance().getServices().isRunning()) {
+				if (Core.getInstance().getServices().isRunning()) {
 					Core.getInstance().getServices().shutdown(null);
 				}
 			}
@@ -188,26 +187,18 @@ public class SwingTerminal extends InOutDevice {
 			private boolean zDown = false;
 
 			@Override
-			public void keyTyped(KeyEvent e) {
-				try {
-					lastChar = SwingTerminal.this.historyArea.getText(SwingTerminal.this.historyArea.getText().length() - 1, 1).charAt(0);
-				} catch (BadLocationException ex) {
-				}
-			}
-
-			@Override
 			public void keyPressed(KeyEvent e) {
-				
-				if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && lastChar == '\n') {
+				if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && SwingTerminal.this.getLastLine().length() == 0) {
 					e.consume();
 				}
 
-				SwingTerminal.this.setCaretToEnd();
 				switch (e.getKeyCode()) {
 
 					case KeyEvent.VK_ENTER:
 						try {
+							e.consume();
 							String cmd = SwingTerminal.this.getLastLine();
+							SwingTerminal.this.historyArea.append("\n");
 							SwingTerminal.this.stdin.writeLine(cmd);
 						} catch (Exception ex) {
 							Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
@@ -247,7 +238,6 @@ public class SwingTerminal extends InOutDevice {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_C:
 						this.cDown = false;

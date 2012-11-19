@@ -1,6 +1,7 @@
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.filesystem.FileMode;
@@ -10,15 +11,12 @@ import cz.zcu.kiv.os.terminal.SwingTerminal;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- *
+ * Main class of the OS simulation. Wraps all standard inputs/outpus, 
+ * terminal and other necessary objects for system execution. 
  * @author bydga
  */
 public class Core {
@@ -28,13 +26,16 @@ public class Core {
 	private ProcessManager processManager;
 	private FileManager fileManager;
 	private SignalDispatcher dispatcher;
-	private volatile boolean osrunning;
-
+	private volatile boolean osRunning;
 	private SwingTerminal terminal;
 	private IOutputDevice stdOut;
 	private IInputDevice stdIn;
 	private IOutputDevice stdErr;
 
+	/**
+	 * Returns singleton instance of the Core.
+	 * @return 
+	 */
 	public static synchronized Core getInstance() {
 		if (Core.instance == null) {
 			Core.instance = new Core();
@@ -44,7 +45,7 @@ public class Core {
 	}
 
 	private Core() {
-		this.osrunning = true;
+		this.osRunning = true;
 		this.services = new Core.CoreServices();
 		this.processManager = new ProcessManager();
 
@@ -52,12 +53,12 @@ public class Core {
 		this.fileManager = new FileManager(System.getProperty("user.home") + separator + "os" + separator);
 		this.dispatcher = new SignalDispatcher();
 		try {
-			initStdStreams();
+			this.initStdStreams();
 		} catch (IOException ex) {
 			//fatal error TODO
 		}
 	}
-	
+
 	private AbstractIODevice createStdDevice() throws IOException {
 		return new PipeDevice(true);
 	}
@@ -68,27 +69,51 @@ public class Core {
 		stdErr = this.createStdDevice();
 	}
 
+	/**
+	 * Creates and openes new terminal window. Adds the terminal stream to the caller process.
+	 * @param caller 
+	 */
 	public void openTerminalWindow(Process caller) {
-		terminal = new SwingTerminal((IInputDevice) stdOut, (IOutputDevice) stdIn);
-		this.processManager.addStreamToProcess(caller.getPid(), terminal);
+		this.terminal = new SwingTerminal((IInputDevice) this.stdOut, (IOutputDevice) this.stdIn);
+		this.processManager.addStreamToProcess(caller.getPid(), this.terminal);
 	}
 
+	/**
+	 * Gets the core's standard input stream.
+	 * @return 
+	 */
 	public IInputDevice getStdIn() {
-		return stdIn;
+		return this.stdIn;
 	}
 
+	/**
+	 * Gets the core's standard output stream.
+	 * @return 
+	 */
 	public IOutputDevice getStdOut() {
-		return stdOut;
+		return this.stdOut;
 	}
 
+	/**
+	 * Gets the core's standard error stream.
+	 * @return 
+	 */
 	public IOutputDevice getStdErr() {
-		return stdErr;
+		return this.stdErr;
 	}
 
+	/**
+	 * Endpoint for processes when calling any service provided by this operating system.
+	 * @return Interface with all supported service calls.
+	 */
 	public ICoreServices getServices() {
 		return this.services;
 	}
 
+	/**
+	 * Closes all standard streams associated with this OS.
+	 * @throws IOException 
+	 */
 	public void detachOSResources() throws IOException {
 		this.getStdIn().detach();
 		this.getStdOut().detach();
@@ -97,8 +122,9 @@ public class Core {
 
 	private class CoreServices implements ICoreServices {
 
+		@Override
 		public synchronized boolean isRunning() {
-			return osrunning;
+			return osRunning;
 		}
 
 		@Override
@@ -188,25 +214,6 @@ public class Core {
 		@Override
 		public List<File> listFiles(Process caller, String dir) {
 			return Core.this.fileManager.listFiles(dir, caller.getWorkingDir());
-		}
-
-		@Override
-		public void killProcess(int pid) {
-			ProcessTableRecord record = processManager.getProcessTable().get(pid);
-			if (record != null) {
-				record.getProcess().stop();
-
-			}
-		}
-
-		@Override
-		public void switchForegroundProcess(Process caller) {
-			if (caller.getParent() != null) {
-//			  Core.this.processManager.switchForegroundProcess(caller.getParent());
-				Utilities.log("Switched fg process");
-			} else {
-				Utilities.log("null parent when switching process");
-			}
 		}
 
 		@Override
