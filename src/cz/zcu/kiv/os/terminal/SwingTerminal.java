@@ -79,6 +79,9 @@ public class SwingTerminal extends InOutDevice {
 		}
 	}
 
+	/**
+	 * Start gui on event dispatch thread
+	 */
 	private void runGui() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -90,6 +93,11 @@ public class SwingTerminal extends InOutDevice {
 
 	/**
 	 * Initialize frame parameters.
+	 *
+	 * Creates terminal, registers its event listener for writing messages from
+	 * other threads into the JTextArea component.
+	 *
+	 * Adds WindowListener for handling application shutdown.
 	 */
 	private void initFrame() {
 		frame = new TerminalFrame("OS simulation") {
@@ -104,6 +112,8 @@ public class SwingTerminal extends InOutDevice {
 				}
 			}
 		};
+
+		//closes window (and system) correctly when required
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
@@ -148,13 +158,13 @@ public class SwingTerminal extends InOutDevice {
 					try {
 						String s = stdout.readLine();
 						if (s != null && shouldListen) {
-							//Thread.sleep(100);
+							
 							queue.postEvent(new MessageEvent(frame, s));
-							//Thread.sleep(100);
+							
 						}
 					} catch (Exception ex) {
+						//always continue reading while stdout open
 						continue;
-//						Logger.getLogger(SwingTerminal.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
 				Utilities.log("messagelistener finishing");
