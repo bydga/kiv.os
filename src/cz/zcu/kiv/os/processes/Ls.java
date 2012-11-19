@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.util.*;
 
 /**
+ * Writes list of files or directories on the given path(s).
  *
  * @author Jakub Danek
  */
@@ -34,8 +35,10 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 			filesMap.put(p, tmp);
 		}
 
-		String output = prepareFileListingOutput(filesMap);
-		this.getOutputStream().writeLine(output);
+		List<String> outputList = prepareFileListingOutput(filesMap);
+		for(String output : outputList) {
+			this.getOutputStream().writeLine(output);
+		}
 	}
 
 	/**
@@ -43,24 +46,29 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 	 * @param filesMap
 	 * @return
 	 */
-	private String prepareFileListingOutput(Map<String, List<File>> filesMap) {
+	private List<String> prepareFileListingOutput(Map<String, List<File>> filesMap) {
+		List<String> ret = new ArrayList<String>();
 		StringBuilder builder = new StringBuilder();
 
 		for(Map.Entry<String, List<File>> entry : filesMap.entrySet()) {
 			if(filesMap.entrySet().size() > 1 && entry.getValue() != null) {//append header if more records
-				builder.append(entry.getKey()).append(":\n");
+				builder.append(entry.getKey());
+				builder.append(":");
+				ret.add(builder.toString());
+				builder.delete(0, builder.length());
 			}
 			if(entry.getValue() != null) { //append dir list
-				builder.append(prepareSingleDirectoryList(entry.getValue()));
+				ret.addAll(prepareSingleDirectoryList(entry.getValue()));
 			} else { //append error message
 				builder.append("ls: Nelze přistoupit k ");
 				builder.append(entry.getKey());
 				builder.append(": soubor nebo adresář neexistuje");
-				builder.append("\n");
+				ret.add(builder.toString());
+				builder.delete(0, builder.length());
 			}
 		}
 		
-		return builder.toString();
+		return ret;
 	}
 
 	/**
@@ -68,9 +76,13 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 	 * @param files
 	 * @return
 	 */
-	private String prepareSingleDirectoryList(List<File> files) {
+	private List<String> prepareSingleDirectoryList(List<File> files) {
+		List<String> ret = new ArrayList<String>();
+		
 		StringBuilder builder = new StringBuilder();
 		List<File> itList = new ArrayList<File>(files);
+
+		Collections.sort(itList);
 
 		if(showDetailed) { //detailed output
 			String tmp;
@@ -86,7 +98,7 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 			}
 
 			DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
-			for(File f : files) { //create output
+			for(File f : itList) { //create output
 				if(f.isDirectory()) {
 					builder.append(IS_DIR);
 				} else {
@@ -98,7 +110,10 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 				builder.append(format.format(new Date(f.lastModified())));
 				builder.append(" ");
 				builder.append(f.getName());
-				builder.append("\n");
+				
+				//add to output
+				ret.add(builder.toString());
+				builder.delete(0, builder.length());
 			}
 		} else { //regular output
 			for(File f : itList) {
@@ -110,10 +125,11 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 				builder.append(f.getName());
 				builder.append(" ");
 			}
-			//builder.append("\n");
+			//add to output
+			ret.add(builder.toString());
 		}
 
-		return builder.toString();
+		return ret;
 	}
 
 	/**
