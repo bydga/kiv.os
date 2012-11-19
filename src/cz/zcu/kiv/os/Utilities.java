@@ -23,6 +23,14 @@ public class Utilities {
 		System.out.println(sdf.format(new Date()) + ": " + text);
 	}
 	
+	public static String trimLeft(String s) {
+		return s.replaceAll("^\\s+", "");
+	}
+
+	public static String trimRight(String s) {
+		return s.replaceAll("\\s+$", "");
+	}
+	
 	public static void echoArgs(ProcessArgs processArgs, IOutputDevice output) throws Exception{
 
 		String[] optionNames = processArgs.getAllOptionNames();
