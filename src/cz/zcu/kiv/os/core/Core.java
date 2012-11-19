@@ -219,16 +219,31 @@ public class Core {
 		@Override
 		public void shutdown(Process caller) {
 			shutDownLogger("System received shutdown request.");
-			osrunning = false;
+			osRunning = false;
 			int callerPid = caller == null ? -1 : caller.getPid();	
 			try {
 				internalShutdown(callerPid);
-			} catch (Exception ex) {
+			} catch (Exception ex) {//something went wrong during the shutdown, log and kill everything
 				Utilities.log("Error during shutdown. System collaped.");
 				System.exit(0);
 			}
 		}
 
+		/**
+		 * System shutdown processing method.
+		 *
+		 * First retrieves the current login process. If it doesnt have changes (waiting
+		 * for the user to login, it sends SIGTERM signal to the login process)
+		 *
+		 * Otherwise shell process (child of login) is retrieved and SIGTERM is sent
+		 * to all its children except the process calling shutdown.
+		 *
+		 * Processes have 6 seconds to terminate, after that SIGKILL is sent to all
+		 * remaining user processes.
+		 * 
+		 * @param callerPid
+		 * @throws Exception
+		 */
 		private void internalShutdown(int callerPid) throws Exception {
 			Process init = processManager.getProcessTable().get(0).getProcess();
 
@@ -246,7 +261,9 @@ public class Core {
 				}
 
 				int j = 0;
-				while(shell.getChildren().size() > 1 && j < 3) {
+				//has any process called shutdown?
+				int shutDownCount = callerPid == -1 ? 0 : 1;
+				while(shell.getChildren().size() > shutDownCount && j < 3) {
 					try {
 						//wait for processes to terminate
 						shutDownLogger("Waiting for processes to die...");
@@ -258,7 +275,14 @@ public class Core {
 					}
 				}
 
+				if(shell.getChildren().isEmpty()) {//all child process dead, killing shell
+					Core.getInstance().getServices().dispatchSystemSignal(shell.getPid(), Signals.SIGTERM);
+					return;
+				}
+
+				//all child processes dead except for the one which called shutdown, killing shell
 				if(shell.getChildren().size() == 1 && shell.getChildren().get(0).getPid() == callerPid) {
+					Core.getInstance().getServices().dispatchSystemSignal(shell.getPid(), Signals.SIGTERM);
 					return;
 				}
 
@@ -273,6 +297,11 @@ public class Core {
 
 		}
 
+		/**
+		 * Helper method to write system shutdown logs.
+		 * Writes to output stream if possible and to log ALWAYS
+		 * @param msg message to be written
+		 */
 		private void shutDownLogger(String msg) {
 			try {
 				stdOut.writeLine(msg);
