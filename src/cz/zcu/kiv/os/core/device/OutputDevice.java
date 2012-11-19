@@ -1,8 +1,7 @@
 package cz.zcu.kiv.os.core.device;
 
+import cz.zcu.kiv.os.Utilities;
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Output device implementation. Can write into any open output stream provided
@@ -31,8 +30,7 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
             writer.newLine();
             writer.flush();
         } catch (IOException ex) {
-            //TODO handle exception
-            Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);
+            Utilities.log("Error while writing to the OutputDevice.");
         }
     }
 
@@ -41,8 +39,7 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
         try {
             writer.close();
         } catch (IOException ex) {
-            //TODO handle exception
-            Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);
+            Utilities.log("Error while closing OutputDevice.");
         } finally {
 			writer = null;
 		}
@@ -53,18 +50,17 @@ public class OutputDevice extends AbstractDevice implements IOutputDevice {
         try {
             writer.close();
         } catch (IOException ex) {
-            Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);
+            Utilities.log("Error while closing OutputDevice.");
         }
     }
 
 	@Override
-	public void write(String input) throws Exception {
+	public void write(String input) {
 		try {
             writer.write(input);
             writer.flush();
         } catch (IOException ex) {
-            //TODO handle exception
-            Logger.getLogger(OutputDevice.class.getName()).log(Level.SEVERE, null, ex);
+            Utilities.log("Error while writing to the OutputDevice.");
         }
 	}
 }

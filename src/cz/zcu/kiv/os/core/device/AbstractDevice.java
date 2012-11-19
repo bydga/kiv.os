@@ -18,18 +18,11 @@ public abstract class AbstractDevice implements IDevice {
         this.stdStream = stdStream;
     }
 
-    /**
-     *
-     * @return true if the device is open
-     */
     @Override
     public boolean isOpen() {
         return open;
     }
 
-    /**
-     * Closes the device.
-     */
     @Override
     public synchronized void detach() throws IOException {
         if(open) {

@@ -17,6 +17,10 @@ public class FileInputDevice extends InputDevice {
         this.path = path;
     }
 
+	/**
+	 * 
+	 * @return System (simulated) path to the file.
+	 */
     public String getPath() {
         return path;
     }

@@ -12,7 +12,6 @@ public interface IInputDevice extends IDevice {
      * Read one line from the input stream if there is any. Blocks otherwise.
      * @return
      */
-    //TODO better exception
     public String readLine() throws Exception;
 
 }

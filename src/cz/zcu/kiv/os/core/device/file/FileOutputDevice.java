@@ -17,7 +17,11 @@ public class FileOutputDevice extends OutputDevice {
         super(outputStream, false);
         this.path = path;
     }
-
+	
+	/**
+	 *
+	 * @return System (simulated) path to the file.
+	 */
     public String getPath() {
         return path;
     }

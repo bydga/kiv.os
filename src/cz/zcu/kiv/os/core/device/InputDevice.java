@@ -1,8 +1,7 @@
 package cz.zcu.kiv.os.core.device;
 
+import cz.zcu.kiv.os.Utilities;
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Input device implementation. Can read from any InputStream provided to it.
@@ -29,7 +28,7 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
 		try {
 			return reader.readLine();
 		} catch (IOException ex) {
-			Logger.getLogger(InputDevice.class.getName()).log(Level.SEVERE, null, ex);
+			Utilities.log("Error while reading from the InputDevice.");
 			return null;
 		}
 	}
@@ -40,7 +39,7 @@ public class InputDevice extends AbstractDevice implements IInputDevice {
 			reader.close();
             
 		} catch (IOException ex) {
-			Logger.getLogger(InputDevice.class.getName()).log(Level.SEVERE, null, ex);
+			Utilities.log("Error while closing the InputDevice.");
 		} finally {
 			reader = null;
 		}
