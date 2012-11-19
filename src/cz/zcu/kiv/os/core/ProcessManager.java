@@ -36,44 +36,46 @@ public class ProcessManager implements Observer {
 	}
 
 	public Process createProcess(String processName, ProcessProperties properties) throws NoSuchProcessException {
+		int pid;
 		synchronized (this.processTable) {
-			int pid;
 			do {
 				this.lastPID = (lastPID + 1 <= 0) ? 0 : lastPID + 1;
 				pid = lastPID;
 			} while (this.processTable.containsKey(this.lastPID));
+		}
 
 
-			try {
-				//class name begins with Capital letter
-				String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
-				String fullClassName = Process.PROCESS_PACKAGE + "." + className;
-				Class procClass = Class.forName(fullClassName);
-				Constructor constructor = procClass.getConstructor();
+		try {
+			//class name begins with Capital letter
+			String className = Character.toUpperCase(processName.charAt(0)) + processName.substring(1).toLowerCase();
+			String fullClassName = Process.PROCESS_PACKAGE + "." + className;
+			Class procClass = Class.forName(fullClassName);
+			Constructor constructor = procClass.getConstructor();
 
-				Process p = (Process) constructor.newInstance();
-				p.init(pid, properties);
+			Process p = (Process) constructor.newInstance();
+			p.init(pid, properties);
 
-				ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess);
+			ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess());
+			synchronized(this.processTable) {
 				this.processTable.put(pid, record);
-				addStreamsToProcessTable(p);
-
-				if (properties.parent != null) { //because of init
-					properties.parent.addChildren(p);
-				}
-				if (!properties.isBackgroundProcess) {
-					this.foregroundProcess = p;
-				}
-				Utilities.log("FG: " + p.getClass().getName());
-
-				p.addObserver(this);
-				p.start();
-
-				return p;
-			} catch (Exception ex) {
-				throw new NoSuchProcessException("Process " + processName + " failed to create: " + ex.getClass().getName() + ": " + ex.getMessage());
-
 			}
+			addStreamsToProcessTable(p);
+
+			if (properties.parent != null) { //because of init
+				properties.parent.addChildren(p);
+			}
+			if (!properties.isBackgroundProcess()) {
+				this.foregroundProcess = p;
+			}
+			Utilities.log("FG: " + p.getClass().getName());
+
+			p.addObserver(this);
+			p.start();
+
+			return p;
+		} catch (Exception ex) {
+			throw new NoSuchProcessException("Process " + processName + " failed to create: " + ex.getClass().getName() + ": " + ex.getMessage());
+
 		}
 	}
 
@@ -135,7 +137,6 @@ public class ProcessManager implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		Process finished = (Process) o;
-		// TODO: handle change of Observable object (stopped process etc)
 		switchForegroundProcess(finished.getParent());
 	}
 
@@ -145,10 +146,9 @@ public class ProcessManager implements Observer {
 		}
 
 		if (newFg != null) {
-			synchronized (newFg) {
-				newFg.setForegroundProcess(true);
-				newFg.notifyAll();
-			}
+			newFg.setForegroundProcess(true);
+			//wakeup processes waiting for newFg to get foreground
+			newFg.notifyIsForeground();
 		}
 	}
 
@@ -165,9 +165,6 @@ public class ProcessManager implements Observer {
 		for (IDevice device : devs) {
 			try {
 				device.detach();
-
-
-
 
 			} catch (IOException ex) {
 				Logger.getLogger(ProcessManager.class

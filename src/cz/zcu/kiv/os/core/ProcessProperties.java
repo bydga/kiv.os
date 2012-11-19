@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.core.device.IInputDevice;
@@ -18,9 +14,9 @@ public class ProcessProperties {
 	public IInputDevice inputStream;
 	public IOutputDevice outputStream;
 	public IOutputDevice errorStream;
-	public String workingDir;
+	private String workingDir;
 	public ProcessGroup processGroup;
-	public boolean isBackgroundProcess;
+	private boolean backgroundProcess;
 	public String user;
 
 	public ProcessProperties(Process parent, String user, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ProcessGroup processGroup) {
@@ -35,6 +31,22 @@ public class ProcessProperties {
 		this.errorStream = errorStream;
 		this.workingDir = workingDir;
 		this.processGroup = processGroup;
-		this.isBackgroundProcess = isBackgroundProcess;
+		this.backgroundProcess = isBackgroundProcess;
+	}
+
+	public synchronized boolean isBackgroundProcess() {
+		return this.backgroundProcess;
+	}
+
+	public synchronized String getWorkingDir() {
+		return this.workingDir;
+	}
+
+	public synchronized void setBackgroundProcess(boolean backgroundProcess) {
+		this.backgroundProcess = backgroundProcess;
+	}
+
+	public synchronized void setWorkingDir(String workingDir) {
+		this.workingDir = workingDir;
 	}
 }

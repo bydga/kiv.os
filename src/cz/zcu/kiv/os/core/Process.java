@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
@@ -12,12 +8,7 @@ import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.interrupts.Interrupt;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
 
 /**
  * observable - because of process cleanup during process termination observer because of system/keyboard events
@@ -39,7 +30,7 @@ public abstract class Process extends Observable implements Observer {
 	protected int exitCode = 0;
 
 	public String getWorkingDir() {
-		return this.properties.workingDir;
+		return this.properties.getWorkingDir();
 	}
 
 	public Process getParent() {
@@ -50,8 +41,10 @@ public abstract class Process extends Observable implements Observer {
 		return this.properties.user;
 	}
 
-	public synchronized List<Process> getChildren() {
-		return this.children;
+	public List<Process> getChildren() {
+		synchronized(this.children) {
+			return Collections.unmodifiableList(this.children);
+		}
 	}
 
 	protected int getExitCode() throws InterruptedException {
@@ -74,29 +67,31 @@ public abstract class Process extends Observable implements Observer {
 			} else {
 				root = this.getWorkingDir();
 			}
-			this.properties.workingDir = FileManager.resolveRelativePath(root, workingDir);
+			this.properties.setWorkingDir(FileManager.resolveRelativePath(root, workingDir));
 		} else {
 			this.getOutputStream().writeLine("Desired path doesn't exist.");
 		}
 	}
 
-	public void setInputStream(IInputDevice stream) {
-		this.properties.inputStream = stream;
-	}
-
-	public void setOutputStream(IOutputDevice stream) {
-		this.properties.outputStream = stream;
-	}
-
-	public void setErrorStream(IOutputDevice stream) {
-		this.properties.errorStream = stream;
-	}
-
-	protected synchronized IInputDevice getInputStream() throws InterruptedException {
-		while (!this.isForegroundProcess() && this.properties.inputStream.isStdStream()) { //only foreground process can read from stdin
-			this.wait();
+	protected IInputDevice getInputStream() throws InterruptedException {
+		if(this.properties.inputStream.isStdStream()) { //only foreground process can read from stdin
+			this.waitToGetForeground();
 		}
 		return this.properties.inputStream;
+	}
+
+	public void waitToGetForeground() throws InterruptedException {
+		while(!this.isForegroundProcess()) {
+			synchronized(this.properties) {
+				this.properties.wait();
+			}
+		}
+	}
+
+	public void notifyIsForeground() {
+		synchronized(this.properties) {
+			this.properties.notifyAll();
+		}
 	}
 
 	public IOutputDevice getOutputStream() {
@@ -165,25 +160,29 @@ public abstract class Process extends Observable implements Observer {
 	}
 
 	protected boolean isForegroundProcess() {
-		return !this.properties.isBackgroundProcess;
+		return !this.properties.isBackgroundProcess();
 	}
 
 	protected void setForegroundProcess(boolean value) {
-		this.properties.isBackgroundProcess = !value;
+		this.properties.setBackgroundProcess(!value);
 	}
 
 	/**
 	 * Add children process id
 	 */
 	protected final void addChildren(Process p) {
-		this.children.add(p);
+		synchronized(this.children) {
+			this.children.add(p);
+		}
 	}
 
 	/**
 	 * Remove children process id
 	 */
 	protected final void removeChildren(Process p) {
-		this.children.remove(p);
+		synchronized(this.children) {
+			this.children.remove(p);
+		}
 	}
 
 	private void handleSignal(Signals sig) {
