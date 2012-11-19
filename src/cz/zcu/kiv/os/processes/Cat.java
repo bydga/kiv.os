@@ -76,7 +76,12 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		
 		// write all files
 		String[] names = processArgs.getAllNames();
-		//
+		if(names.length == 0) {
+			String userInput = this.readStandardInput();
+			if(userInput != null) {
+				this.getOutputStream().writeLine(userInput);
+			}
+		}
 		for (int i = 0; i < names.length; i++) {
 			
 			if( names[i].equals("-") ) {
@@ -107,7 +112,6 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		}
 		input.detach();
 	}
-	
 	
 	private String readStandardInput() throws Exception {
 		

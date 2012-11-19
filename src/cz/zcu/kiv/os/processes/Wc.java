@@ -4,7 +4,6 @@
  */
 package cz.zcu.kiv.os.processes;
 
-import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.ProcessArgs;
 import cz.zcu.kiv.os.core.ProcessDefinedOptions;
@@ -47,7 +46,7 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 	@Override
 	public void run(String[] args) throws Exception {
 			
-		// set options
+		// set defined options
 		ProcessDefinedOptions definedOptions = new ProcessDefinedOptions();
 		definedOptions.addOption("-m", 0);
 		definedOptions.addOption("--chars", 0);
@@ -60,7 +59,6 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		definedOptions.addOption("--help", 0);
 		ProcessArgs processArgs = new ProcessArgs(args, definedOptions, "-");
 		
-		//Utilities.echoArgs(processArgs, this.getOutputStream());
 		ProcessOption[] options = processArgs.getAllOptions();
 		// apply options
 		for (int i = 0; i < options.length; i++) {
@@ -110,8 +108,7 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 			}
 			else {
 				try {
-					IInputDevice file = Core.getInstance().getServices().openFileForRead(this, names[i]);
-					this.readFile(file);
+					this.readFile(names[i]);
 					this.echoCounts(names[i]);
 					this.resetCounts();
 				} catch (FileNotFoundException e) {
@@ -125,32 +122,30 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		}
 	}
 	
-	private void readFile(IInputDevice input) throws Exception {
+	private void readFile(String fileName) throws Exception {
 		
+		IInputDevice file = Core.getInstance().getServices().openFileForRead(this, fileName);
 		String line;
-		while ((line = input.readLine()) != null) {
+		while ((line = file.readLine()) != null) {
 			this.getCountsFromLine(line);
 		}
-		input.detach();
+		file.detach();
 	}
 	
 	private void readStandardInput() throws Exception {
 		
-		String line = this.getInputStream().readLine();
-		// TODO: compare with null, not with ""
-		while(!line.equals("")) {
+		String line;
+		while((line = this.getInputStream().readLine()) != null) {
 			this.getOutputStream().writeLine(line);
 			this.getCountsFromLine(line);
-			line = this.getInputStream().readLine();
 		}
 	}
 	
 	private void readPipe() throws Exception {
 		
-		String line = this.getInputStream().readLine();
-		while(line != null) {
+		String line;
+		while((line = this.getInputStream().readLine()) != null) {
 			this.getCountsFromLine(line);
-			line = this.getInputStream().readLine();
 		}
 	}
 	
