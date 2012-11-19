@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.core.interrupts;
 
 /**
- *
+ * Available signals, that the operating system supports.
  * @author bydga
  */
 public enum Signals {
@@ -20,12 +16,7 @@ public enum Signals {
 	SIGQUIT,
 	
 	/**
-	 * CTRL+Z
-	 */
-	SIGPAUSE,
-	
-	/**
-	 * 
+	 * Unoverridable signal indicating the process to stop.
 	 */
 	SIGKILL,
 	

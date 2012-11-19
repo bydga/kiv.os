@@ -1,6 +1,7 @@
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
+import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IDevice;
 import cz.zcu.kiv.os.core.device.PipeDevice;
 import java.io.IOException;
@@ -10,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Service class for the OS Core. Encapsulates process table, processes in them and opened streams.
  * @author bydga
  */
 public class ProcessManager implements Observer {
@@ -20,15 +21,26 @@ public class ProcessManager implements Observer {
 	private final Object foregroundProcessLock = new Object();
 	private Process foregroundProcess = null;
 
+	/**
+	 * Creates new instance of ProcessManager class.
+	 */
 	public ProcessManager() {
 		this.processTable = new HashMap<Integer, ProcessTableRecord>();
 		this.lastPID = -1;
 	}
 
+	/**
+	 * Returns processTable map containing info about all running processes.
+	 * @return 
+	 */
 	public Map<Integer, ProcessTableRecord> getProcessTable() {
 		return this.processTable;
 	}
 
+	/**
+	 * Returns current FG process.
+	 * @return Process that is currently operating in foreground.
+	 */
 	public Process getForegroundProcess() {
 		synchronized (foregroundProcessLock) {
 			return this.foregroundProcess;
@@ -55,7 +67,7 @@ public class ProcessManager implements Observer {
 			Process p = (Process) constructor.newInstance();
 			p.init(pid, properties);
 
-			ProcessTableRecord record = new ProcessTableRecord(p, properties.isBackgroundProcess());
+			ProcessTableRecord record = new ProcessTableRecord(p);
 			synchronized(this.processTable) {
 				this.processTable.put(pid, record);
 			}
@@ -104,6 +116,12 @@ public class ProcessManager implements Observer {
 		}
 	}
 
+	/**
+	 * Blocking call to the process. Waits for its exit code, cleanup after the process terminates and returns its exit value.
+	 * @param p Process to wait for.
+	 * @return Exit code of the finished process.
+	 * @throws InterruptedException Is thrown when the caller (reader of the exit code) is interrupted in the waiting.
+	 */
 	public int readProcessExitCode(Process p) throws InterruptedException {
 		try {
 			int res = p.getExitCode();
@@ -122,24 +140,44 @@ public class ProcessManager implements Observer {
 		}
 	}
 
+	/**
+	 * Adds new Device to the process specified by the pid.
+	 * @param pid Pid of process to attach stream to.
+	 * @param stream Stream to be attached.
+	 */
 	public void addStreamToProcess(int pid, IDevice stream) {
 		synchronized (this.processTable) {
 			this.processTable.get(pid).getOpenedStreams().add(stream);
 		}
 	}
 
+	/**
+	 * Removes existing Device from the process specified by the pid.
+	 * @param pid Pid of process to remove stream from.
+	 * @param stream Stream to be removed.
+	 */
 	public void removeStreamFromProcess(int pid, IDevice stream) {
 		synchronized (this.processTable) {
 			this.processTable.get(pid).getOpenedStreams().remove(stream);
 		}
 	}
 
+	/**
+	 * Implementation of the observable pattern.
+	 * This method is called when a process finishes and the foreground must be given back to its parent.
+	 * @param o Finished process.
+	 * @param arg null
+	 */
 	@Override
 	public void update(Observable o, Object arg) {
 		Process finished = (Process) o;
 		switchForegroundProcess(finished.getParent());
 	}
 
+	/**
+	 * Switches the foreground process.
+	 * @param newFg new process that will operate on foreground.
+	 */
 	private void switchForegroundProcess(Process newFg) {
 		synchronized (foregroundProcessLock) {
 			this.foregroundProcess = newFg;
@@ -152,6 +190,10 @@ public class ProcessManager implements Observer {
 		}
 	}
 
+	/**
+	 * Does cleanup after process ends. Removes it from the processtable and closes it's unclosed streams.
+	 * @param p Process to cleanup after.
+	 */
 	private void cleanUpProcess(Process p) {
 		synchronized (this.processTable) {
 			closeStreams(p.getPid());
@@ -160,6 +202,10 @@ public class ProcessManager implements Observer {
 
 	}
 
+	/**
+	 * Closes all attached streams to a finished process.
+	 * @param pid 
+	 */
 	private void closeStreams(int pid) {
 		List<IDevice> devs = processTable.get(pid).getOpenedStreams();
 		for (IDevice device : devs) {

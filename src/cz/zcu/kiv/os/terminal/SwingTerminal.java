@@ -200,7 +200,6 @@ public class SwingTerminal extends InOutDevice {
 			private boolean ctrlDown = false;
 			private boolean cDown = false;
 			private boolean dDown = false;
-			private boolean zDown = false;
 
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -223,9 +222,6 @@ public class SwingTerminal extends InOutDevice {
 					case KeyEvent.VK_C:
 						this.cDown = true;
 						break;
-					case KeyEvent.VK_Z:
-						this.zDown = true;
-						break;
 					case KeyEvent.VK_D:
 						this.dDown = true;
 						break;
@@ -239,9 +235,6 @@ public class SwingTerminal extends InOutDevice {
 					e.consume();
 				} else if (this.ctrlDown && this.dDown) {
 					Core.getInstance().getServices().dispatchSystemSignal(Signals.SIGQUIT);
-					e.consume();
-				} else if (this.ctrlDown && this.zDown) {
-					Core.getInstance().getServices().dispatchSystemSignal(Signals.SIGPAUSE);
 					e.consume();
 				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
 					Core.getInstance().getServices().dispatchKeyboardEvent(KeyboardEvent.ARROW_UP);
@@ -257,9 +250,6 @@ public class SwingTerminal extends InOutDevice {
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_C:
 						this.cDown = false;
-						break;
-					case KeyEvent.VK_Z:
-						this.zDown = false;
 						break;
 					case KeyEvent.VK_D:
 						this.dDown = false;

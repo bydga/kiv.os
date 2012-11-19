@@ -5,35 +5,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Simple structure wrapping process and its streams and some additional info about the process.
  *
  * @author bydga
  */
 public class ProcessTableRecord {
 
 	private Process process;
-	private boolean backgroundProcess;
 	private List<IDevice> openedStreams;
 
-        public ProcessTableRecord(Process p, boolean isBackgroundProcess) {
+	public ProcessTableRecord(Process p) {
 		this.process = p;
-		this.backgroundProcess = isBackgroundProcess;
 		this.openedStreams = new ArrayList<IDevice>();
 	}
 
-        public boolean isForegroundProcess() {
-		return this.backgroundProcess;
-	}
-
+	/**
+	 * Gets all streams associated with this ProcessInfo entry.
+	 *
+	 * @return
+	 */
 	public List<IDevice> getOpenedStreams() {
 		return this.openedStreams;
 	}
 
+	/**
+	 * Get process associated with this ProcessInfo entry.
+	 *
+	 * @return
+	 */
 	public Process getProcess() {
 		return this.process;
 	}
 
-        public void addOpenStream(IDevice stream) {
-            this.openedStreams.add(stream);
-        }
-
+	/**
+	 * Adds new stream to the process.
+	 *
+	 * @param stream Stream to be addded.
+	 */
+	public void addOpenStream(IDevice stream) {
+		this.openedStreams.add(stream);
+	}
 }

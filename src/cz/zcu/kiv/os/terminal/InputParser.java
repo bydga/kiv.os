@@ -3,7 +3,7 @@ package cz.zcu.kiv.os.terminal;
 import java.util.*;
 
 /**
- *
+ * Handles parsing of the input command in shell and returns structure containing compatibile command definition.
  * @author bydga
  */
 public class InputParser {
@@ -14,6 +14,12 @@ public class InputParser {
 	public static final char PIPELINE_OPERATOR = '|';
 	public static final char PARAMETER_DELIMITER = ' ';
 
+	/**
+	 * Parses the input and returns linked structure of the given command.
+	 * @param input String representing the command input.
+	 * @return ParseResult structure. Linked list connected by pipeline - each containig one process definition.
+	 * @throws ParseException Is thrown when the input is not a valid input parser.
+	 */
 	public ParseResult parse(String input) throws ParseException {
 		input = input.trim();
 		int inputSize = input.length();
