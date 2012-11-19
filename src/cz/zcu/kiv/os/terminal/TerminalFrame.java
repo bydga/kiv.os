@@ -1,15 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.terminal;
 
 import java.awt.HeadlessException;
 import javax.swing.JFrame;
 
 /**
+ * JFrame extension which is able to listen to MessageEvents.
  *
- * @author veveri
+ * @author Jakub Danek
  */
 public class TerminalFrame extends JFrame {
 

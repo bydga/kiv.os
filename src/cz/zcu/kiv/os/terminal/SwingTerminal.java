@@ -45,7 +45,8 @@ public class SwingTerminal extends InOutDevice {
 	public void setText(String text) {
 		try {
 			String original = this.historyArea.getText(0, this.historyArea.getLineStartOffset(this.historyArea.getLineCount() - 1));
-			this.historyArea.setText(original + text);
+			EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+			queue.postEvent(new MessageEvent(frame, original + text, false));
 		} catch (BadLocationException ex) {
 			Utilities.log("setText error");
 		}
@@ -104,8 +105,13 @@ public class SwingTerminal extends InOutDevice {
 			@Override
 			protected void processEvent(AWTEvent e) {
 				if (e instanceof MessageEvent) {
-					String s = ((MessageEvent) e).getMessage();
-					historyArea.append(s + "\n");
+					MessageEvent ev = (MessageEvent) e;
+					String s = ev.getMessage();
+					if(ev.isAppend()) {
+						historyArea.append(s + "\n");
+					} else {
+						historyArea.setText(s);
+					}
 					SwingTerminal.this.setCaretToEnd();
 				} else {
 					super.processEvent(e);
