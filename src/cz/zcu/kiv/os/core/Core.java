@@ -213,44 +213,57 @@ public class Core {
 		public void shutdown(Process caller) {
 			shutDownLogger("System received shutdown request.");
 			osrunning = false;
-			
+			int callerPid = caller == null ? -1 : caller.getPid();	
+			try {
+				internalShutdown(callerPid);
+			} catch (Exception ex) {
+				Utilities.log("Error during shutdown. System collaped.");
+				System.exit(0);
+			}
+		}
+
+		private void internalShutdown(int callerPid) throws Exception {
 			Process init = processManager.getProcessTable().get(0).getProcess();
 
 			//send sigterm to all processes
 			Process login = init.getChildren().get(0);
-			Process shell = login.getChildren().get(0);
+			if(!login.getChildren().isEmpty()) {
+				Process shell = login.getChildren().get(0);
 
-			shutDownLogger("Sending SIGTERM to user processes.");
-			for(Process p : shell.getChildren()) {
-				if(p.pid == caller.pid) {
-					continue;
+				shutDownLogger("Sending SIGTERM to user processes.");
+				for(Process p : shell.getChildren()) {
+					if(p.pid == callerPid) {
+						continue;
+					}
+					Core.getInstance().getServices().dispatchSystemSignal(p.getPid(), Signals.SIGTERM);
 				}
-				Core.getInstance().getServices().dispatchSystemSignal(p.getPid(), Signals.SIGTERM);
-			}
 
-			int j = 0;
-			while(shell.getChildren().size() > 1 && j < 3) {
-				try {
-					//wait for processes to terminate
-					shutDownLogger("Waiting for processes to die...");
-					j++;
-					Thread.sleep(2000);
-					shell.checkForFinishedChildren();
-				} catch (InterruptedException ex) {
-					//shutdown cannot be interrupted, go on
+				int j = 0;
+				while(shell.getChildren().size() > 1 && j < 3) {
+					try {
+						//wait for processes to terminate
+						shutDownLogger("Waiting for processes to die...");
+						j++;
+						Thread.sleep(2000);
+						shell.checkForFinishedChildren();
+					} catch (InterruptedException ex) {
+						//shutdown cannot be interrupted, go on
+					}
 				}
+
+				if(shell.getChildren().size() == 1 && shell.getChildren().get(0).getPid() == callerPid) {
+					return;
+				}
+
+				//killing remaining processes
+				shutDownLogger("Killing remaining processes");
+				if(init.getChildren().size() > 0) {
+					Core.getInstance().getServices().dispatchSystemSignal(login.pid, Signals.SIGKILL);
+				}
+			} else { //disrupt login
+				Core.getInstance().getServices().dispatchSystemSignal(login.getPid(), Signals.SIGTERM);
 			}
 
-			if(shell.getChildren().size() == 1 && shell.getChildren().get(0).getPid() == caller.getPid()) {
-				return;
-			}
-
-			//killing remaining processes
-			shutDownLogger("Killing remaining processes");
-			if(init.getChildren().size() > 0) {
-				Core.getInstance().getServices().dispatchSystemSignal(login.pid, Signals.SIGKILL);
-			}
-		
 		}
 
 		private void shutDownLogger(String msg) {

@@ -74,7 +74,7 @@ public class SwingTerminal extends InOutDevice {
 		} catch (InterruptedException ex) {
 			//close the window, listener died
 		} finally {
-			WindowEvent wev = new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING);
+			WindowEvent wev = new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSED);
 			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
 		}
 	}
@@ -107,19 +107,21 @@ public class SwingTerminal extends InOutDevice {
 		frame.addWindowListener(new WindowAdapter() {
 
 			@Override
+			public void windowClosed(WindowEvent e) {
+				frame.dispose();
+				System.exit(0);
+			}
+
+			@Override
 			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				//shortcut to shutdown system correctly when terminal window closed
-				//manually via X button
 				if(Core.getInstance().getServices().isRunning()) {
 					Core.getInstance().getServices().shutdown(null);
 				}
 			}
 
-
 		});
 		initComponents();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
 		frame.pack();
 	}
