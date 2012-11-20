@@ -1,7 +1,6 @@
 package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.Utilities;
-import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.IDevice;
 import cz.zcu.kiv.os.core.device.PipeDevice;
 import java.io.IOException;
@@ -146,9 +145,11 @@ public class ProcessManager implements Observer {
 	 * @param stream Stream to be attached.
 	 */
 	public void addStreamToProcess(int pid, IDevice stream) {
+		ProcessTableRecord rec;
 		synchronized (this.processTable) {
-			this.processTable.get(pid).getOpenedStreams().add(stream);
+			rec = this.processTable.get(pid);
 		}
+		rec.addOpenStream(stream);
 	}
 
 	/**
@@ -157,9 +158,11 @@ public class ProcessManager implements Observer {
 	 * @param stream Stream to be removed.
 	 */
 	public void removeStreamFromProcess(int pid, IDevice stream) {
+		ProcessTableRecord rec;
 		synchronized (this.processTable) {
-			this.processTable.get(pid).getOpenedStreams().remove(stream);
+			rec = this.processTable.get(pid);
 		}
+		rec.removeStream(stream);
 	}
 
 	/**
@@ -195,8 +198,8 @@ public class ProcessManager implements Observer {
 	 * @param p Process to cleanup after.
 	 */
 	private void cleanUpProcess(Process p) {
+		closeStreams(p.getPid());
 		synchronized (this.processTable) {
-			closeStreams(p.getPid());
 			this.processTable.remove(p.getPid());
 		}
 
@@ -207,7 +210,11 @@ public class ProcessManager implements Observer {
 	 * @param pid 
 	 */
 	private void closeStreams(int pid) {
-		List<IDevice> devs = processTable.get(pid).getOpenedStreams();
+		ProcessTableRecord rec;
+		synchronized(this.processTable) {
+			rec = processTable.get(pid);
+		}
+		List<IDevice> devs = rec.getOpenedStreams();
 		for (IDevice device : devs) {
 			try {
 				device.detach();

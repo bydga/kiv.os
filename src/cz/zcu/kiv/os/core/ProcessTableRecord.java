@@ -2,6 +2,7 @@ package cz.zcu.kiv.os.core;
 
 import cz.zcu.kiv.os.core.device.IDevice;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,7 +26,9 @@ public class ProcessTableRecord {
 	 * @return
 	 */
 	public List<IDevice> getOpenedStreams() {
-		return this.openedStreams;
+		synchronized(this.openedStreams) {
+			return Collections.unmodifiableList(this.openedStreams);
+		}
 	}
 
 	/**
@@ -43,6 +46,18 @@ public class ProcessTableRecord {
 	 * @param stream Stream to be addded.
 	 */
 	public void addOpenStream(IDevice stream) {
-		this.openedStreams.add(stream);
+		synchronized(this.openedStreams) {
+			this.openedStreams.add(stream);
+		}
+	}
+
+	/**
+	 * Removes stram from the process table record.
+	 * @param stream stream to be removed
+	 */
+	public void removeStream(IDevice stream) {
+		synchronized(this.openedStreams) {
+			this.openedStreams.remove(stream);
+		}
 	}
 }
