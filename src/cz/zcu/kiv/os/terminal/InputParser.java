@@ -4,6 +4,7 @@ import java.util.*;
 
 /**
  * Handles parsing of the input command in shell and returns structure containing compatibile command definition.
+ *
  * @author bydga
  */
 public class InputParser {
@@ -16,6 +17,7 @@ public class InputParser {
 
 	/**
 	 * Parses the input and returns linked structure of the given command.
+	 *
 	 * @param input String representing the command input.
 	 * @return ParseResult structure. Linked list connected by pipeline - each containig one process definition.
 	 * @throws ParseException Is thrown when the input is not a valid input parser.
@@ -28,8 +30,6 @@ public class InputParser {
 		boolean inStdIn = false;
 		boolean inStdOut = false;
 		boolean stdOutAppend = false;
-		boolean inStdErr = false;
-		boolean stdErrAppend = false;
 
 		ParseResult result = new ParseResult();
 
@@ -84,9 +84,6 @@ public class InputParser {
 				} else if (inStdOut) {
 					result.stdOut = buffer.toString();
 					result.stdOutAppend = stdOutAppend;
-				} else if (inStdErr) {
-					result.stdErr = buffer.toString();
-					result.stdErrAppend = stdErrAppend;
 				} else {
 					parameters.add(buffer.toString());
 					//skip additional spaces if present
@@ -100,16 +97,42 @@ public class InputParser {
 				}
 				inStdIn = false;
 				inStdOut = false;
-				inStdErr = false;
 				stdOutAppend = false;
-				stdErrAppend = false;
 				buffer.delete(0, buffer.length());
 				continue;
 			}
 
-			if (buffer.length() == 1 && !inQuotation && (currentChar == '>' || currentChar == '<' || currentChar == '2')) {
+			if (!inQuotation && (currentChar == '>' || currentChar == '<')) {
+
+				//store previous param
+				if (inStdIn) {
+					buffer.deleteCharAt(buffer.length() - 1);
+					result.stdIn = buffer.toString();
+				} else if (inStdOut) {
+					buffer.deleteCharAt(buffer.length() - 1);
+					result.stdOut = buffer.toString();
+					result.stdOutAppend = stdOutAppend;
+				} else {
+					if (buffer.length() > 1) {
+						buffer.deleteCharAt(buffer.length() - 1);
+						parameters.add(buffer.toString());
+
+					}
+					//skip additional spaces if present
+					while (i + 1 < inputSize) {
+						if (input.charAt(i + 1) == InputParser.PARAMETER_DELIMITER) {
+							i++;
+						} else {
+							break;
+						}
+					}
+				}
+				inStdIn = false;
+				inStdOut = false;
+				stdOutAppend = false;
+				buffer.delete(0, buffer.length());
+
 				//check if it is fwd parameter - need to do this before escaping as the information would be lost
-				buffer.deleteCharAt(buffer.length() - 1);
 				if (currentChar == '>') {
 					inStdOut = true;
 					if (i + 1 < inputSize && input.charAt(i + 1) == '>') {
@@ -118,15 +141,6 @@ public class InputParser {
 					}
 				} else if (currentChar == '<') {
 					inStdIn = true;
-				} else if (currentChar == '2') {
-					if (i + 1 < inputSize && input.charAt(i + 1) == '>') {
-						inStdErr = true;
-						i++;
-						if (i + 1 < inputSize && input.charAt(i + 1) == '>') {
-							stdErrAppend = true;
-							i++;
-						}
-					}
 				}
 
 				//skip additional spaces if present
@@ -159,9 +173,6 @@ public class InputParser {
 		} else if (inStdOut) {
 			result.stdOut = buffer.toString();
 			result.stdOutAppend = stdOutAppend;
-		} else if (inStdErr) {
-			result.stdErr = buffer.toString();
-			result.stdErrAppend = stdErrAppend;
 		} else if (buffer.length() > 0) {
 			parameters.add(buffer.toString());
 		}
@@ -170,6 +181,6 @@ public class InputParser {
 			throw new ParseException("Missing corresponding quotation mark");
 		}
 		result.args = parameters.toArray(new String[]{});
-		return result;
+			return result;
 	}
 }
