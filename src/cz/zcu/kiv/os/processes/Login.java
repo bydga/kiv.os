@@ -10,6 +10,7 @@ import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
+import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 
 /**
  * Process that handles login procedure. It is usually run by init. After successfull login creates new Shell (on foreground).
@@ -22,12 +23,22 @@ public class Login extends Process {
 
 		this.getOutputStream().writeLine("Enter login: ");
 		String login = this.getInputStream().readLine();
-		login = FileManager.removeProhibitedChars(login);
+		try {
+			FileManager.checkProhibitedChars(login);
+		} catch(InvalidPathCharactersException ex) {
+			login = "";
+			this.getOutputStream().writeLine("Following characters cannot be used as filename: " + InvalidPathCharactersException.invalidCharsList());
+		}
 
 		while (login.equals("")) {
 			this.getOutputStream().writeLine("Invalid login name. Enter login:");
 			login = this.getInputStream().readLine();
-			login = FileManager.removeProhibitedChars(login);
+			try {
+				FileManager.checkProhibitedChars(login);
+			} catch (InvalidPathCharactersException ex) {
+				login = "";
+				this.getOutputStream().writeLine("Following characters cannot be used as filename: " + InvalidPathCharactersException.invalidCharsList());
+			}
 		}
 
 		this.getOutputStream().writeLine("Logging in as " + login + "...");

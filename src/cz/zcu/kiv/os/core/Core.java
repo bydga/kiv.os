@@ -5,6 +5,7 @@ import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.device.*;
 import cz.zcu.kiv.os.core.filesystem.FileManager;
 import cz.zcu.kiv.os.core.filesystem.FileMode;
+import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.terminal.SwingTerminal;
@@ -135,14 +136,14 @@ public class Core {
 		}
 
 		@Override
-		public IInputDevice openFileForRead(Process caller, String path) throws IOException {
+		public IInputDevice openFileForRead(Process caller, String path) throws IOException, InvalidPathCharactersException {
 			IInputDevice file = (IInputDevice) fileManager.openFile(path, caller.getWorkingDir(), FileMode.READ);
 			processManager.addStreamToProcess(caller.getPid(), file);
 			return file;
 		}
 
 		@Override
-		public IOutputDevice openFileForWrite(Process caller, String path, boolean append) throws IOException {
+		public IOutputDevice openFileForWrite(Process caller, String path, boolean append) throws IOException, InvalidPathCharactersException {
 			FileMode mode = append ? FileMode.APPEND : FileMode.WRITE;
 			IOutputDevice file = (IOutputDevice) fileManager.openFile(path, caller.getWorkingDir(), mode);
 			processManager.addStreamToProcess(caller.getPid(), file);
@@ -150,12 +151,12 @@ public class Core {
 		}
 
 		@Override
-		public boolean createDirectory(Process caller, String dirName) {
+		public boolean createDirectory(Process caller, String dirName) throws InvalidPathCharactersException {
 			return fileManager.createDirectory(dirName, caller.getWorkingDir());
 		}
 
 		@Override
-		public boolean directoryExists(Process caller, String filename) {
+		public boolean directoryExists(Process caller, String filename) throws InvalidPathCharactersException {
 			return fileManager.directoryExists(filename, caller.getWorkingDir());
 		}
 
@@ -212,7 +213,7 @@ public class Core {
 		}
 
 		@Override
-		public List<File> listFiles(Process caller, String dir) {
+		public List<File> listFiles(Process caller, String dir) throws InvalidPathCharactersException {
 			return Core.this.fileManager.listFiles(dir, caller.getWorkingDir());
 		}
 

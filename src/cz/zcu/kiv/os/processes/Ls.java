@@ -1,6 +1,7 @@
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.core.Core;
+import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import java.io.File;
 import java.text.DateFormat;
 import java.util.*;
@@ -30,9 +31,14 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 
 		Map<String, List<File>> filesMap = new HashMap<String, List<File>>();
 		List<File> tmp;
-		for(String p : paths) {
-			tmp = Core.getInstance().getServices().listFiles(this, p);
-			filesMap.put(p, tmp);
+		try {
+			for(String p : paths) {
+				tmp = Core.getInstance().getServices().listFiles(this, p);
+				filesMap.put(p, tmp);
+			}
+		} catch (InvalidPathCharactersException ex) {
+			this.getOutputStream().writeLine("Following characters cannot be used as filename: " + InvalidPathCharactersException.invalidCharsList());
+			return;
 		}
 
 		List<String> outputList = prepareFileListingOutput(filesMap);

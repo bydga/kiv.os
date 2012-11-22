@@ -10,6 +10,7 @@ import cz.zcu.kiv.os.core.ProcessArgs;
 import cz.zcu.kiv.os.core.ProcessDefinedOptions;
 import cz.zcu.kiv.os.core.ProcessOption;
 import cz.zcu.kiv.os.core.device.IInputDevice;
+import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import java.io.FileNotFoundException;
 
 
@@ -96,6 +97,9 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 					this.readFile(file);
 				} catch (FileNotFoundException e) {
 					this.getOutputStream().writeLine("cat: " + names[i] + ": No such file");
+				} catch (InvalidPathCharactersException ex) {
+					this.getOutputStream().writeLine("Following characters cannot be used as filename: " + InvalidPathCharactersException.invalidCharsList());
+					return;
 				}
 				
 			}

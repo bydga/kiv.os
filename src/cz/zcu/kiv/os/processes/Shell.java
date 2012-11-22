@@ -11,6 +11,8 @@ import cz.zcu.kiv.os.core.Process;
 import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
 import cz.zcu.kiv.os.core.device.*;
+import cz.zcu.kiv.os.core.filesystem.FileManager;
+import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.terminal.InputParser;
 import cz.zcu.kiv.os.terminal.ParseException;
@@ -44,7 +46,7 @@ public class Shell extends Process {
 	 * @param nullValue Value, that will be returned in case path is null - output is not forwarded
 	 * @return
 	 */
-	private IOutputDevice createOutput(String path, boolean append, IOutputDevice nullValue) {
+	private IOutputDevice createOutput(String path, boolean append, IOutputDevice nullValue) throws InvalidPathCharactersException {
 		if (path != null) {
 
 			try {
@@ -65,7 +67,7 @@ public class Shell extends Process {
 	 * @param nullValue Value, that will be returned in case path is null - input is not forwarded
 	 * @return
 	 */
-	private IInputDevice createInput(String path, IInputDevice nullValue) {
+	private IInputDevice createInput(String path, IInputDevice nullValue) throws InvalidPathCharactersException {
 		if (path != null) {
 
 			try {
@@ -86,7 +88,7 @@ public class Shell extends Process {
 	 * @return The newly created process, or in case there is the pipeline, the latest process.
 	 * @throws NoSuchProcessException
 	 */
-	private List<Process> createProcess(ParseResult parseResult) throws NoSuchProcessException, InterruptedException {
+	private List<Process> createProcess(ParseResult parseResult) throws NoSuchProcessException, InterruptedException, InvalidPathCharactersException {
 
 		ProcessGroup group = new ProcessGroup(new ThreadGroup("group_" + parseResult.args[0]));
 		//only for debugging reasons
@@ -152,6 +154,20 @@ public class Shell extends Process {
 				try {
 					//process command
 					ParseResult result = parser.parse(command);
+					//check file paths for invalid characters
+					try {
+						ParseResult tmp = result;
+						do {
+							FileManager.checkProhibitedChars(tmp.stdIn);
+							FileManager.checkProhibitedChars(tmp.stdOut);
+							FileManager.checkProhibitedChars(tmp.stdErr);
+							tmp = tmp.pipeline;
+						} while (tmp != null);
+					} catch (InvalidPathCharactersException ex) {
+						this.getOutputStream().writeLine("Following characters cannot be used as filename: " + InvalidPathCharactersException.invalidCharsList());
+						continue;
+					}
+
 
 					//special cases of input command
 					if (result.args.length == 0) {

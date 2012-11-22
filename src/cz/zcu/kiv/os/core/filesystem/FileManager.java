@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 public class FileManager {
 
 	public static final String SEPARATOR = System.getProperty("file.separator");
-	public static String[] ILLEGAL_FILE_CHARS = new String[]{"\\", "*", "?", ":", "\"", "<", ">", "|"};
+	public static char[] ILLEGAL_FILE_CHARS = new char[]{'\\', '*', '?', ':', '"', '<', '>', '|'};
 	private final String rootPath;
 
 	/**
@@ -40,8 +40,9 @@ public class FileManager {
 	 * @param mode mode in which the file shall be opened
 	 * @return created device
 	 * @throws FileNotFoundException if file doesnt exist and couldnt be created
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public AbstractDevice openFile(String path, String workingDir, FileMode mode) throws FileNotFoundException {
+	public AbstractDevice openFile(String path, String workingDir, FileMode mode) throws FileNotFoundException, InvalidPathCharactersException {
 		String realPath = resolveRealPath(path, workingDir);
 
 		return prepareDevice(realPath, mode);
@@ -53,8 +54,9 @@ public class FileManager {
 	 * @param path dirpath
 	 * @param workingDir working dir the path is relative to
 	 * @return
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public boolean createDirectory(String path, String workingDir) {
+	public boolean createDirectory(String path, String workingDir) throws InvalidPathCharactersException {
 		String realPath = resolveRealPath(path, workingDir);
 
 		return mkDir(realPath);
@@ -66,8 +68,9 @@ public class FileManager {
 	 * @param path dirpath
 	 * @param workingDir working dir the path is relative to
 	 * @return
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public boolean directoryExists(String path, String workingDir) {
+	public boolean directoryExists(String path, String workingDir) throws InvalidPathCharactersException {
 		String realPath = resolveRealPath(path, workingDir);
 
 		return isDir(realPath);
@@ -79,8 +82,9 @@ public class FileManager {
 	 * @param path dirpath
 	 * @param workingDir working dir the path is relative to
 	 * @return list of files in the dir given, or filename if path is file, or null otherwise
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public List<File> listFiles(String path, String workingDir) {
+	public List<File> listFiles(String path, String workingDir) throws InvalidPathCharactersException {
 		String realPath = resolveRealPath(path, workingDir);
 
 		File dir = new File(realPath);
@@ -121,10 +125,11 @@ public class FileManager {
 	 * @param pathArg path to the file in the simulated system
 	 * @param workingDir directory to which the path is relative to (if related)
 	 * @return real path to the file in the host system
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public String resolveRealPath(String pathArg, String workingDir) {
+	public String resolveRealPath(String path, String workingDir) throws InvalidPathCharactersException {
 		StringBuilder realPath = new StringBuilder(getRootPath());
-		String path = removeProhibitedChars(pathArg);
+		checkProhibitedChars(path);
 
 		String innerPath;
 		switch (path.charAt(0)) {
@@ -150,13 +155,16 @@ public class FileManager {
 	 * systems.
 	 * @param path path to be cleared of prohibited characters
 	 * @return cleared path
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public static String removeProhibitedChars(final String path) {
-		String ret = path;
-		for(String c : ILLEGAL_FILE_CHARS) {
-			ret = ret.replace(c, "");
+	public static void checkProhibitedChars(final String path) throws InvalidPathCharactersException {
+		if(path != null) {
+			for(char c : ILLEGAL_FILE_CHARS) {
+				if(path.indexOf(c) != -1) {
+					throw new InvalidPathCharactersException();
+				}
+			}
 		}
-		return ret;
 	}
 
 	private String substituteFileSeparators(String path) {

@@ -5,6 +5,7 @@ import cz.zcu.kiv.os.core.interrupts.KeyboardEvent;
 import cz.zcu.kiv.os.core.interrupts.Signals;
 import cz.zcu.kiv.os.core.device.IInputDevice;
 import cz.zcu.kiv.os.core.device.IOutputDevice;
+import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -21,8 +22,9 @@ public interface ICoreServices {
 	 * @param caller process calling the service
 	 * @param path path to the file
 	 * @return readable device backed by the file on the given path
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public IInputDevice openFileForRead(Process caller, String path) throws IOException;
+	public IInputDevice openFileForRead(Process caller, String path) throws IOException, InvalidPathCharactersException;
 
 	/**
 	 * System service which opens the file on the given path for writing.
@@ -31,8 +33,9 @@ public interface ICoreServices {
 	 * @param path path to the file
 	 * @param append append to existing file (if false, overwrites existing file or creates a new one)
 	 * @return writable device backed by the file on the given path
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public IOutputDevice openFileForWrite(Process caller, String path, boolean append) throws IOException;
+	public IOutputDevice openFileForWrite(Process caller, String path, boolean append) throws IOException, InvalidPathCharactersException;
 
 	/**
 	 * System service that creates new runnable process. The process is already started.
@@ -49,24 +52,27 @@ public interface ICoreServices {
 	 * @param caller Process, that calls this service.
 	 * @param dirName Requested name of the directory.
 	 * @return true when the directory was created sucessfully. False when the directory already exists.
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public boolean createDirectory(Process caller, String dirName);
+	public boolean createDirectory(Process caller, String dirName) throws InvalidPathCharactersException;
 
 	/**
 	 * Checks for existance of a desired directory.
 	 * @param caller Process, that calls this service.
 	 * @param filename Path to a directory to check for existance.
 	 * @return True when the specified directory exists, false otherwise.
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public boolean directoryExists(Process caller, String filename);
+	public boolean directoryExists(Process caller, String filename) throws InvalidPathCharactersException;
 
 	/**
 	 * Service that lists all files and folders in the specified path.
 	 * @param caller Process that calls this service.
 	 * @param dir Directory name that should be listed. If its a relative path, its relative to the process working directory.
 	 * @return Collection of all files and folders on the specified path.
+	 * @throws InvalidPathCharactersException when path contains prohibited characters
 	 */
-	public List<File> listFiles(Process caller, String dir);
+	public List<File> listFiles(Process caller, String dir) throws InvalidPathCharactersException;
 
 	/**
 	 * Sets specified string to a last line of terminal. 

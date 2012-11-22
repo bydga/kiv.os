@@ -7,6 +7,7 @@ package cz.zcu.kiv.os.processes;
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.device.IInputDevice;
+import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -41,7 +42,12 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		if( this.getNamesAndOptinos(args) == false) {
 			return;
 		}
-		this.getLines();
+		try {
+			this.getLines();
+		} catch(InvalidPathCharactersException ex) {
+			this.getOutputStream().writeLine("Following characters cannot be used as filename: " + InvalidPathCharactersException.invalidCharsList());
+			return;
+		}
 		this.sortLines();
 		this.echoLines();
 	}
