@@ -17,30 +17,17 @@ import cz.zcu.kiv.os.core.filesystem.FileManager;
  */
 public class Login extends Process {
 
-	private boolean containsAny(String str, char[] searchChars) {
-      if (str == null || str.length() == 0 || searchChars == null || searchChars.length == 0) {
-          return false;
-      }
-      for (int i = 0; i < str.length(); i++) {
-          char ch = str.charAt(i);
-          for (int j = 0; j < searchChars.length; j++) {
-              if (searchChars[j] == ch) {
-                  return true;
-              }
-          }
-      }
-      return false;
-  }
-	
 	@Override
 	protected void run(String[] args) throws Exception {
 
 		this.getOutputStream().writeLine("Enter login: ");
 		String login = this.getInputStream().readLine();
+		login = FileManager.removeProhibitedChars(login);
 
-		while (login.equals("") || this.containsAny(login, FileManager.ILLEGAL_FILE_CHARS)) {
+		while (login.equals("")) {
 			this.getOutputStream().writeLine("Invalid login name. Enter login:");
 			login = this.getInputStream().readLine();
+			login = FileManager.removeProhibitedChars(login);
 		}
 
 		this.getOutputStream().writeLine("Logging in as " + login + "...");

@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 public class FileManager {
 
 	public static final String SEPARATOR = System.getProperty("file.separator");
-	public static char[] ILLEGAL_FILE_CHARS = new char[]{'/', '\\', '*', '?', ':', '"', '<', '>', '|'};
+	public static String[] ILLEGAL_FILE_CHARS = new String[]{"\\", "*", "?", ":", "\"", "<", ">", "|"};
 	private final String rootPath;
 
 	/**
@@ -118,12 +118,13 @@ public class FileManager {
 	 * Returns the real path (in the host system) to the file on the simulated system's path (which is given as an
 	 * argument).
 	 *
-	 * @param path path to the file in the simulated system
+	 * @param pathArg path to the file in the simulated system
 	 * @param workingDir directory to which the path is relative to (if related)
 	 * @return real path to the file in the host system
 	 */
-	public String resolveRealPath(String path, String workingDir) {
+	public String resolveRealPath(String pathArg, String workingDir) {
 		StringBuilder realPath = new StringBuilder(getRootPath());
+		String path = removeProhibitedChars(pathArg);
 
 		String innerPath;
 		switch (path.charAt(0)) {
@@ -142,6 +143,20 @@ public class FileManager {
 		realPath.append(innerPath);
 
 		return realPath.toString();
+	}
+
+	/**
+	 * Removes characters from the path, which would cause problems on Windows
+	 * systems.
+	 * @param path path to be cleared of prohibited characters
+	 * @return cleared path
+	 */
+	public static String removeProhibitedChars(final String path) {
+		String ret = path;
+		for(String c : ILLEGAL_FILE_CHARS) {
+			ret = ret.replace(c, "");
+		}
+		return ret;
 	}
 
 	private String substituteFileSeparators(String path) {
