@@ -33,6 +33,7 @@ public class FileManagerTest {
         String result = "/Donald/Mickey/Minnie.c";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/");
+		result = manager.resolveRealPath(result, "/");
 
         assertEquals("Resolved path doesnt match the expected result!",result, resolved);
     }
@@ -47,6 +48,7 @@ public class FileManagerTest {
         String result = "/Donald/Dolan/Mickey/Minnie.c";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/");
+		result = manager.resolveRealPath(result, "/");
 
         assertEquals("Resolved path doesnt match the expected result!",result, resolved);
     }
@@ -61,6 +63,7 @@ public class FileManagerTest {
         String result = "/Donald/Mickey/.../Minnie.c";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/");
+		result = manager.resolveRealPath(result, "/");
 
         assertEquals("Resolved path doesnt match the expected result!",result, resolved);
     }
@@ -75,6 +78,7 @@ public class FileManagerTest {
         String result = "/workingDir/workingSubdir/Donald/Mickey/Minnie.c";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/ololo/");
+		result = manager.resolveRealPath(result, "/");
 
         assertEquals("Resolved path doesnt match the expected result!",result, resolved);
     }
@@ -89,6 +93,7 @@ public class FileManagerTest {
         String result = "/workingDir/workingSubdir/ololo/Donald/Dolan/Mickey/Minnie.c";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/ololo/");
+		result = manager.resolveRealPath(result, "/");
 
         assertEquals("Resolved path doesnt match the expected result!",result, resolved);
     }
@@ -103,6 +108,7 @@ public class FileManagerTest {
         String result = "/workingDir/workingSubdir/Donald/Mickey/Minnie.c";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/ololo/");
+		result = manager.resolveRealPath(result, "/");
 
         assertEquals("Resolved path doesnt match the expected result!",result, resolved);
     }
@@ -113,6 +119,7 @@ public class FileManagerTest {
         String result = "/workingDir/workingSubdir/ahoj.txt";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/");
+		result = manager.resolveRealPath(result, "/");
         assertEquals("Resolved path doesnt match the expected result!", result, resolved);
     }
 
@@ -122,6 +129,7 @@ public class FileManagerTest {
         String result = "/workingDir/";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/");
+		result = manager.resolveRealPath(result, "/");
         assertEquals("Resolved path doesnt match the expected result!", result, resolved);
     }
 
@@ -131,9 +139,7 @@ public class FileManagerTest {
         String result = "/workingDir/workingSubdir/";
 
         String resolved = manager.resolveRealPath(testPath, "/workingDir/workingSubdir/");
-        assertEquals("Resolved path doesnt match the expected result!", result, resolved);
-
-        testPath = "/";
+		result = manager.resolveRealPath(result, "/");
         assertEquals("Resolved path doesnt match the expected result!", result, resolved);
 
     }

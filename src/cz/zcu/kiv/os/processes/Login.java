@@ -4,7 +4,6 @@
  */
 package cz.zcu.kiv.os.processes;
 
-import com.sun.xml.internal.ws.util.StringUtils;
 import cz.zcu.kiv.os.core.Core;
 import cz.zcu.kiv.os.core.ProcessGroup;
 import cz.zcu.kiv.os.core.ProcessProperties;
