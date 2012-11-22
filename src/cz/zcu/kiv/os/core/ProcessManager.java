@@ -184,6 +184,7 @@ public class ProcessManager implements Observer {
 	private void switchForegroundProcess(Process newFg) {
 		synchronized (foregroundProcessLock) {
 			this.foregroundProcess = newFg;
+			Utilities.log("FG process: " + newFg.getPid() + " " + newFg.getClass().getSimpleName());
 		}
 
 		if (newFg != null) {
