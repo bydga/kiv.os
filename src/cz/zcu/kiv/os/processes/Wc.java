@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.core.Core;
@@ -13,7 +9,9 @@ import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import java.io.FileNotFoundException;
 
 /**
- *
+ * Process that counts lines, words and characters from files and standard input
+ * and writes them to the standard output.
+ * 
  * @author Jiri Zikmund
  */
 public class Wc extends cz.zcu.kiv.os.core.Process {
@@ -45,6 +43,11 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		"      --help             display this help and exit\n"+
 		"With no FILE, or when FILE is -, read standard input.\n";
 	
+	/**
+	 * Returns manual page for Wc process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText;
 	}
@@ -133,6 +136,12 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		}
 	}
 	
+	/**
+	 * Reads lines from file
+	 *
+	 * @param fileName file to read
+	 * @throws Exception when error occurs while reading file
+	 */
 	private void readFile(String fileName) throws Exception {
 		
 		IInputDevice file = Core.getInstance().getServices().openFileForRead(this, fileName);
@@ -143,6 +152,12 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		file.detach();
 	}
 	
+	/**
+	 * Reads lines from standard input and writes them to the standard output
+	 * 
+	 * @throws Exception when error occures while reading from standard input or
+	 * writing to standart output
+	 */
 	private void readStandardInput() throws Exception {
 		
 		String line;
@@ -152,6 +167,11 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		}
 	}
 	
+	/**
+	 * Reads lines from standard pipe (standard input)
+	 * 
+	 * @throws Exception when error occures while reading from standard input
+	 */
 	private void readPipe() throws Exception {
 		
 		String line;
@@ -160,6 +180,11 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		}
 	}
 	
+	/**
+	 * Saves count statisctics from one line
+	 * 
+	 * @param line line to count
+	 */
 	private void getCountsFromLine(String line) {
 		
 		int lineLength = line.length();
@@ -181,6 +206,16 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		}
 	}
 	
+	/**
+	 * Writes statisctics for current input to the standard output
+	 * 
+	 * @param countLines count of all lines from the input
+	 * @param countWords count of all words from the input
+	 * @param countChars count of all characters from the input
+	 * @param countMaxLineLength length of the longest line in the input
+	 * @param inputName name from the input
+	 * @throws Exception when error occures while writing to standard output
+	 */
 	private void echoCounts(int countLines, int countWords, int countChars, int countMaxLineLength, String inputName) throws Exception {
 		
 		StringBuilder bf = new StringBuilder();
@@ -214,18 +249,37 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		this.getOutputStream().writeLine(bf.toString());
 	}
 	
+	/**
+	 * Writes total count statistics to the standard output
+	 * 
+	 * @throws Exception when error occures while writing to standard output
+	 */
 	private void echoCounts() throws Exception {
 		this.echoCounts(null);
 	}
 	
+	/**
+	 * Writes count statistics of the input to the standard output
+	 * 
+	 * @param inputName name of input
+	 * @throws Exception when error occures while writing to standard output
+	 */
 	private void echoCounts(String inputName) throws Exception {
 		this.echoCounts(this.countLines, this.countWords, this.countChars, this.countMaxLineLength, inputName);
 	}
 	
+	/**
+	 * Writes total count statisctics to the standard output
+	 * 
+	 * @throws Exception when error occures while writing to standard output
+	 */
 	private void echoTotalCounts() throws Exception {
 		this.echoCounts(this.totalCountLines, this.totalCountWords, this.totalCountChars, this.totalCountMaxLineLength, "total");
 	}
 	
+	/**
+	 * Resets line counter for current input (file or standard input)
+	 */
 	private void resetCounts() {
 		this.countChars = 0;
 		this.countLines = 0;
@@ -233,6 +287,12 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		this.countWords = 0;
 	}
 	
+	/**
+	 * Get count of words from one line
+	 *
+	 * @param s line to count words from
+	 * @return count of words in the line
+	 */
 	private int getCountWords(String s){
 
 		int counter = 0;
@@ -252,10 +312,24 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 		return counter;
 	}
 	
+	/**
+	 * Edits string to be padded to right
+	 *
+	 * @param s string to pad
+	 * @param n number of positions to pad
+	 * @return string padded to right
+	 */
 	private String padRight(String s, int n) {
 		return String.format("%1$-" + n + "s", s);  
 	}
 	
+	/**
+	 * Edits string to be padded to left
+	 *
+	 * @param s string to pad
+	 * @param n number of positions to pad
+	 * @return string padded to left
+	 */
 	private String padLeft(String s, int n) {
 		return String.format("%1$" + n + "s", s);  
 	}

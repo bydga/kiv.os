@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.Utilities;
@@ -10,7 +6,8 @@ import cz.zcu.kiv.os.core.ProcessInfo;
 import java.util.List;
 
 /**
- *
+ * Writes information about active processes to the standard output.
+ * 
  * @author bydga
  */
 public class Ps extends cz.zcu.kiv.os.core.Process {
@@ -21,6 +18,11 @@ public class Ps extends cz.zcu.kiv.os.core.Process {
 		"OPTION:\n"+
 		"      --help        display this help and exit\n";
 	
+	/**
+	 * Returns manual page for Ps process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText; 
 	}

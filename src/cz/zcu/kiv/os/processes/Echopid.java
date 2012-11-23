@@ -1,14 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Process that writes its own PID in loop to the standard input.
+ * User can define number of lines and sleeptime after each write.
+ * 
  * @author Jiri Zikmund
  */
 public class Echopid extends cz.zcu.kiv.os.core.Process {
@@ -23,6 +21,11 @@ public class Echopid extends cz.zcu.kiv.os.core.Process {
 				"If no option set, default values are:\n"+
 				"  SLEEPTIME: 10, COUNT: 1000\n";
 	
+	/**
+	 * Returns manual page for Echopid process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText;
 	}

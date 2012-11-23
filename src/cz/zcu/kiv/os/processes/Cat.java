@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.Utilities;
@@ -15,7 +11,9 @@ import java.io.FileNotFoundException;
 
 
 /**
- *
+ * Process that concatenates multiple files and ipnuts and
+ * writes them to the standard output.
+ * 
  * @author Jiri Zikmund
  */
 public class Cat extends cz.zcu.kiv.os.core.Process{
@@ -38,6 +36,11 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 				"             then g's contents.\n"+
 				"  cat        Copy standard input to standard output.\n";
 	
+	/**
+	 * Returns manual page for Cat process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText;
 	}
@@ -112,6 +115,13 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		
 	}
 	
+	/**
+	 * Reads lines from file, edits them by user options
+	 * and writes them to the standard output.
+	 *
+	 * @param input file
+	 * @throws Exception when error occurs while reading file
+	 */
 	private void readFile(IInputDevice input) throws Exception {
 		
 		String line;
@@ -122,6 +132,11 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		input.detach();
 	}
 	
+	/* Reads lines from standard input, edits them by user options
+	 * and writes them to the standard output.
+	 *
+	 * @throws Exception when error occurs while reading from standard input
+	 */
 	private String readStandardInput() throws Exception {
 		
 		StringBuilder bf = new StringBuilder();
@@ -130,7 +145,6 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		
 		while(line != null) {
 			this.checkForStop();
-//			this.getOutputStream().writeLine(line);
 			line = this.editLineByOptions(line);
 			if(this.optionLineNumber == true) {
 				bf.append(newLineChar);
@@ -148,7 +162,12 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		else return null;
 	}
 
-	
+	/**
+	 * Edits line by user options.
+	 *
+	 * @param line line to edit
+	 * @return edited line
+	 */
 	private String editLineByOptions(String line) {
 		
 		if(this.optionShowEnds == true) {

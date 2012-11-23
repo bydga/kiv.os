@@ -1,7 +1,6 @@
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.core.Core;
-//TODO java.lang.NoClassDefFoundError: cz/zcu/kiv/os/core/filesystem/InvalidPathCharactersException
 import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +24,18 @@ public class Mkdir extends cz.zcu.kiv.os.core.Process{
 		"  -v, --verbose    write a message for each created direcotry\n"+
 		"      --help       display this help and exit\n";	
 	
+	/**
+	 * Returns manual page for Mkdir process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText; 
 	}
 	
+	/**
+	 * Public constructor, sets default values
+	 */
 	public Mkdir() {
 		this.names = new ArrayList<String>();
 	}

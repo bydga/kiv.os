@@ -7,7 +7,7 @@ import java.text.DateFormat;
 import java.util.*;
 
 /**
- * Writes list of files or directories on the given path(s).
+ * Process that writes list of files or directories on the given path(s).
  *
  * @author Jakub Danek
  */
@@ -31,10 +31,18 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 		"  -l, --detail     show detailed output\n"+
 		"      --help       display this help and exit\n";	
 	
+	/**
+	 * Returns manual page for Ls process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText; 
 	}
 	
+	/**
+	 * Public constructor, sets default values
+	 */
 	public Ls() {
 		paths = new ArrayList<String>();
 	}

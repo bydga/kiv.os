@@ -1,11 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 /**
- *
+ * Process that prints the name of the current working directory
+ * to the standard output.
+ * 
  * @author bydga, Jiri Zikmund
  */
 public class Pwd extends cz.zcu.kiv.os.core.Process {
@@ -16,6 +14,11 @@ public class Pwd extends cz.zcu.kiv.os.core.Process {
 		"OPTION:\n"+
 		"      --help        display this help and exit\n";
 	
+	/**
+	 * Returns manual page for Pwd process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText; 
 	}

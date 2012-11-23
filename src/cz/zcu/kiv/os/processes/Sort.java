@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.Utilities;
@@ -14,7 +10,10 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 /**
- *
+ * Process that concatenates multiple files and ipnuts, sorts them by lines
+ * 
+ * and writes them to the standard output.
+ * 
  * @author Jiri Zikmund
  */
 public class Sort extends cz.zcu.kiv.os.core.Process {
@@ -35,10 +34,18 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		"      --help                  display this help and exit\n"+
 		"With no FILE, or when FILE is -, read standard input.\n";	
 	
+	/**
+	 * Returns manual page for Sort process.
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText; 
 	}
 	
+	/**
+	 * Public constructor, sets default values
+	 */
 	public Sort() {
 		this.names = new ArrayList<String>();
 		this.lines = new ArrayList<String>();
@@ -60,6 +67,13 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		this.echoLines();
 	}
 	
+	/**
+	 * Processes arguments from user and obtains options and filenames from them.
+	 *
+	 * @param args array of arguments from user
+	 * @return true if arguments are processed correctly
+	 * @throws Exception when error occures while writing to standard output
+	 */
 	private boolean getNamesAndOptinos(String[] args) throws Exception {
 		for (int i = 1; i < args.length; i++) {
 			
@@ -95,6 +109,11 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		return true;
 	}
 
+	/**
+	 * Reads all files and standard inputs.
+	 *
+	 * @throws Exception when error occures while reading file or standard input
+	 */
 	private void getLines() throws Exception {
 		if(this.names.isEmpty()) {
 			this.readStandardInput();
@@ -111,6 +130,9 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		}
 	}
 	
+	/**
+	 * Sorts all obtained lines from inputs and sorts them by options.
+	 */
 	private void sortLines() {
 		
 		IdentityHashMap<Integer, String> originalLinesMap = new IdentityHashMap<Integer, String>();
@@ -141,12 +163,23 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		
 	}
 	
+	/**
+	 * Write all lines to the standard output.
+	 * 
+	 * @throws Exception when error occures while writing to standard input
+	 */
 	private void echoLines() throws Exception {
 		for(String line : this.lines) {
 			this.getOutputStream().writeLine(line);
 		}
 	}
 	
+	/**
+	 * Edits line by options.
+	 *
+	 * @param line line to edit
+	 * @return edited line
+	 */
 	private String editLineByOptions(String line) {
 		if(this.optionBlanks == true) {
 			line = Utilities.trimLeft(line);
@@ -154,6 +187,12 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		return line;
 	}
 	
+	/**
+	 * Reads lines from file.
+	 *
+	 * @param input file
+	 * @throws Exception when error occurs while reading file
+	 */
 	private void readFile(String fileName) throws Exception {
 		IInputDevice file = Core.getInstance().getServices().openFileForRead(this, fileName);
 		String line;
@@ -163,6 +202,10 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 		file.detach();
 	}
 	
+	/* Reads lines from standard input.
+	 *
+	 * @throws Exception when error occurs while reading from standard input
+	 */
 	private void readStandardInput() throws Exception {
 		String line;
 		while((line = this.getInputStream().readLine()) != null) {

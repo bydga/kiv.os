@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.core.Core;
@@ -11,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Process that creates new file or update access time of existing one
+ * 
  * @author bydga, Jiri Zikmund
  */
 public class Touch extends cz.zcu.kiv.os.core.Process{
@@ -24,10 +21,18 @@ public class Touch extends cz.zcu.kiv.os.core.Process{
 		"OPTIONS:\n"+
 		"      --help     display this help and exit\n";	
 	
+	/**
+	 * Returns manual page for Touch process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText; 
 	}
 	
+	/**
+	 * Public constructor, sets default values
+	 */
 	public Touch() {
 		this.names = new ArrayList<String>();
 	}

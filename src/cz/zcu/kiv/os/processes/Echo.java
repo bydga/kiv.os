@@ -1,12 +1,10 @@
 package cz.zcu.kiv.os.processes;
 
 import cz.zcu.kiv.os.Utilities;
-import cz.zcu.kiv.os.core.ProcessArgs;
-import cz.zcu.kiv.os.core.ProcessDefinedOptions;
-import cz.zcu.kiv.os.core.ProcessOption;
 
 /**
- *
+ * Process that writes strings from the standard input to the standard output
+ * 
  * @author Jiri Zikmund
  */
 public class Echo extends cz.zcu.kiv.os.core.Process {
@@ -17,6 +15,11 @@ public class Echo extends cz.zcu.kiv.os.core.Process {
 			"OPTION:\n"+
 			"      --help           display this help and exit\n";
 	
+	/**
+	 * Returns manual page for Echo process.
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText;
 	}

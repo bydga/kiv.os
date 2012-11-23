@@ -1,20 +1,22 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.zcu.kiv.os.processes;
 
 /**
- *
+ * Process that suspeds execution of current process
+ * 
  * @author bydga
  */
 public class Sleep extends cz.zcu.kiv.os.core.Process {
 
 	private static final String helpText =
 			"Usage: sleep TIME\n"+
-			" Suspends the current process execution for specified ammount of seconds."+
+			"Suspends the current process execution for specified ammount of seconds."+
 			"      --help               display this help and exit";
 
+	/**
+	 * Returns manual page for Sleep process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText;
 	}

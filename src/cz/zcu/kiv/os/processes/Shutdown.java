@@ -4,6 +4,7 @@ import cz.zcu.kiv.os.core.Core;
 
 /**
  * Process that initiates the core shutdown procedure.
+ * 
  * @author bydga
  */
 public class Shutdown extends cz.zcu.kiv.os.core.Process {
@@ -14,6 +15,11 @@ public class Shutdown extends cz.zcu.kiv.os.core.Process {
 		"OPTION:\n"+
 		"      --help        display this help and exit\n";
 	
+	/**
+	 * Returns manual page for Shutdown process
+	 * 
+	 * @return string with manual page
+	 */
 	public static String getManualPage() {
 		return helpText; 
 	}
