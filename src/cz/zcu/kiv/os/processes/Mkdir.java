@@ -15,7 +15,6 @@ import java.util.List;
  */
 public class Mkdir extends cz.zcu.kiv.os.core.Process{
 
-	
 	private boolean optionVerbose = false;
 	private List<String> names;
 	
@@ -23,8 +22,8 @@ public class Mkdir extends cz.zcu.kiv.os.core.Process{
 		"\nUsage: mkdir [OPTION]... DIRECTORY...\n" +
 		"Create spicified DIRECTORY(ies).\n"+
 		"OPTIONS:\n"+
-		"-v, --verbose    write a message for each created direcotry\n"+
-		"      --help     display this help and exit\n";	
+		"  -v, --verbose    write a message for each created direcotry\n"+
+		"      --help       display this help and exit\n";	
 	
 	public static String getManualPage() {
 		return helpText; 
@@ -36,8 +35,7 @@ public class Mkdir extends cz.zcu.kiv.os.core.Process{
 	
 	@Override
 	protected void run(String[] args) throws Exception {
-		boolean success;
-		
+
 		for(int i = 1; i < args.length; i++) {
 			
 			String arg = args[i];
@@ -52,9 +50,8 @@ public class Mkdir extends cz.zcu.kiv.os.core.Process{
 					return; //exit
 				}
 				else {
-					StringBuilder bf = new StringBuilder();
 					this.getOutputStream().writeLine("mkdir: invalid option " + arg);
-					this.getOutputStream().writeLine("Try 'sort --help' for more information.");
+					this.getOutputStream().writeLine("Try 'mkdir --help' for more information.");
 					return; //exit
 				}
 			}
@@ -70,6 +67,8 @@ public class Mkdir extends cz.zcu.kiv.os.core.Process{
 			this.getOutputStream().writeLine("Try 'mkdir --help' for more information.");
 			return;
 		}
+		
+		boolean success;
 		
 		for(String name : this.names) {
 			try {

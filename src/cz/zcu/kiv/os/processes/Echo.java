@@ -12,15 +12,20 @@ import cz.zcu.kiv.os.core.ProcessOption;
 public class Echo extends cz.zcu.kiv.os.core.Process {
 
 	private static final String helpText =
-				"Usage: echo [OPTION]... [STRINGS]...\n"+
-				" Echo the STRING(s) to standard output.\n"+
-				"      --help               display this help and exit";
+			"\nUsage: echo [OPTION] [STRING]...\n"+
+			"Echo all specified STRING(s) to standard output.\n"+
+			"OPTION:\n"+
+			"      --help           display this help and exit\n";
+	
+	public static String getManualPage() {
+		return helpText;
+	}
 	
 	@Override
 	protected void run(String[] args) throws Exception {
 		
 		if(args.length == 2 && args[1].equals("--help")) {
-			this.getOutputStream().writeLine(this.helpText);
+			this.getOutputStream().writeLine(Echo.getManualPage());
 			return;
 		}
 		
@@ -32,10 +37,6 @@ public class Echo extends cz.zcu.kiv.os.core.Process {
 			space = " ";
 		}
 		this.getOutputStream().writeLine(bf.toString());
-	}
-
-	public static String getManualPage() {
-		return helpText;
 	}
 	
 }

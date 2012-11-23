@@ -20,7 +20,21 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 	private boolean showHidden = false;
 	private boolean showImpliedHidden = false;
 	private boolean showDetailed = false;
+	private boolean showHelp = false;
 
+	private static final String helpText =
+		"\nUsage: ls [OPTION]... [FILE]...\n" +
+		"Update access times of specified FILE(s) to the current time.\n"+
+		"OPTIONS:\n"+
+		"  -a, --all        show implied hidden files\n"+
+		"  -A, --almost-all show hidden files\n"+
+		"  -l, --detail     show detailed output\n"+
+		"      --help       display this help and exit\n";	
+	
+	public static String getManualPage() {
+		return helpText; 
+	}
+	
 	public Ls() {
 		paths = new ArrayList<String>();
 	}
@@ -28,6 +42,11 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 	@Override
 	protected void run(String[] args) throws Exception {
 		processParameters(args);
+		
+		if(showHelp) {
+			this.getOutputStream().writeLine(Ls.getManualPage());
+			return; //exit
+		}
 
 		Map<String, List<File>> filesMap = new HashMap<String, List<File>>();
 		List<File> tmp;
@@ -163,13 +182,15 @@ public class Ls extends cz.zcu.kiv.os.core.Process {
 			tmp = args[i];
 			if(tmp.startsWith("-")) {
 				for(int j = 1; j < tmp.length(); j++) {
-					if(tmp.charAt(j) == 'A') {
+					if(tmp.charAt(j) == 'A' || tmp.equals("--almost-all")) {
 						showHidden = true;
-					} else if(tmp.charAt(j) == 'a') {
+					} else if(tmp.charAt(j) == 'a' || tmp.equals("--all")) {
 						showHidden = true;
 						showImpliedHidden = true;
-					} else if(tmp.charAt(j) == 'l') {
+					} else if(tmp.charAt(j) == 'l' || tmp.equals("--detail")) {
 						showDetailed = true;
+					} else if(tmp.equals("--help")) {
+						showHelp = true;
 					}
 				}
 			} else {

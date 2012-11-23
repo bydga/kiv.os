@@ -14,12 +14,14 @@ import java.util.logging.Logger;
 public class Echopid extends cz.zcu.kiv.os.core.Process {
 
 	private static final String helpText =
-				"Usage: echopid [OPTIONS]...\n"+
-				"Write PID of current echopid process instance.\n\n"+
-				"  [-s, --sleep SLEEPTIME]   Sleep time in miliseconds\n"+
-				"  [-c, --count COUNT]       Number of lines\n\n"+
+				"\nUsage: echopid [OPTION]...\n"+
+				"Write PID of current echopid process in loop.\n"+
+				"OPTIONS:\n"+
+				"  -s, --sleep SLEEPTIME    sleeptime in miliseconds after each write\n"+
+				"  -c, --count COUNT        count of loops\n"+
+				"      --help               display this help and exit\n"+
 				"If no option set, default values are:\n"+
-				"sleep: 10, count: 1000";
+				"  SLEEPTIME: 10, COUNT: 1000\n";
 	
 	public static String getManualPage() {
 		return helpText;
@@ -32,8 +34,6 @@ public class Echopid extends cz.zcu.kiv.os.core.Process {
 	protected void run(String[] args) throws Exception {
 		int count = this.defaultCount;
 		int sleepTime = this.defaultSleep;
-				
-		this.getOutputStream().writeLine("Echopid started");
 		
 		for (int i = 1; i < args.length; i++) {	
 			String arg = args[i];
@@ -65,7 +65,7 @@ public class Echopid extends cz.zcu.kiv.os.core.Process {
 				}
 			}
 			else if(arg.equals("--help")) {	
-				this.getOutputStream().writeLine(this.helpText);
+				this.getOutputStream().writeLine(Echopid.getManualPage());
 				return; //exit
 			}
 			else {
@@ -78,12 +78,14 @@ public class Echopid extends cz.zcu.kiv.os.core.Process {
 					return; //exit
 			}
 		}
+		
+		this.getOutputStream().writeLine("Echopid started writing");
 
 		for (int i = 0; i < count; i++) {
 			this.getOutputStream().writeLine(("PID " + (this.pid)) + ", iteration " + i);
 			Thread.sleep(sleepTime);
 		}
-		this.getOutputStream().writeLine("Echopid finished");
+		this.getOutputStream().writeLine("Echopid finished writing");
 
 	}
 }

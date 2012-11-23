@@ -25,17 +25,22 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 	private int lineNumber = 0;
 	
 	private static final String helpText =
-				"Usage: cat [OPTION] [FILE]...\n"+
-				"Concatenate FILE(s), or standard input, to standard output.\n"+
+				"\nUsage: cat [OPTION]... [FILE]...\n"+
+				"Concatenate all specified FILE(s) or standard input\n"+
+				"to standard output.\n"+
+				"OPTIONS:\n"+
 				"  -E, --show-ends          display $ at end of each line\n"+
 				"  -n, --number             number all output lines\n"+
 				"      --help               display this help and exit\n"+
-				"\n"+
 				"With no FILE, or when FILE is -, read standard input.\n"+
-				""+
 				"Examples:\n"+
-				"  cat f - g  Output f's contents, then standard input, then g's contents.\n"+
-				"  cat        Copy standard input to standard output.";
+				"  cat f - g  Output f's contents, then standard input,\n"+
+				"             then g's contents.\n"+
+				"  cat        Copy standard input to standard output.\n";
+	
+	public static String getManualPage() {
+		return helpText;
+	}
 	
 	@Override
 	protected void run(String[] args) throws Exception {
@@ -156,10 +161,6 @@ public class Cat extends cz.zcu.kiv.os.core.Process{
 		}
 		
 		return line;
-	}
-
-	public static String getManualPage() {
-		return helpText;
 	}
 
 }

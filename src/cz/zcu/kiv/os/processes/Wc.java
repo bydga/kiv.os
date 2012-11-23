@@ -33,16 +33,21 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 	private int totalCountMaxLineLength = 0;
 	private int totalCountWords = 0;
 	
-	private final String helpText =
-		"Usage: wc [OPTION]... [FILE]..."+
-		"Print newline, word, and byte counts for each FILE, and a total line if"+
-		"more than one FILE is specified.  With no FILE, or when FILE is -,"+
-		"read standard input."+
-		"  -m, --chars            print the character counts"+
-		"  -l, --lines            print the newline counts"+
-		"  -L, --max-line-length  print the length of the longest line"+
-		"  -w, --words            print the word counts"+
-		"      --help             display this help and exit";
+	private static final String helpText =
+		"\nUsage: wc [OPTION]... [FILE]...\n"+
+		"Print line, word and byte counts for each specified FILE.\n"+
+		"If more than one FILE is specified, print also total of counts.\n"+
+		"OPTIONS:\n"+
+		"  -m, --chars            print the character counts\n"+
+		"  -l, --lines            print the newline counts\n"+
+		"  -L, --max-line-length  print the length of the longest line\n"+
+		"  -w, --words            print the word counts\n"+
+		"      --help             display this help and exit\n"+
+		"With no FILE, or when FILE is -, read standard input.\n";
+	
+	public static String getManualPage() {
+		return helpText;
+	}
 	
 	@Override
 	public void run(String[] args) throws Exception {
@@ -73,7 +78,7 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 				return; //exit
 			}
 			else if(options[i].getOptionName().equals("--help")) {
-				this.getOutputStream().writeLine(this.helpText);
+				this.getOutputStream().writeLine(Wc.getManualPage());
 				return; //exit
 			}
 			else if(options[i].getOptionName().equals("-m") || options[i].getOptionName().equals("--chars")) {
@@ -118,7 +123,7 @@ public class Wc extends cz.zcu.kiv.os.core.Process {
 					this.echoCounts(names[i]);
 					this.resetCounts();
 				} catch (FileNotFoundException e) {
-					this.getOutputStream().writeLine("cat: " + names[i] + ": No such file");
+					this.getOutputStream().writeLine("wc: " + names[i] + ": No such file");
 				}
 			}
 		}

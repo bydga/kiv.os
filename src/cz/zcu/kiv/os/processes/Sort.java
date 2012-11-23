@@ -20,16 +20,24 @@ import java.util.List;
 public class Sort extends cz.zcu.kiv.os.core.Process {
 	
 	private boolean optionBlanks = false;
+	private boolean optionReverse = false;
 	
 	private List<String> names;
 	private List<String> lines;
 	
-	private final String helpText =
-		"Usage: sort [OPTION]... [FILE]...\n" +
-		"Write sorted concatenation of all FILE(s) to standard output.\n"+
-		"Ordering options:\n\n" +
-		"-b, --ignore-leading-blanks  ignore leading blanks\n\n"+
-		"With no FILE, or when FILE is -, read standard input.";
+	private static final String helpText =
+		"\nUsage: sort [OPTION]... [FILE]...\n" +
+		"Write sorted concatenation of all specified FILE(s)\n"+
+		"to standard output.\n"+
+		"OPTIONS:\n"+
+		"  -r, --reverse                 descending order\n"+
+		"  -b, --ignore-leading-blanks   ignore leading blanks\n"+
+		"      --help                  display this help and exit\n"+
+		"With no FILE, or when FILE is -, read standard input.\n";	
+	
+	public static String getManualPage() {
+		return helpText; 
+	}
 	
 	public Sort() {
 		this.names = new ArrayList<String>();
@@ -62,8 +70,11 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 				if(arg.equals("-b") || arg.equals("--ignore-leading-blanks")) {
 					this.optionBlanks = true;
 				}
+				else if(arg.equals("-r") || arg.equals("--reverse")) {
+					this.optionReverse = true;
+				}
 				else if(arg.equals("--help")) {
-					this.getOutputStream().writeLine(this.helpText);
+					this.getOutputStream().writeLine(Sort.getManualPage());
 					return false; //exit
 				}
 				else {
@@ -114,7 +125,13 @@ public class Sort extends cz.zcu.kiv.os.core.Process {
 			editedLines.add(editedLine);
 		}
 		
-		Collections.sort(editedLines);
+		if(this.optionBlanks == true) {
+			Collections.sort(editedLines, Collections.reverseOrder());
+		}
+		else {
+			Collections.sort(editedLines);
+		}
+		
 		this.lines = new ArrayList<String>();
 		
 		for( String line : editedLines ) {

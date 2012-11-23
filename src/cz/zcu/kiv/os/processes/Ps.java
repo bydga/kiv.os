@@ -15,9 +15,31 @@ import java.util.List;
  */
 public class Ps extends cz.zcu.kiv.os.core.Process {
 
+	private static final String helpText =
+		"\nUsage: ps [OPTION]\n" +
+		"Show information about active processes.\n"+
+		"OPTION:\n"+
+		"      --help        display this help and exit\n";
+	
+	public static String getManualPage() {
+		return helpText; 
+	}
+	
 	@Override
 	protected void run(String[] args) throws Exception {
 
+		if(args.length > 1) {
+			if(args[1].equals("--help")) {
+				this.getOutputStream().writeLine(Ps.getManualPage());
+				return; //exit
+			}
+			else {
+				this.getOutputStream().writeLine("ps: invalid option " + args[1]);
+				this.getOutputStream().writeLine("Try 'ps --help' for more information.");
+				return; //exit
+			}
+		}
+		
 		StringBuilder builder = new StringBuilder();
 		int maxLength = 3; //PID.length
 		List<ProcessInfo> list = Core.getInstance().getServices().getProcessTableData();
