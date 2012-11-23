@@ -34,7 +34,7 @@ public class Shell extends Process {
 	private static final String CWD_COMMAND = "cd";
 	private List<String> history;
 	private int historyIndex = 0;
-	private String curentCommand;
+	private String curentCommand = "";
 	private IOutputDevice historyLog;
 
 	/**
@@ -106,8 +106,8 @@ public class Shell extends Process {
 			err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 			in = this.createInput(parseResult.stdIn, in);
 
-			ProcessProperties properties = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
-			Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
+			ProcessProperties props = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+			Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], props);
 			list.add(p);
 			//pipe was used as an output device here, remember it for next iteration, where it will stand as an input
 			in = pipe;
@@ -120,8 +120,8 @@ public class Shell extends Process {
 		out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, this.getOutputStream());
 		err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 
-		ProcessProperties properties = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
-		Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], properties);
+		ProcessProperties prop = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+		Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], prop);
 
 		list.add(p);
 		return list;
@@ -138,14 +138,14 @@ public class Shell extends Process {
 			this.checkForStop();
 			try {
 				this.getOutputStream().write(this.getUser() + " " + this.getWorkingDir() + " $");
-			} catch(InterruptedException e) {
+			} catch (InterruptedException e) {
 				continue;
 			}
-			
+
 			String command = this.getInputStream().readLine();
 
 			this.checkForFinishedChildren();
-			
+
 			if (command != null && !command.isEmpty()) {
 				this.history.add(command);
 				this.historyLog.writeLine(this.getWorkingDir() + " $ " + command);
@@ -213,7 +213,7 @@ public class Shell extends Process {
 		if (e == KeyboardEvent.ARROW_DOWN) {
 			this.historyIndex++;
 			if (this.historyIndex >= this.history.size()) {
-				Core.getInstance().getServices().setTerminalCommand(this.curentCommand);
+					Core.getInstance().getServices().setTerminalCommand(this.curentCommand);
 				this.historyIndex = this.history.size();
 			} else {
 				Core.getInstance().getServices().setTerminalCommand(this.history.get(this.historyIndex));
