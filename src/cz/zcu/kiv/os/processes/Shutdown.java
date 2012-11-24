@@ -12,6 +12,7 @@ public class Shutdown extends cz.zcu.kiv.os.core.Process {
 	private static final String helpText =
 		"\nUsage: shutdown [OPTION]\n" +
 		"Shut the system down in a secure way.\n"+
+		"All processes will be ended and OS simulation will quit.\n"+
 		"OPTION:\n"+
 		"      --help        display this help and exit\n";
 	

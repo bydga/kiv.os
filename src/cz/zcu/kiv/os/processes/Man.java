@@ -36,7 +36,7 @@ public class Man extends Process {
 		StringBuilder bf = new StringBuilder();
 		for (int i = 1; i < args.length; i++) {
 			bf.append(args[i]).append(":\n");
-			bf.append(getManualEntry(args[i])).append("\n");
+			bf.append(getManualEntry(args[i]));
 		}
 
 		this.getOutputStream().writeLine(bf.toString());
@@ -62,7 +62,7 @@ public class Man extends Process {
 	}
 	private static final String helpText =
 			"\nUsage: man [OPTION] PROCESS..\n"
-			+ "Display manual page(s) of the PROCESS(es)."
+			+ "Display manual page(s) of the PROCESS(es).\n"
 			+ "OPTION:\n"
 			+ "      --help           display this help and exit\n";
 
@@ -72,6 +72,6 @@ public class Man extends Process {
 	 * @return string with manual page
 	 */
 	public static String getManualPage() {
-		return "";
+		return helpText;
 	}
 }

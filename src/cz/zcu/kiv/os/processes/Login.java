@@ -17,9 +17,22 @@ import cz.zcu.kiv.os.core.filesystem.InvalidPathCharactersException;
  */
 public class Login extends Process {
 
+	private static final String helpText =
+		"\nUsage: login\n" +
+		"Login as another user.\n";
+	
+	/**
+	 * Returns manual page for Pwd process
+	 * 
+	 * @return string with manual page
+	 */
+	public static String getManualPage() {
+		return helpText; 
+	}
+	
 	@Override
 	protected void run(String[] args) throws Exception {
-
+		
 		this.getOutputStream().writeLine("Enter login: ");
 		String login = this.getInputStream().readLine();
 		try {

@@ -37,6 +37,19 @@ public class Shell extends Process {
 	private String curentCommand = "";
 	private IOutputDevice historyLog;
 
+	private static final String helpText =
+			"Usage: shell\n"+
+			"Create and run new instance of command interpreter.\n";
+
+	/**
+	 * Returns manual page for Sleep process
+	 * 
+	 * @return string with manual page
+	 */
+	public static String getManualPage() {
+		return helpText;
+	}
+	
 	/**
 	 * Initializes new instance of output device - suitable for forwarding process's output/error streams. If given path
 	 * is null, last argument is used as a return value.

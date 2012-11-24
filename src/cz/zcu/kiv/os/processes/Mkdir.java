@@ -20,9 +20,15 @@ public class Mkdir extends cz.zcu.kiv.os.core.Process{
 	private static final String helpText =
 		"\nUsage: mkdir [OPTION]... DIRECTORY...\n" +
 		"Create spicified DIRECTORY(ies).\n"+
+		"It is possible to enter the whole direcory path.\n"+
 		"OPTIONS:\n"+
-		"  -v, --verbose    write a message for each created direcotry\n"+
-		"      --help       display this help and exit\n";	
+		"  -v, --verbose    write a message for each created directory\n"+
+		"      --help       display this help and exit\n"+
+		"EXAMPLES:\n"+
+		"  mkdir dir_1 dir_2   Creates 2 directories 'dir_1' and 'dir_2'\n"+
+		"                      in the current working direcotory\n"+
+		"  mkdir /dir_1/dir_2  Creates new directory 'dir_1' and another\n"+
+		"                      directory 'dir_2' inside 'dir_1'\n";
 	
 	/**
 	 * Returns manual page for Mkdir process

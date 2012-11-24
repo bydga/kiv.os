@@ -8,9 +8,10 @@ package cz.zcu.kiv.os.processes;
 public class Sleep extends cz.zcu.kiv.os.core.Process {
 
 	private static final String helpText =
-			"Usage: sleep TIME\n"+
-			"Suspends the current process execution for specified ammount of seconds."+
-			"      --help               display this help and exit";
+			"Usage: sleep [OPTION] TIME\n"+
+			"Suspends the current process execution for specified ammount of seconds.\n"+
+			"OPTION:\n"+
+			"      --help               display this help and exit\n";
 
 	/**
 	 * Returns manual page for Sleep process
