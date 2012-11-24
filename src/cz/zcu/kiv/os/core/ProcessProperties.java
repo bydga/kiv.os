@@ -18,14 +18,16 @@ public class ProcessProperties {
 	public ProcessGroup processGroup;
 	private boolean backgroundProcess;
 	public String user;
+	public boolean switchFg;
 
-	public ProcessProperties(Process parent, String user, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ProcessGroup processGroup) {
-		this(parent, user, args, inputStream, outputStream, errorStream, workingDir, processGroup, false);	
+	public ProcessProperties(Process parent, String user, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ProcessGroup processGroup,  boolean switchFg) {
+		this(parent, user, args, inputStream, outputStream, errorStream, workingDir, processGroup, switchFg, false);	
 	}
-	public ProcessProperties(Process parent, String user, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ProcessGroup processGroup, boolean  isBackgroundProcess) {
+	public ProcessProperties(Process parent, String user, String[] args, IInputDevice inputStream, IOutputDevice outputStream, IOutputDevice errorStream, String workingDir, ProcessGroup processGroup, boolean switchFg, boolean  isBackgroundProcess) {
 		this.parent = parent;
 		this.user = user;
 		this.args = args;
+		this.switchFg = switchFg;
 		this.inputStream = inputStream;
 		this.outputStream = outputStream;
 		this.errorStream = errorStream;

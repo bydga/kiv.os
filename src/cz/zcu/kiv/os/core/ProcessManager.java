@@ -3,14 +3,17 @@ package cz.zcu.kiv.os.core;
 import cz.zcu.kiv.os.Utilities;
 import cz.zcu.kiv.os.core.device.IDevice;
 import cz.zcu.kiv.os.core.device.PipeDevice;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Service class for the OS Core. Encapsulates process table, processes in them and opened streams.
+ *
  * @author bydga
  */
 public class ProcessManager implements Observer {
@@ -30,7 +33,8 @@ public class ProcessManager implements Observer {
 
 	/**
 	 * Returns processTable map containing info about all running processes.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public Map<Integer, ProcessTableRecord> getProcessTable() {
 		return this.processTable;
@@ -38,6 +42,7 @@ public class ProcessManager implements Observer {
 
 	/**
 	 * Returns current FG process.
+	 *
 	 * @return Process that is currently operating in foreground.
 	 */
 	public Process getForegroundProcess() {
@@ -67,7 +72,7 @@ public class ProcessManager implements Observer {
 			p.init(pid, properties);
 
 			ProcessTableRecord record = new ProcessTableRecord(p);
-			synchronized(this.processTable) {
+			synchronized (this.processTable) {
 				this.processTable.put(pid, record);
 			}
 			addStreamsToProcessTable(p);
@@ -75,10 +80,10 @@ public class ProcessManager implements Observer {
 			if (properties.parent != null) { //because of init
 				properties.parent.addChildren(p);
 			}
-			if (!properties.isBackgroundProcess()) {
+			if (!properties.isBackgroundProcess() && properties.switchFg) {
 				this.foregroundProcess = p;
 			}
-			Utilities.log("FG: " + p.getClass().getName());
+			Utilities.log("FG: " + this.foregroundProcess.getClass().getName());
 
 			p.addObserver(this);
 			p.start();
@@ -116,7 +121,9 @@ public class ProcessManager implements Observer {
 	}
 
 	/**
-	 * Blocking call to the process. Waits for its exit code, cleanup after the process terminates and returns its exit value.
+	 * Blocking call to the process. Waits for its exit code, cleanup after the process terminates and returns its exit
+	 * value.
+	 *
 	 * @param p Process to wait for.
 	 * @return Exit code of the finished process.
 	 * @throws InterruptedException Is thrown when the caller (reader of the exit code) is interrupted in the waiting.
@@ -141,6 +148,7 @@ public class ProcessManager implements Observer {
 
 	/**
 	 * Adds new Device to the process specified by the pid.
+	 *
 	 * @param pid Pid of process to attach stream to.
 	 * @param stream Stream to be attached.
 	 */
@@ -154,6 +162,7 @@ public class ProcessManager implements Observer {
 
 	/**
 	 * Removes existing Device from the process specified by the pid.
+	 *
 	 * @param pid Pid of process to remove stream from.
 	 * @param stream Stream to be removed.
 	 */
@@ -166,8 +175,9 @@ public class ProcessManager implements Observer {
 	}
 
 	/**
-	 * Implementation of the observable pattern.
-	 * This method is called when a process finishes and the foreground must be given back to its parent.
+	 * Implementation of the observable pattern. This method is called when a process finishes and the foreground must
+	 * be given back to its parent.
+	 *
 	 * @param o Finished process.
 	 * @param arg null
 	 */
@@ -179,6 +189,7 @@ public class ProcessManager implements Observer {
 
 	/**
 	 * Switches the foreground process.
+	 *
 	 * @param newFg new process that will operate on foreground.
 	 */
 	private void switchForegroundProcess(Process newFg) {
@@ -195,6 +206,7 @@ public class ProcessManager implements Observer {
 
 	/**
 	 * Does cleanup after process ends. Removes it from the processtable and closes it's unclosed streams.
+	 *
 	 * @param p Process to cleanup after.
 	 */
 	private void cleanUpProcess(Process p) {
@@ -207,11 +219,12 @@ public class ProcessManager implements Observer {
 
 	/**
 	 * Closes all attached streams to a finished process.
-	 * @param pid 
+	 *
+	 * @param pid
 	 */
 	private void closeStreams(int pid) {
 		ProcessTableRecord rec;
-		synchronized(this.processTable) {
+		synchronized (this.processTable) {
 			rec = processTable.get(pid);
 		}
 		List<IDevice> devs = rec.getOpenedStreams();
@@ -224,5 +237,69 @@ public class ProcessManager implements Observer {
 						.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+	}
+
+	public List<String> getAvailableCommands() {
+		List<String> output = new ArrayList<String>();
+		for (Class c : this.getClasses(Process.PROCESS_PACKAGE)) {
+			output.add(c.getSimpleName().toLowerCase());
+		}
+
+		return output;
+	}
+
+	/**
+	 * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
+	 *
+	 * @param packageName The base package
+	 * @return The classes
+	 */
+	private Class[] getClasses(String packageName) {
+		try {
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+			String path = packageName.replace('.', '/');
+			Enumeration<URL> resources = classLoader.getResources(path);
+			List<File> dirs = new ArrayList<File>();
+			while (resources.hasMoreElements()) {
+				URL resource = resources.nextElement();
+				dirs.add(new File(resource.getFile()));
+			}
+			ArrayList<Class> classes = new ArrayList<Class>();
+			for (File directory : dirs) {
+				classes.addAll(findClasses(directory, packageName));
+			}
+			return classes.toArray(new Class[classes.size()]);
+		} catch (IOException ex) {
+			return new Class[0];
+		}
+	}
+
+	/**
+	 * Recursive method used to find all classes in a given directory and subdirs.
+	 *
+	 * @param directory The base directory
+	 * @param packageName The package name for classes found inside the base directory
+	 * @return The classes
+	 * @throws ClassNotFoundException
+	 */
+	private List<Class> findClasses(File directory, String packageName) {
+		List<Class> classes = new ArrayList<Class>();
+		if (!directory.exists()) {
+			return classes;
+		}
+		File[] files = directory.listFiles();
+		for (File file : files) {
+			if (file.isDirectory()) {
+				classes.addAll(findClasses(file, packageName + "." + file.getName()));
+			} else if (file.getName().endsWith(".class")) {
+				try {
+					classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
+				} catch (ClassNotFoundException ex) {
+					//nothing to do here
+				}
+			}
+		}
+		return classes;
 	}
 }

@@ -320,5 +320,10 @@ public class Core {
 			}
 			return output;
 		}
+
+		@Override
+		public List<String> getAvailableCommands() {
+			return Core.this.processManager.getAvailableCommands();
+		}
 	}
 }

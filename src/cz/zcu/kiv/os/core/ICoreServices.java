@@ -142,4 +142,6 @@ public interface ICoreServices {
 	 * @return 
 	 */
 	public boolean isRunning();
+	
+	public List<String> getAvailableCommands();
 }

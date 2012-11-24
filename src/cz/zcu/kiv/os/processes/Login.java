@@ -47,7 +47,7 @@ public class Login extends Process {
 			this.getOutputStream().writeLine("Creating home directory " + path);
 			Core.getInstance().getServices().createDirectory(this, path);
 		}
-		ProcessProperties props = new ProcessProperties(this, login, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), path, new ProcessGroup(new ThreadGroup("shellgroup")));
+		ProcessProperties props = new ProcessProperties(this, login, null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), path, new ProcessGroup(new ThreadGroup("shellgroup")), true);
 		cz.zcu.kiv.os.core.Process shell = Core.getInstance().getServices().createProcess("shell", props);
 		Core.getInstance().getServices().readProcessExitCode(shell);
 

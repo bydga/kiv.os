@@ -96,6 +96,7 @@ public class Shell extends Process {
 		IInputDevice in = this.createInput(parseResult.stdIn, this.getInputStream());
 		IOutputDevice out;
 		IOutputDevice err;
+		boolean switchFg = !parseResult.isBackgroundTask;
 
 
 		//there is another process waiting in the pipeline for ouput of this process
@@ -106,7 +107,8 @@ public class Shell extends Process {
 			err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 			in = this.createInput(parseResult.stdIn, in);
 
-			ProcessProperties props = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+			ProcessProperties props = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, switchFg,parseResult.isBackgroundTask);
+			switchFg = false;
 			Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], props);
 			list.add(p);
 			//pipe was used as an output device here, remember it for next iteration, where it will stand as an input
@@ -120,7 +122,7 @@ public class Shell extends Process {
 		out = this.createOutput(parseResult.stdOut, parseResult.stdOutAppend, this.getOutputStream());
 		err = this.createOutput(parseResult.stdErr, parseResult.stdErrAppend, this.getErrorStream());
 
-		ProcessProperties prop = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, parseResult.isBackgroundTask);
+		ProcessProperties prop = new ProcessProperties(this, this.getUser(), parseResult.args, in, out, err, this.getWorkingDir(), group, switchFg, parseResult.isBackgroundTask);
 		Process p = Core.getInstance().getServices().createProcess(parseResult.args[0], prop);
 
 		list.add(p);

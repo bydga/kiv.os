@@ -22,7 +22,7 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 		try {
 			while (Core.getInstance().getServices().isRunning()) {
 				this.checkForStop();
-				ProcessProperties props = new ProcessProperties(this, this.getUser(), null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("logingroup")));
+				ProcessProperties props = new ProcessProperties(this, this.getUser(), null, this.getInputStream(), this.getOutputStream(), this.getErrorStream(), this.getWorkingDir(), new ProcessGroup(new ThreadGroup("logingroup")), true);
 				Process login = Core.getInstance().getServices().createProcess("Login", props);
 				int code = Core.getInstance().getServices().readProcessExitCode(login);
 			}
