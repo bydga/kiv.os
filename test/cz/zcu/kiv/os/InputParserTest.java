@@ -4,7 +4,7 @@
  */
 package cz.zcu.kiv.os;
 
-import cz.zcu.kiv.os.terminal.InputParser;
+import cz.zcu.kiv.os.core.InputParser;
 import cz.zcu.kiv.os.terminal.ParseResult;
 import java.io.BufferedReader;
 import java.io.FileReader;

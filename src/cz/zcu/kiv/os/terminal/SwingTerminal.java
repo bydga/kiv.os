@@ -95,8 +95,8 @@ public class SwingTerminal extends InOutDevice {
 	/**
 	 * Initialize frame parameters.
 	 *
-	 * Creates terminal, registers its event listener for writing messages from
-	 * other threads into the JTextArea component.
+	 * Creates terminal, registers its event listener for writing messages from other threads into the JTextArea
+	 * component.
 	 *
 	 * Adds WindowListener for handling application shutdown.
 	 */
@@ -107,7 +107,7 @@ public class SwingTerminal extends InOutDevice {
 				if (e instanceof MessageEvent) {
 					MessageEvent ev = (MessageEvent) e;
 					String s = ev.getMessage();
-					if(ev.isAppend()) {
+					if (ev.isAppend()) {
 						historyArea.append(s + "\n");
 					} else {
 						historyArea.setText(s);
@@ -118,7 +118,7 @@ public class SwingTerminal extends InOutDevice {
 				}
 			}
 		};
-
+		frame.setResizable(false);
 		//closes window (and system) correctly when required
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
@@ -133,12 +133,13 @@ public class SwingTerminal extends InOutDevice {
 					Core.getInstance().getServices().shutdown(null);
 				}
 			}
-
 		});
 		initComponents();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
 		frame.pack();
+		frame.setLocationRelativeTo(null);
+
 	}
 
 	/**
@@ -164,9 +165,9 @@ public class SwingTerminal extends InOutDevice {
 					try {
 						String s = stdout.readLine();
 						if (s != null && shouldListen) {
-							
+
 							queue.postEvent(new MessageEvent(frame, s));
-							
+
 						}
 					} catch (Exception ex) {
 						//always continue reading while stdout open
@@ -195,6 +196,7 @@ public class SwingTerminal extends InOutDevice {
 
 		historyArea = new JTextArea();
 		historyArea.setFont(new Font("Monospaced", Font.PLAIN, 15));
+		historyArea.setLineWrap(true);
 
 		historyArea.addKeyListener(new KeyAdapter() {
 			private boolean ctrlDown = false;
@@ -264,8 +266,7 @@ public class SwingTerminal extends InOutDevice {
 
 		JScrollPane scroll = new JScrollPane(historyArea);
 
-		scroll.setPreferredSize(
-				new Dimension(640, 450));
+		scroll.setPreferredSize(new Dimension(640, 475));
 
 		topPanel.add(scroll);
 		return topPanel;

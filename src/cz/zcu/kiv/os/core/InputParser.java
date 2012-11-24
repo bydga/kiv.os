@@ -1,5 +1,6 @@
-package cz.zcu.kiv.os.terminal;
+package cz.zcu.kiv.os.core;
 
+import cz.zcu.kiv.os.terminal.ParseResult;
 import java.util.*;
 
 /**

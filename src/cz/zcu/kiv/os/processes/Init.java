@@ -15,10 +15,24 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 
 	@Override
 	public void run(String[] args) throws Exception {
+
+		List<Process> processess = Core.getInstance().getServices().getAllProcessess();
+		int cnt = 0;
+		for (Process p : processess) {
+			if (p.getClass() == Init.class) {
+				cnt++;
+			}
+		}
+
+		if (cnt == 2) { //first (real) init running and user is trying to run second  Init
+			this.getOutputStream().writeLine("Init already running...");
+			return;
+		}
+
 		Utilities.log("INIT running...");
 
 		Core.getInstance().openTerminalWindow(this);
-		
+
 		try {
 			while (Core.getInstance().getServices().isRunning()) {
 				this.checkForStop();
@@ -38,7 +52,7 @@ public class Init extends cz.zcu.kiv.os.core.Process {
 		List<Process> processess = Core.getInstance().getServices().getAllProcessess();
 		boolean first = true;
 		for (Process p : processess) {
-			if(first) {
+			if (first) {
 				first = false;
 				this.getOutputStream().writeLine("Init joining all remaining processess");
 			}
